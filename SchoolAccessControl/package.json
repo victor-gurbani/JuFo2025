@@ -17,8 +17,12 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@types/axios": "^0.9.36",
     "@types/react": "~18.3.12",
     "typescript": "^5.3.3"
+  },
+  "compilerOptions": {
+    "esModuleInterop": true
   },
   "private": true
 }
