@@ -1,0 +1,49 @@
+classDiagram
+    class Card {
+        +String uid
+        +DateTime lastAssigned
+        +Boolean isValid
+        +void invalidate()
+    }
+    
+    class Permission {
+        +DateTime startDate
+        +DateTime endDate
+        +Boolean isRecurring
+        +String recurrencePattern
+        +Boolean isValid
+        +Student assignedStudent
+        +Teacher assignedBy
+        +Card associatedCard
+    }
+    
+    class Student {
+        +String id
+        +String name
+        +String photoUrl
+        +String classGroup
+        +Teacher tutor
+    }
+    
+    class Teacher {
+        +String id
+        +String name
+        +AccessLevel permissionLevel
+        +Student[] assignedStudents
+        +void assignCard()
+        +void viewPermissions()
+    }
+    
+    class AccessLog {
+        +DateTime timestamp
+        +String direction
+        +Student student
+        +Card card
+        +Boolean wasApproved
+    }
+
+    Teacher "1" --> "*" Permission : assigns
+    Permission "1" --> "1" Card : uses
+    Permission "1" --> "1" Student : granted to
+    Student "1" --> "*" AccessLog : generates
+    Card "1" --> "*" AccessLog : used in

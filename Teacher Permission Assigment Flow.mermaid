@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant S as Student
+    participant C as Card Reader
+    participant Sys as System
+    participant D as Display
+    participant G as Guard
+
+    S->>C: Swipes card
+    C->>Sys: Sends card UID
+    Sys->>Sys: Validates permission
+    Sys->>D: Shows student photo & permission details
+    G->>D: Visually verifies student
+    alt Valid and Verified
+        G->>S: Allows passage
+        Sys->>Sys: Logs successful access
+    else Invalid or Not Verified
+        G->>S: Denies passage
+        Sys->>Sys: Logs failed attempt
+    end

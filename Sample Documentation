@@ -1,0 +1,127 @@
+# School Access Control System
+## Technical Documentation
+
+### System Overview
+The School Access Control System is designed to streamline student entry/exit permissions using secure card-based authentication. The system integrates with existing school infrastructure and Phidias, utilizing pre-existing student photos and data while maintaining strict data protection standards.
+
+### Core Components
+
+#### 1. Physical Infrastructure
+- NFC/RFID Card Reader at school entrance
+- Display screen for security personnel
+- iPad-based teacher interface
+- Secure cards with unique UIDs (Madrid Metro compatible technology)
+
+#### 2. Software Components
+- Teacher Permission Management Interface
+- Access Control System
+- Security Verification Interface
+- Logging and Monitoring System
+
+### User Roles and Permissions
+
+#### Class Tutors
+- Assign cards to their assigned students
+- Set permission schedules (one-time and recurring)
+- View and modify permissions for their students
+- Invalidate lost/stolen cards
+- View access logs for their students
+
+#### Regular Teachers
+- View student permission schedules
+- View current permissions for their class attendees
+
+#### Security Personnel
+- View student photos and permission details via display screen
+- Verify student identity against system photo
+- Enforce access control based on system validation
+
+### Core Processes
+
+#### Card Assignment Process
+1. Tutor receives parent confirmation for student access
+2. Tutor selects available card from physical storage
+3. Tutor logs into iPad application
+4. Tutor enters card UID and selects student
+5. Tutor sets permission parameters:
+   - Start date/time
+   - End date/time
+   - Recurring schedule (if applicable)
+6. System validates and activates card
+
+#### Access Verification Process
+1. Student presents card at reader
+2. System validates permission and displays:
+   - Student photo
+   - Permission validity
+   - Scheduled access times
+3. Security personnel verifies student identity
+4. System logs entry/exit attempt
+
+### Security Features
+
+#### Card Management
+- Cards contain only UIDs - no personal data stored
+- Immediate invalidation capability
+- Last-known assignment tracking
+- One-week return policy with fine enforcement
+
+#### Access Control
+- Photo verification requirement
+- Real-time permission validation
+- Comprehensive access logging
+- Different permission levels for staff
+
+#### Data Protection
+- Integration with existing Phidias system
+- All data stored within school premises
+- No additional personal data collection
+- Compliant with educational data protection standards
+
+### System Integration
+
+#### Phidias Integration
+- Utilizes existing student photos
+- Maintains current data protection standards
+- Leverages existing student/teacher relationships
+
+#### Security Monitoring
+- Real-time access logging
+- Failed attempt tracking
+- Card usage history
+- Permission modification audit trail
+
+### Implementation Requirements
+
+#### Hardware Requirements
+- NFC/RFID card reader (Madrid Metro compatible)
+- Display screen for security checkpoint
+- iPads for teacher access
+- Secure physical card storage
+
+#### Software Requirements
+- Teacher management interface
+- Security display interface
+- Database system
+- Logging system
+- Integration APIs
+
+### Maintenance Procedures
+
+#### Card Management
+- Regular inventory checks
+- Lost card tracking
+- Card replacement process
+- Fine collection system
+
+#### System Maintenance
+- Regular security updates
+- Database backups
+- Log rotation
+- Performance monitoring
+
+### Emergency Procedures
+- Manual override capabilities
+- Emergency card invalidation
+- System backup procedures
+- Offline operation protocols
