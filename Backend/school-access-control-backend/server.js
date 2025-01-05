@@ -5,6 +5,7 @@ const cors = require("cors");
 const adminRoutes = require("./routes/admin");
 const teacherRoutes = require("./routes/teacher");
 const guardRoutes = require("./routes/guard");
+const cardRoutes = require("./routes/cards");
 
 const app = express();
 app.use(bodyParser.json());
@@ -14,6 +15,7 @@ app.use(cors());
 app.use("/admin", adminRoutes);
 app.use("/teacher", teacherRoutes);
 app.use("/guard", guardRoutes);
+app.use("/cards", cardRoutes);
 
 const PORT = 3000;
 app.listen(PORT, () => {

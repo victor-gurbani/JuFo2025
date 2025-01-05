@@ -10,8 +10,6 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@react-navigation/native-stack": "^7.2.0",
-    "axios": "^1.7.9",
     "expo": "~52.0.20",
     "expo-status-bar": "~2.0.0",
     "react": "18.3.1",
@@ -21,11 +19,7 @@
     "@babel/core": "^7.25.2",
     "@types/axios": "^0.9.36",
     "@types/react": "~18.3.12",
-    "@types/react-native": "^0.72.8",
     "typescript": "^5.3.3"
-  },
-  "compilerOptions": {
-    "esModuleInterop": true
   },
   "private": true
 }
