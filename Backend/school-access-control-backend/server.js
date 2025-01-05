@@ -9,20 +9,91 @@ const db = new sqlite3.Database("./database.db", (err) => {
     console.error("Error opening database:", err.message);
   } else {
     console.log("Connected to SQLite database.");
-    
-    // Example: Creating a shared table for demonstration (optional)
-    db.run(
-      `CREATE TABLE IF NOT EXISTS example (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-      )`,
-      (err) => {
-        if (err) {
-          console.error("Error creating table:", err.message);
+
+    // Create tables if they do not exist
+    db.serialize(() => {
+      db.run(
+        `CREATE TABLE IF NOT EXISTS cards (
+          uid TEXT PRIMARY KEY,
+          lastAssigned TEXT,
+          isValid INTEGER
+        )`,
+        (err) => {
+          if (err) {
+            console.error("Error creating cards table:", err.message);
+          }
         }
-      }
-    );
+      );
+
+      db.run(
+        `CREATE TABLE IF NOT EXISTS permissions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          startDate TEXT,
+          endDate TEXT,
+          isRecurring INTEGER,
+          recurrencePattern TEXT,
+          isValid INTEGER,
+          assignedStudent TEXT,
+          assignedBy TEXT,
+          associatedCard TEXT,
+          FOREIGN KEY (assignedStudent) REFERENCES students(id),
+          FOREIGN KEY (assignedBy) REFERENCES teachers(id),
+          FOREIGN KEY (associatedCard) REFERENCES cards(uid)
+        )`,
+        (err) => {
+          if (err) {
+            console.error("Error creating permissions table:", err.message);
+          }
+        }
+      );
+
+      db.run(
+        `CREATE TABLE IF NOT EXISTS students (
+          id TEXT PRIMARY KEY,
+          name TEXT,
+          photoUrl TEXT,
+          classGroup TEXT,
+          tutor TEXT,
+          FOREIGN KEY (tutor) REFERENCES teachers(id)
+        )`,
+        (err) => {
+          if (err) {
+            console.error("Error creating students table:", err.message);
+          }
+        }
+      );
+
+      db.run(
+        `CREATE TABLE IF NOT EXISTS teachers (
+          id TEXT PRIMARY KEY,
+          name TEXT,
+          permissionLevel TEXT
+        )`,
+        (err) => {
+          if (err) {
+            console.error("Error creating teachers table:", err.message);
+          }
+        }
+      );
+
+      db.run(
+        `CREATE TABLE IF NOT EXISTS accessLogs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          timestamp TEXT,
+          direction TEXT,
+          student TEXT,
+          card TEXT,
+          wasApproved INTEGER,
+          FOREIGN KEY (student) REFERENCES students(id),
+          FOREIGN KEY (card) REFERENCES cards(uid)
+        )`,
+        (err) => {
+          if (err) {
+            console.error("Error creating accessLogs table:", err.message);
+          }
+        }
+      );
+    });
   }
 });
 
