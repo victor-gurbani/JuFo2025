@@ -1,11 +1,36 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const sqlite3 = require("sqlite3").verbose(); // SQLite library
 
-const adminRoutes = require("./routes/admin");
-const teacherRoutes = require("./routes/teacher");
-const guardRoutes = require("./routes/guard");
-const cardRoutes = require("./routes/cards");
+// Initialize SQLite database
+const db = new sqlite3.Database("./database.db", (err) => {
+  if (err) {
+    console.error("Error opening database:", err.message);
+  } else {
+    console.log("Connected to SQLite database.");
+    
+    // Example: Creating a shared table for demonstration (optional)
+    db.run(
+      `CREATE TABLE IF NOT EXISTS example (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )`,
+      (err) => {
+        if (err) {
+          console.error("Error creating table:", err.message);
+        }
+      }
+    );
+  }
+});
+
+// Pass database instance to routes
+const adminRoutes = require("./routes/admin")(db);
+const teacherRoutes = require("./routes/teacher")(db);
+const guardRoutes = require("./routes/guard")(db);
+const cardRoutes = require("./routes/cards")(db);
 
 const app = express();
 app.use(bodyParser.json());
