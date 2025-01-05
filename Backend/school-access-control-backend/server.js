@@ -21,3 +21,15 @@ const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// Gracefully close the database connection when the server shuts down
+process.on("SIGINT", () => {
+  db.close((err) => {
+    if (err) {
+      console.error("Error closing database:", err.message);
+    } else {
+      console.log("Database connection closed.");
+    }
+    process.exit(0);
+  });
+});
