@@ -1,25 +1,41 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, ScrollView } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { Snackbar } from "react-native-paper";
+import { View, Text, TextInput, ScrollView } from "react-native";
+import { Button } from "react-native-paper";
+import { DatePickerModal, TimePickerModal } from "react-native-paper-dates";
 import api from "../services/api";
+import "react-native-paper-dates"; // For date formatting
 
 export default function TeacherPanel() {
   const [studentId, setStudentId] = useState("");
   const [cardUID, setCardUID] = useState("");
-  const [startDate, setStartDate] = useState(new Date());
-  const [startTime, setStartTime] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
-  const [endTime, setEndTime] = useState(new Date());
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [startTime, setStartTime] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [endTime, setEndTime] = useState<Date | undefined>(undefined);
+  const [isStartDatePickerVisible, setStartDatePickerVisible] = useState(false);
+  const [isStartTimePickerVisible, setStartTimePickerVisible] = useState(false);
+  const [isEndDatePickerVisible, setEndDatePickerVisible] = useState(false);
+  const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrencePattern, setRecurrencePattern] = useState("");
-  const [permissions, setPermissions] = useState([]);
+  const [permissions, setPermissions] = useState<any[]>([]);
   const [invalidateCardUID, setInvalidateCardUID] = useState("");
 
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  const showSnackbar = (message: string) => {
+    setSnackbarMessage(message);
+    setSnackbarVisible(true);
+  };
+
   const handleAssignCard = () => {
+    if (!startDate || !startTime || !endDate || !endTime) {
+      showSnackbar("Please select all date and time values.");
+      return;
+    }
+
     const startDateTime = new Date(
       startDate.getFullYear(),
       startDate.getMonth(),
@@ -44,20 +60,20 @@ export default function TeacherPanel() {
       isRecurring,
       recurrencePattern,
     })
-      .then(() => alert("Card assigned"))
-      .catch((err) => alert("Error: " + err));
+      .then(() => showSnackbar("Card assigned"))
+      .catch((err) => showSnackbar("Error: " + err));
   };
 
   const handleInvalidateCard = () => {
     api.post("/teacher/invalidate-card", { cardUID: invalidateCardUID })
-      .then(() => alert("Card invalidated"))
-      .catch((err) => alert("Error: " + err));
+      .then(() => showSnackbar("Card invalidated"))
+      .catch((err) => showSnackbar("Error: " + err));
   };
 
   const handleViewPermissions = () => {
     api.get("/teacher/permissions")
       .then((res) => setPermissions(res.data))
-      .catch((err) => alert("Error: " + err));
+      .catch((err) => showSnackbar("Error: " + err));
   };
 
   return (
@@ -77,64 +93,58 @@ export default function TeacherPanel() {
       />
 
       <Text style={{ marginTop: 10 }}>Start Date</Text>
-      <Button title="Select Start Date" onPress={() => setShowStartDatePicker(true)} />
-      {showStartDatePicker && (
-        <DateTimePicker
-          value={startDate}
-          mode="date"
-          display="default"
-          onChange={(event, selectedDate) => {
-            setShowStartDatePicker(false);
-            if (selectedDate) setStartDate(selectedDate);
-          }}
-        />
-      )}
-      <Text>Selected Start Date: {startDate.toDateString()}</Text>
+      <Button onPress={() => setStartDatePickerVisible(true)}>Select Start Date</Button>
+      <DatePickerModal
+        mode="single"
+        locale="en"
+        visible={isStartDatePickerVisible}
+        onDismiss={() => setStartDatePickerVisible(false)}
+        date={startDate}
+        onConfirm={(params: { date: Date }) => {
+          setStartDate(params.date);
+          setStartDatePickerVisible(false);
+        }}
+      />
+      <Text>Selected Start Date: {startDate?.toDateString() || "None"}</Text>
 
       <Text style={{ marginTop: 10 }}>Start Time</Text>
-      <Button title="Select Start Time" onPress={() => setShowStartTimePicker(true)} />
-      {showStartTimePicker && (
-        <DateTimePicker
-          value={startTime}
-          mode="time"
-          display="default"
-          onChange={(event, selectedTime) => {
-            setShowStartTimePicker(false);
-            if (selectedTime) setStartTime(selectedTime);
-          }}
-        />
-      )}
-      <Text>Selected Start Time: {startTime.toLocaleTimeString()}</Text>
+      <Button onPress={() => setStartTimePickerVisible(true)}>Select Start Time</Button>
+      <TimePickerModal
+        visible={isStartTimePickerVisible}
+        onDismiss={() => setStartTimePickerVisible(false)}
+        onConfirm={(params) => {
+          setStartTime(params.hours != null ? new Date(0, 0, 0, params.hours, params.minutes) : undefined);
+          setStartTimePickerVisible(false);
+        }}
+      />
+      <Text>Selected Start Time: {startTime?.toLocaleTimeString() || "None"}</Text>
 
-      <Text style={{ marginTop: 10 }}>End Date</Text>
-      <Button title="Select End Date" onPress={() => setShowEndDatePicker(true)} />
-      {showEndDatePicker && (
-        <DateTimePicker
-          value={endDate}
-          mode="date"
-          display="default"
-          onChange={(event, selectedDate) => {
-            setShowEndDatePicker(false);
-            if (selectedDate) setEndDate(selectedDate);
-          }}
-        />
-      )}
-      <Text>Selected End Date: {endDate.toDateString()}</Text>
+      <DatePickerModal
+        mode="single"
+        locale="en"
+        visible={isEndDatePickerVisible}
+        onDismiss={() => setEndDatePickerVisible(false)}
+        date={endDate}
+        onConfirm={(params: { date: Date }) => {
+          setEndDate(params.date);
+          setEndDatePickerVisible(false);
+        }}
+      />
+        }}
+      />
+      <Text>Selected End Date: {endDate?.toDateString() || "None"}</Text>
 
       <Text style={{ marginTop: 10 }}>End Time</Text>
-      <Button title="Select End Time" onPress={() => setShowEndTimePicker(true)} />
-      {showEndTimePicker && (
-        <DateTimePicker
-          value={endTime}
-          mode="time"
-          display="default"
-          onChange={(event, selectedTime) => {
-            setShowEndTimePicker(false);
-            if (selectedTime) setEndTime(selectedTime);
-          }}
-        />
-      )}
-      <Text>Selected End Time: {endTime.toLocaleTimeString()}</Text>
+      <Button onPress={() => setEndTimePickerVisible(true)}>Select End Time</Button>
+      <TimePickerModal
+        visible={isEndTimePickerVisible}
+        onDismiss={() => setEndTimePickerVisible(false)}
+        onConfirm={(params) => {
+          setEndTime(params.hours != null ? new Date(0, 0, 0, params.hours, params.minutes) : undefined);
+          setEndTimePickerVisible(false);
+        }}
+      />
+      <Text>Selected End Time: {endTime?.toLocaleTimeString() || "None"}</Text>
 
       <TextInput
         placeholder="Recurrence Pattern"
@@ -143,12 +153,11 @@ export default function TeacherPanel() {
         style={{ borderWidth: 1, marginVertical: 5, padding: 5 }}
       />
       <View style={{ flexDirection: "row", marginVertical: 10 }}>
-        <Button
-          title={isRecurring ? "Recurring: ON" : "Recurring: OFF"}
-          onPress={() => setIsRecurring(!isRecurring)}
-        />
+        <Button onPress={() => setIsRecurring(!isRecurring)}>
+          {isRecurring ? "Recurring: ON" : "Recurring: OFF"}
+        </Button>
       </View>
-      <Button title="Assign Card" onPress={handleAssignCard} />
+      <Button onPress={handleAssignCard}>Assign Card</Button>
 
       <Text style={{ fontWeight: "bold", marginVertical: 10 }}>Invalidate a Card</Text>
       <TextInput
@@ -157,15 +166,22 @@ export default function TeacherPanel() {
         onChangeText={setInvalidateCardUID}
         style={{ borderWidth: 1, marginVertical: 5, padding: 5 }}
       />
-      <Button title="Invalidate Card" onPress={handleInvalidateCard} />
+      <Button onPress={handleInvalidateCard}>Invalidate Card</Button>
 
       <Text style={{ fontWeight: "bold", marginVertical: 10 }}>View Permissions</Text>
-      <Button title="Load Permissions" onPress={handleViewPermissions} />
+      <Button onPress={handleViewPermissions}>Load Permissions</Button>
       {permissions.map((perm, i) => (
         <Text key={i} style={{ marginTop: 5 }}>
           {JSON.stringify(perm)}
         </Text>
       ))}
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={Snackbar.DURATION_SHORT}
+      >
+        {snackbarMessage}
+      </Snackbar>
     </ScrollView>
   );
 }
