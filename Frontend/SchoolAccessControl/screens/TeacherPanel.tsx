@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, ScrollView } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import api from "../services/api";
 
 export default function TeacherPanel() {
   const [studentId, setStudentId] = useState("");
   const [cardUID, setCardUID] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrencePattern, setRecurrencePattern] = useState("");
   const [permissions, setPermissions] = useState([]);
@@ -52,17 +53,31 @@ export default function TeacherPanel() {
         onChangeText={setCardUID}
         style={{ borderWidth: 1, marginVertical: 5, padding: 5 }}
       />
-      <TextInput
-        placeholder="Start Date (YYYY-MM-DD)"
+      <Text style={{ marginTop: 10 }}>Start Date</Text>
+      <DateTimePicker
+        style={{ width: 200 }}
         value={startDate}
-        onChangeText={setStartDate}
-        style={{ borderWidth: 1, marginVertical: 5, padding: 5 }}
+        mode="date"
+        placeholder="Select start date"
+        format="YYYY-MM-DD"
+        minDate="2020-01-01"
+        maxDate="2030-12-31"
+        confirmBtnText="Confirm"
+        cancelBtnText="Cancel"
+        onDateChange={(date) => setStartDate(date)}
       />
-      <TextInput
-        placeholder="End Date (YYYY-MM-DD)"
+      <Text style={{ marginTop: 10 }}>End Date</Text>
+      <DateTimePicker
+        style={{ width: 200 }}
         value={endDate}
-        onChangeText={setEndDate}
-        style={{ borderWidth: 1, marginVertical: 5, padding: 5 }}
+        mode="date"
+        placeholder="Select end date"
+        format="YYYY-MM-DD"
+        minDate="2020-01-01"
+        maxDate="2030-12-31"
+        confirmBtnText="Confirm"
+        cancelBtnText="Cancel"
+        onDateChange={(date) => setEndDate(date)}
       />
       <TextInput
         placeholder="Recurrence Pattern"
