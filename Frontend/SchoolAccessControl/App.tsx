@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./screens/LoginScreen";
 import AdminPanel from "./screens/AdminPanel";
 import TeacherPanel from "./screens/TeacherPanel";
-import GuardScreen from "./screens/GuardScreen";
+import GuardScreen from "./screens/GuardPanel";
 
 const Stack = createNativeStackNavigator();
 
