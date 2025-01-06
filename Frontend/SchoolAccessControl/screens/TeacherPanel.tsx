@@ -1,13 +1,15 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, ScrollView } from "react-native";
+import { View, Text, TextInput, Button, ScrollView, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import api from "../services/api";
 
 export default function TeacherPanel() {
   const [studentId, setStudentId] = useState("");
   const [cardUID, setCardUID] = useState("");
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrencePattern, setRecurrencePattern] = useState("");
   const [permissions, setPermissions] = useState([]);
@@ -17,8 +19,8 @@ export default function TeacherPanel() {
     api.post("/teacher/assign-card", {
       studentId,
       cardUID,
-      startDate,
-      endDate,
+      startDate: startDate.toISOString().split("T")[0],
+      endDate: endDate.toISOString().split("T")[0],
       isRecurring,
       recurrencePattern,
     })
@@ -53,32 +55,37 @@ export default function TeacherPanel() {
         onChangeText={setCardUID}
         style={{ borderWidth: 1, marginVertical: 5, padding: 5 }}
       />
+
       <Text style={{ marginTop: 10 }}>Start Date</Text>
-      <DateTimePicker
-        style={{ width: 200 }}
-        value={startDate}
-        mode="date"
-        placeholder="Select start date"
-        format="YYYY-MM-DD"
-        minDate="2020-01-01"
-        maxDate="2030-12-31"
-        confirmBtnText="Confirm"
-        cancelBtnText="Cancel"
-        onDateChange={(date) => setStartDate(date)}
-      />
+      <Button title="Select Start Date" onPress={() => setShowStartPicker(true)} />
+      {showStartPicker && (
+        <DateTimePicker
+          value={startDate}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowStartPicker(false);
+            if (selectedDate) setStartDate(selectedDate);
+          }}
+        />
+      )}
+      <Text>Selected Start Date: {startDate.toISOString().split("T")[0]}</Text>
+
       <Text style={{ marginTop: 10 }}>End Date</Text>
-      <DateTimePicker
-        style={{ width: 200 }}
-        value={endDate}
-        mode="date"
-        placeholder="Select end date"
-        format="YYYY-MM-DD"
-        minDate="2020-01-01"
-        maxDate="2030-12-31"
-        confirmBtnText="Confirm"
-        cancelBtnText="Cancel"
-        onDateChange={(date) => setEndDate(date)}
-      />
+      <Button title="Select End Date" onPress={() => setShowEndPicker(true)} />
+      {showEndPicker && (
+        <DateTimePicker
+          value={endDate}
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowEndPicker(false);
+            if (selectedDate) setEndDate(selectedDate);
+          }}
+        />
+      )}
+      <Text>Selected End Date: {endDate.toISOString().split("T")[0]}</Text>
+
       <TextInput
         placeholder="Recurrence Pattern"
         value={recurrencePattern}
