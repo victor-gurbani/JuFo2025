@@ -114,7 +114,7 @@ export default function AdminPanel() {
         Current Teachers
       </Text>
       {teachers.map((t: any) => (
-        <Card key={t.id} style={{ marginBottom: 10 }}>
+        <Card key={t.id} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
           <Card.Content>
             <Title>ID: {t.id}</Title>
             <Paragraph>Name: {t.name}</Paragraph>

@@ -15,14 +15,14 @@ export default function GuardPanel() {
         setVisible(true);
       })
       .catch(() => {
-        setResult("Error");M
+        setResult("Error");
         setVisible(true);
       });
   };
 
   return (
     <View style={{ margin: 20 }}>
-      <Card>
+      <Card elevation={4} style={{ margin: 10 }}>
         <Card.Content>
           <Title>Guard Panel</Title>
           <TextInput

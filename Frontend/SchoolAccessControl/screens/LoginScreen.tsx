@@ -19,7 +19,7 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={{ margin: 20 }}>
-      <Card>
+      <Card elevation={5} style={{ margin: 10 }}>
         <Card.Content>
           <Title>Login</Title>
           <Text>Login as (admin/teacher/guard):</Text>

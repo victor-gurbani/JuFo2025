@@ -77,7 +77,7 @@ export default function TeacherPanel() {
 
   return (
     <ScrollView style={{ margin: 20 }}>
-      <Card style={{ marginBottom: 20 }}>
+      <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
         <Card.Content>
           <Title>Assign a Card</Title>
           <TextInput
@@ -169,7 +169,7 @@ export default function TeacherPanel() {
         </Card.Content>
       </Card>
 
-      <Card style={{ marginBottom: 20 }}>
+      <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
         <Card.Content>
           <Title>Invalidate a Card</Title>
           <TextInput
@@ -185,7 +185,7 @@ export default function TeacherPanel() {
         </Card.Content>
       </Card>
 
-      <Card style={{ marginBottom: 20 }}>
+      <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
         <Card.Content>
           <Title>View Permissions</Title>
           <Button mode="contained" onPress={handleViewPermissions} style={{ marginBottom: 10 }}>
