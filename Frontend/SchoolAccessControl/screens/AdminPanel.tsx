@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Button, TextInput, ScrollView } from "react-native";
+import { View, ScrollView } from "react-native";
+import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, Switch } from "react-native-paper";
 import api from "../services/api";
 
 export default function AdminPanel() {
@@ -8,6 +9,8 @@ export default function AdminPanel() {
   const [teacherId, setTeacherId] = useState("");
   const [teacherName, setTeacherName] = useState("");
   const [teacherPermission, setTeacherPermission] = useState("");
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   useEffect(() => {
     // Load admin dashboard info
@@ -23,7 +26,7 @@ export default function AdminPanel() {
     api
       .get("/admin/teachers")
       .then((res) => setTeachers(res.data))
-      .catch((err) => alert("Error: " + err));
+      .catch((err) => showSnackbar("Error: " + err));
   };
 
   const createTeacher = () => {
@@ -34,13 +37,13 @@ export default function AdminPanel() {
         permissionLevel: teacherPermission,
       })
       .then(() => {
-        alert("Teacher created");
+        showSnackbar("Teacher created");
         setTeacherId("");
         setTeacherName("");
         setTeacherPermission("");
         loadTeachers();
       })
-      .catch((err) => alert("Error: " + err));
+      .catch((err) => showSnackbar("Error: " + err));
   };
 
   const updateTeacher = () => {
@@ -50,20 +53,25 @@ export default function AdminPanel() {
         permissionLevel: teacherPermission,
       })
       .then(() => {
-        alert("Teacher updated");
+        showSnackbar("Teacher updated");
         loadTeachers();
       })
-      .catch((err) => alert("Error: " + err));
+      .catch((err) => showSnackbar("Error: " + err));
   };
 
   const deleteTeacher = (id: string) => {
     api
       .delete(`/admin/teachers/${id}`)
       .then(() => {
-        alert("Teacher deleted");
+        showSnackbar("Teacher deleted");
         loadTeachers();
       })
-      .catch((err) => alert("Error: " + err));
+      .catch((err) => showSnackbar("Error: " + err));
+  };
+
+  const showSnackbar = (message: string) => {
+    setSnackbarMessage(message);
+    setSnackbarVisible(true);
   };
 
   return (
@@ -75,40 +83,56 @@ export default function AdminPanel() {
         Create or Update Teacher
       </Text>
       <TextInput
-        placeholder="Teacher ID"
+        label="Teacher ID"
         value={teacherId}
         onChangeText={setTeacherId}
-        style={{ borderWidth: 1, marginVertical: 5, padding: 5 }}
+        style={{ marginVertical: 5 }}
       />
       <TextInput
-        placeholder="Teacher Name"
+        label="Teacher Name"
         value={teacherName}
         onChangeText={setTeacherName}
-        style={{ borderWidth: 1, marginVertical: 5, padding: 5 }}
+        style={{ marginVertical: 5 }}
       />
       <TextInput
-        placeholder="Permission Level"
+        label="Permission Level"
         value={teacherPermission}
         onChangeText={setTeacherPermission}
-        style={{ borderWidth: 1, marginVertical: 5, padding: 5 }}
+        style={{ marginVertical: 5 }}
       />
 
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <Button title="Create Teacher" onPress={createTeacher} />
-        <Button title="Update Teacher" onPress={updateTeacher} />
+        <Button mode="contained" onPress={createTeacher} style={{ margin: 5 }}>
+          Create Teacher
+        </Button>
+        <Button mode="contained" onPress={updateTeacher} style={{ margin: 5 }}>
+          Update Teacher
+        </Button>
       </View>
 
       <Text style={{ marginVertical: 20, fontWeight: "bold" }}>
         Current Teachers
       </Text>
       {teachers.map((t: any) => (
-        <View key={t.id} style={{ marginBottom: 10 }}>
-          <Text>ID: {t.id}</Text>
-          <Text>Name: {t.name}</Text>
-          <Text>Permission: {t.permissionLevel}</Text>
-          <Button title="Delete" onPress={() => deleteTeacher(t.id)} />
-        </View>
+        <Card key={t.id} style={{ marginBottom: 10 }}>
+          <Card.Content>
+            <Title>ID: {t.id}</Title>
+            <Paragraph>Name: {t.name}</Paragraph>
+            <Paragraph>Permission: {t.permissionLevel}</Paragraph>
+          </Card.Content>
+          <Card.Actions>
+            <Button onPress={() => deleteTeacher(t.id)}>Delete</Button>
+          </Card.Actions>
+        </Card>
       ))}
+
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={3000}
+      >
+        {snackbarMessage}
+      </Snackbar>
     </ScrollView>
   );
 }

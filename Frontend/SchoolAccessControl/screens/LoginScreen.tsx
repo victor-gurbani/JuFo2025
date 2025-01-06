@@ -1,30 +1,46 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button } from "react-native";
+import { View } from "react-native";
+import { TextInput, Button, Snackbar, Text, Card, Title } from "react-native-paper";
 
 export default function LoginScreen({ navigation }) {
   const [role, setRole] = useState("");
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const handleLogin = () => {
-    // Simple example to route based on role
-    if (role === "admin") {
-      navigation.navigate("AdminPanel");
-    } else if (role === "teacher") {
-      navigation.navigate("TeacherPanel");
-    } else if (role === "guard") {
-      navigation.navigate("GuardScreen");
+    if (role === "admin" || role === "teacher" || role === "guard") {
+      navigation.navigate(`${role.charAt(0).toUpperCase() + role.slice(1)}Panel`);
+    } else {
+      setSnackbarMessage("Invalid role. Please enter admin, teacher, or guard.");
+      setSnackbarVisible(true);
     }
   };
 
   return (
     <View style={{ margin: 20 }}>
-      <Text>Login as (admin/teacher/guard):</Text>
-      <TextInput
-        placeholder="Enter role"
-        value={role}
-        onChangeText={setRole}
-        style={{ borderWidth: 1, marginVertical: 10, padding: 5 }}
-      />
-      <Button title="Login" onPress={handleLogin} />
+      <Card>
+        <Card.Content>
+          <Title>Login</Title>
+          <Text>Login as (admin/teacher/guard):</Text>
+          <TextInput
+            label="Enter role"
+            value={role}
+            onChangeText={setRole}
+            mode="outlined"
+            style={{ marginVertical: 10 }}
+          />
+          <Button mode="contained" onPress={handleLogin}>
+            Login
+          </Button>
+        </Card.Content>
+      </Card>
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={Snackbar.DURATION_SHORT}
+      >
+        {snackbarMessage}
+      </Snackbar>
     </View>
   );
 }
