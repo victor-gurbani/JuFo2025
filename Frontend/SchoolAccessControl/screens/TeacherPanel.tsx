@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, ScrollView, Platform } from "react-native";
+import { View, Text, TextInput, Button, ScrollView } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import api from "../services/api";
 
@@ -7,20 +7,40 @@ export default function TeacherPanel() {
   const [studentId, setStudentId] = useState("");
   const [cardUID, setCardUID] = useState("");
   const [startDate, setStartDate] = useState(new Date());
+  const [startTime, setStartTime] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
-  const [showStartPicker, setShowStartPicker] = useState(false);
-  const [showEndPicker, setShowEndPicker] = useState(false);
+  const [endTime, setEndTime] = useState(new Date());
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrencePattern, setRecurrencePattern] = useState("");
   const [permissions, setPermissions] = useState([]);
   const [invalidateCardUID, setInvalidateCardUID] = useState("");
 
   const handleAssignCard = () => {
+    const startDateTime = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth(),
+      startDate.getDate(),
+      startTime.getHours(),
+      startTime.getMinutes()
+    );
+
+    const endDateTime = new Date(
+      endDate.getFullYear(),
+      endDate.getMonth(),
+      endDate.getDate(),
+      endTime.getHours(),
+      endTime.getMinutes()
+    );
+
     api.post("/teacher/assign-card", {
       studentId,
       cardUID,
-      startDate: startDate.toISOString().split("T")[0],
-      endDate: endDate.toISOString().split("T")[0],
+      startDate: startDateTime.toISOString(),
+      endDate: endDateTime.toISOString(),
       isRecurring,
       recurrencePattern,
     })
@@ -57,34 +77,64 @@ export default function TeacherPanel() {
       />
 
       <Text style={{ marginTop: 10 }}>Start Date</Text>
-      <Button title="Select Start Date" onPress={() => setShowStartPicker(true)} />
-      {showStartPicker && (
+      <Button title="Select Start Date" onPress={() => setShowStartDatePicker(true)} />
+      {showStartDatePicker && (
         <DateTimePicker
           value={startDate}
           mode="date"
           display="default"
           onChange={(event, selectedDate) => {
-            setShowStartPicker(false);
+            setShowStartDatePicker(false);
             if (selectedDate) setStartDate(selectedDate);
           }}
         />
       )}
-      <Text>Selected Start Date: {startDate.toISOString().split("T")[0]}</Text>
+      <Text>Selected Start Date: {startDate.toDateString()}</Text>
+
+      <Text style={{ marginTop: 10 }}>Start Time</Text>
+      <Button title="Select Start Time" onPress={() => setShowStartTimePicker(true)} />
+      {showStartTimePicker && (
+        <DateTimePicker
+          value={startTime}
+          mode="time"
+          display="default"
+          onChange={(event, selectedTime) => {
+            setShowStartTimePicker(false);
+            if (selectedTime) setStartTime(selectedTime);
+          }}
+        />
+      )}
+      <Text>Selected Start Time: {startTime.toLocaleTimeString()}</Text>
 
       <Text style={{ marginTop: 10 }}>End Date</Text>
-      <Button title="Select End Date" onPress={() => setShowEndPicker(true)} />
-      {showEndPicker && (
+      <Button title="Select End Date" onPress={() => setShowEndDatePicker(true)} />
+      {showEndDatePicker && (
         <DateTimePicker
           value={endDate}
           mode="date"
           display="default"
           onChange={(event, selectedDate) => {
-            setShowEndPicker(false);
+            setShowEndDatePicker(false);
             if (selectedDate) setEndDate(selectedDate);
           }}
         />
       )}
-      <Text>Selected End Date: {endDate.toISOString().split("T")[0]}</Text>
+      <Text>Selected End Date: {endDate.toDateString()}</Text>
+
+      <Text style={{ marginTop: 10 }}>End Time</Text>
+      <Button title="Select End Time" onPress={() => setShowEndTimePicker(true)} />
+      {showEndTimePicker && (
+        <DateTimePicker
+          value={endTime}
+          mode="time"
+          display="default"
+          onChange={(event, selectedTime) => {
+            setShowEndTimePicker(false);
+            if (selectedTime) setEndTime(selectedTime);
+          }}
+        />
+      )}
+      <Text>Selected End Time: {endTime.toLocaleTimeString()}</Text>
 
       <TextInput
         placeholder="Recurrence Pattern"
