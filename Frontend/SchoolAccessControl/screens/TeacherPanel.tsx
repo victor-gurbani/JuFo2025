@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Snackbar } from "react-native-paper";
 import { View, Text, TextInput, ScrollView } from "react-native";
-import { Button } from "react-native-paper";
+import { Button, Snackbar } from "react-native-paper";
 import { DatePickerModal, TimePickerModal } from "react-native-paper-dates";
 import api from "../services/api";
 import "react-native-paper-dates"; // For date formatting
@@ -119,6 +118,8 @@ export default function TeacherPanel() {
       />
       <Text>Selected Start Time: {startTime?.toLocaleTimeString() || "None"}</Text>
 
+      <Text style={{ marginTop: 10 }}>End Date</Text>
+      <Button onPress={() => setEndDatePickerVisible(true)}>Select End Date</Button>
       <DatePickerModal
         mode="single"
         locale="en"
@@ -128,8 +129,6 @@ export default function TeacherPanel() {
         onConfirm={(params: { date: Date }) => {
           setEndDate(params.date);
           setEndDatePickerVisible(false);
-        }}
-      />
         }}
       />
       <Text>Selected End Date: {endDate?.toDateString() || "None"}</Text>
