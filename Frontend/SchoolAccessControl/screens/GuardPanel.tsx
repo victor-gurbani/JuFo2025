@@ -3,7 +3,7 @@ import { View } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, Switch } from "react-native-paper";
 import api from "../services/api";
 
-export default function GuardScreen() {
+export default function GuardPanel() {
   const [uid, setUid] = useState("");
   const [result, setResult] = useState("");
   const [visible, setVisible] = useState(false);
@@ -15,7 +15,7 @@ export default function GuardScreen() {
         setVisible(true);
       })
       .catch(() => {
-        setResult("Error");
+        setResult("Error");M
         setVisible(true);
       });
   };
@@ -24,7 +24,7 @@ export default function GuardScreen() {
     <View style={{ margin: 20 }}>
       <Card>
         <Card.Content>
-          <Title>Guard Screen</Title>
+          <Title>Guard Panel</Title>
           <TextInput
             label="Card UID"
             value={uid}

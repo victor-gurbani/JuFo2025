@@ -8,7 +8,8 @@ export default function LoginScreen({ navigation }) {
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const handleLogin = () => {
-    if (role === "admin" || role === "teacher" || role === "guard") {
+    const trimmedRole = role.trim().toLowerCase();
+    if (trimmedRole === "admin" || trimmedRole === "teacher" || trimmedRole === "guard") {
       navigation.navigate(`${role.charAt(0).toUpperCase() + role.slice(1)}Panel`);
     } else {
       setSnackbarMessage("Invalid role. Please enter admin, teacher, or guard.");
