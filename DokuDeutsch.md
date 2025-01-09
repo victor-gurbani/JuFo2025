@@ -60,7 +60,7 @@ Beim Serverstart initialisiert die server.js-Datei die SQLite-Datenbank:
 ```js
 db.run(
   `CREATE TABLE IF NOT EXISTS cards (
-    -- Tabellenschema
+    -- Weitere Tabellenstruktur
   )`
 );
 ```
@@ -91,11 +91,24 @@ Diese Funktionen wurden via React-Native-Oberfläche implementiert und über Exp
 Das System erlaubt Lehrenden, Karten für wiederkehrende Nutzungen zu konfigurieren (z. B. für Schüler, die regelmäßig Laborräume aufsuchen). Das Feld isRecurring (Bool, 0 oder 1) und das String-Feld recurrencePattern (z. B. „daily“, „weekly“ usw.) ermöglichen es, wiederholt Zugänge zu gewähren. Dies wird im Frontend über einen einfachen Schalter gesteuert.
 
 ### 3.2.5 Stetige Integration
-Im 
+In der 
 
 GitLog.md
 
- lassen sich zahlreiche kleine Commits erkennen, bei denen jeweils kleine Features oder Fehlerbehebungen umgesetzt wurden. So wurden beispielsweise DatePicker mit der Zeit ergänzt, das Guard Panel eingeführt und UI-Komponenten überarbeitet. Dieses iterative Vorgehen macht den Entwicklungsprozess flexibel und transparenter.
+ lassen sich zahlreiche kleine Commits erkennen, bei denen jeweils neue Funktionen oder Fehlerbehebungen umgesetzt wurden. So wurden beispielsweise DatePicker mit der Zeit ergänzt, das Guard Panel eingeführt und UI-Komponenten überarbeitet. Dieses iterative Vorgehen macht den Entwicklungsprozess flexibel und transparenter.
+
+### 3.2.6 Einsatz von Git und Expo
+**Git** dient als zentrale Versionsverwaltung:  
+- Durch regelmäßige Commits mit aussagekräftigen Kommentaren kann jederzeit ein bestimmter Entwicklungsstand wiederhergestellt oder überprüft werden.  
+- Branches ermöglichen paralleles Arbeiten an verschiedenen Features, ohne die Hauptversion zu beeinträchtigen.  
+- Git erhöht die Sicherheit hinsichtlich Datenverlust, da Code an einem Remote-Repository (z. B. GitHub) gesichert ist.  
+
+**Expo** wurde genutzt, um die React-Native-App zu entwickeln und zu testen:  
+- Expo stellt eine stabile Entwicklungsumgebung bereit, in der sich Code schnell auf diversen Geräten oder Emulatoren ausführen lässt.  
+- Es ist sicher, da typische Konfigurationsfehler (z. B. bei nativem Aufbau) minimiert werden und Expo die Pflege vieler Abhängigkeiten übernimmt.  
+- Automatische Updates und Over-the-Air-Updates erleichtern die Wartung, wodurch sich weniger Angriffsflächen für veraltete Software ergeben.
+
+Beides zusammen trägt zu einem sicheren und effizienten Arbeitsablauf bei: Git bewahrt Entwicklungsstände und Expo vereinfacht den Produktivbetrieb oder das Betreiben von Testumgebungen.
 
 ---
 
