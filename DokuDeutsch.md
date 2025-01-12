@@ -41,6 +41,20 @@ In diesem Abschnitt wird beschrieben, wie das System entwickelt wurde. Dazu zäh
 • Visual Studio Code oder eine andere aktuelle IDE für Entwicklung und Wartung.  
 • Zusätzliche Libraries wie „react-native-paper“ und „react-native-paper-dates“ für UI-Design und Datumsfunktionen.
 
+### 3.1.1 Eingesetzte Technologien
+
+- **Node.js**: Als JavaScript-Laufzeitumgebung bildet Node.js die Grundlage für den Server- und Backend-Code, was eine einheitliche Sprache im gesamten Projekt ermöglicht.  
+- **Express.js**: Auf Basis von Node.js dient Express.js als schlanker Webframework für den Aufbau der REST-APIs. Dies erleichtert Routing und Middleware-Nutzung und bringt eine klare Struktur für die Backend-Routen.  
+- **React Native**: Diese Bibliothek erlaubt die Entwicklung einer nativen mobilen App (iOS/Android) unter Verwendung bekannter Web-Technologien (JavaScript/TypeScript). So kann man Funktionalitäten wie das Teacher Panel oder das AdminPanel einfach und plattformübergreifend bereitstellen.  
+- **Expo**: Expo ergänzt React Native durch eine vereinfachte Entwicklungsumgebung, Over-the-Air-Updates und integrierte Tools (z. B. für Tests und Geräte-Emulation), wodurch die Pflege vieler Abhängigkeiten erleichtert wird.  
+- **SQLite**: Als lokal eingebettete Datenbank kommt SQLite zum Einsatz, um Schüler, Lehrer, Karten, Berechtigungen und Protokolle effizient zu speichern. Der Vorteil liegt in der einfachen Handhabung und geringen Ressourcenanforderung.  
+- **react-native-paper** und **react-native-paper-dates**: Diese UI-Bibliotheken stellen sofort nutzbare Komponenten (Buttons, Textfelder, Datepicker etc.) für ein konsistentes und ansprechendes Frontend bereit.  
+- **Git**: Über Git werden alle Codeänderungen versionskontrolliert. Dadurch lassen sich einzelne Entwicklungsstände jederzeit wiederherstellen und Weiterentwicklungen in separaten Branches gestalten, ohne die Stabilität der Hauptversion zu gefährden.  
+- **Mermaid**: Mit Mermaid lassen sich Diagramme (Sequenz- und Klassendiagramme etc.) im Code oder in Markdown-Dateien einbinden und so Projektabläufe und -strukturen verständlich visualisieren. Dies ist beispielsweise in „Acess Flow Diagram.mermaid“ und „Teacher Permission Assigment Flow.mermaid“ umgesetzt.  
+- **TypeScript** (optional in Teilen): Für strengere Typisierung und bessere Wartbarkeit kann zusätzlich TypeScript verwendet werden, wodurch Fehler bereits beim Kompilieren erkannt werden können.  
+
+Alle diese Technologien wurden gewählt, um ein leicht zugängliches, erweiterbares und performantes System zu schaffen, das sowohl von Entwicklern als auch von Endanwendern effektiv genutzt werden kann.
+
 ## 3.2 Methodik
 
 Die Entwicklung stützte sich auf Code und Konzepte aus „Idea.md“, UML-Designs in „IdeaClassDiagram.mermaid“ sowie Ablaufdiagramme in „Acess Flow Diagram.mermaid“ und „Teacher Permission Assigment Flow.mermaid“. Ein Beispiel für das Zusammenspiel zeigt sich im folgenden Code-Schnipsel für Node.js-Routen, der verdeutlicht, wie Lehrende im System Karten zuweisen können:
