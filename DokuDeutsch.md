@@ -1,21 +1,34 @@
+# 0. Kurzfassung
+
+In diesem Projekt „Schul-Zugangskontrolle“ kombinieren wir Hardware (NFC-/RFID-Kartenleser), Software (Node.js/Express) und Mobile Apps (React Native), um Schülern und Schulpersonal einen sicheren und effizienten Zutritt zum Schulgebäude zu ermöglichen. Jeder Nutzer erhält eine RFID-Karte, die beim Betreten oder Verlassen eingelesen wird. 
+
+Das System prüft in einer SQLite-Datenbank, ob die Karte gültige Berechtigungen besitzt. Lehrkräfte können im „TeacherPanel“ Karten zuweisen, deaktivieren oder wiederkehrend freischalten. Administratoren verwalten über ein „AdminPanel“ die Lehrerkonten und Einträge. Ein Sicherheitsteam (Guard) hat die Möglichkeit, die Karten direkt zu überprüfen und protokolliert alle Zugriffe. Merkmale wie automatisierte Logs und einheitliche UI-Komponenten (z. B. per „react-native-paper“) vereinfachen Nutzung und Wartung.
+
+Dank des modularen Aufbaus lässt sich das System an unterschiedlichste Anforderungen anpassen. Ob neue Features wie biometrische Daten, Erweiterungen für mehrere Schulstandorte oder zusätzliche Rollen und Berechtigungen – das Grundgerüst ist dafür bereits angelegt. Alle Änderungen werden in Git versioniert, sodass Entwicklungen leicht nachvollzogen werden können. Insgesamt bietet das Projekt eine flexible, leicht bedienbare Lösung, um den Schulalltag sicherer und strukturierter zu gestalten.
+
 # 1. Einleitung
 
-Willkommen zu diesem umfassenden Dokument über das „School Access Control System“, ein Projekt, das Hardware, Software und Benutzerabläufe integriert. Dabei wurden verschiedene Dateien und Diagramme im Repository genutzt (einschließlich Mermaid-Diagrammen, TypeScript/JavaScript-Code und unterstützender Dokumente wie „Extended Documentation.md“, „Idea.md“ und „Sample Documentation“). Diese Dokumentation orientiert sich am Aufbau von PaperStructure.md und umfasst neun formale Abschnitte. Ihr Zweck ist es, jeden Aspekt des Projekts – von Zielen und Methoden bis hin zu Ergebnissen und weiteren Entwicklungsmöglichkeiten – in einer verständlichen und strukturierten Weise darzulegen.
+Willkommen zu diesem umfassenden Dokument über das „Schul-Zugangskontrolle“, ein Projekt, das die moderne Welt von heute widerspiegelt, in der Technologie und Sicherheit Hand in Hand gehen. In einer Ära, in der digitale Transformation und innovative Lösungen den Alltag prägen, vereint dieses Projekt Hardware, Software und Benutzerabläufe zu einem nahtlosen und effizienten System. 
 
-Dieser Text verweist zudem auf die „GitLog.md“-Datei, die den Verlauf der Projektentwicklung dokumentiert. Auch wenn wir diese Logs nicht wörtlich wiedergeben werden, dienen sie als Beispiel dafür, wie sich bestimmte Funktionen entwickelten und wie größere oder kleinere Änderungen im Lauf der Zeit hinzukamen. Aus den Commits geht hervor, dass während einer intensiven Arbeitsphase Funktionalitäten wie Card Handling, Teacher Routes, Admin-Panel-Funktionen und Front-End-Erweiterungen umgesetzt wurden. Diese spiegeln den fortlaufenden, iterativen Ausbau des Codebestands wider.
+Durch die Nutzung fortschrittlicher Technologien wie Node.js, React Native und SQLite, sowie die Integration von Diagrammen und unterstützenden Dokumenten, bietet dieses System eine zukunftsweisende Lösung für Schulen. Es zeigt, wie moderne Softwareentwicklung und Best Practices in DevOps zu einem sicheren und benutzerfreundlichen Zugangskontrollsystem führen können.
 
-Als Überblick zum Projektkontext:
-• Das System ist hauptsächlich in JavaScript/TypeScript geschrieben und verwendet Node.js und Express für das Backend sowie React Native (mit einigen auf React bezogenen Design-Konzepten) für das Frontend.  
-• Die Datenhaltung wird über SQLite realisiert, ein leichtgewichtiges Datenbanksystem. Dabei werden u. a. Entitäten wie Students, Teachers, Cards, Permissions und Access Logs verwaltet.  
-• Eine Vielzahl von Diagrammen (zum Beispiel in „Acess Flow Diagram.mermaid“, „IdeaClassDiagram.mermaid“ oder „Teacher Permission Assigment Flow.mermaid“) veranschaulicht die Zusammenarbeit zwischen den verschiedenen Rollen (Student, Teacher, Guard, Admin) und den physischen bzw. Software-Komponenten (Kartenlesegeräte, Datenbanksystem, Admin-Interface usw.).  
+Diese Dokumentation, die sich am Aufbau von PaperStructure.md orientiert, umfasst neun formale Abschnitte und zielt darauf ab, jeden Aspekt des Projekts – von Zielen und Methoden bis hin zu Ergebnissen und zukünftigen Entwicklungsmöglichkeiten – in einer klaren und strukturierten Weise darzulegen. 
 
-Der vorliegende Text führt alle diese Elemente in einem einzigen Dokument zusammen. In den folgenden Abschnitten finden Sie Codebeispiele, Verweise auf Versionsprotokolle und eingebundene Diagramme, damit Sie das Design des Systems nachvollziehen können. Dieses Papier umfasst ungefähr 25 Seiten im ausgedruckten Zustand, sodass Sie sich einen detaillierten Überblick über die gesamte Lösung verschaffen können. Beginnen wir nun mit den Zielen in Abschnitt 2.
+Der Verlauf der Projektentwicklung zeigt, wie sich das System durch kontinuierliche Verbesserungen und Erweiterungen entwickelt hat. Diese iterative Vorgehensweise spiegelt den dynamischen Charakter der modernen Softwareentwicklung wider, bei der Flexibilität und Anpassungsfähigkeit im Vordergrund stehen.
+
+Das Schul-Zugangskontrolle ist ein Beispiel dafür, wie Technologie den Schulalltag sicherer und effizienter gestalten kann. Es nutzt die Leistungsfähigkeit von JavaScript/TypeScript, Node.js und React Native, um eine robuste und skalierbare Lösung zu bieten. Die Datenhaltung erfolgt über SQLite, ein leichtgewichtiges und effizientes Datenbanksystem, das die Verwaltung von Entitäten wie Students, Teachers, Cards, Permissions und Access Logs ermöglicht.
+
+Diagramme wie „Acess Flow Diagram.mermaid“ und „Teacher Permission Assigment Flow.mermaid“ veranschaulichen die Zusammenarbeit zwischen den verschiedenen Rollen und Komponenten des Systems. Diese Visualisierungen helfen dabei, die komplexen Abläufe und Interaktionen innerhalb des Systems zu verstehen und zu optimieren.
+
+In den folgenden Abschnitten finden Sie detaillierte Codebeispiele, Verweise auf Versionsprotokolle und eingebundene Diagramme, die das Design und die Funktionalität des Systems verdeutlichen. Dieses Dokument bietet einen umfassenden Überblick über das Schul-Zugangskontrolle und zeigt, wie moderne Technologien und innovative Ansätze zu einer sicheren und effizienten Lösung führen können. Lassen Sie sich inspirieren von den Möglichkeiten, die die digitale Welt von heute bietet, und entdecken Sie, wie dieses Projekt einen Beitrag zu einer sichereren und besser organisierten Schulumgebung leisten kann.
+
+Beginnen wir nun mit den Zielen in Abschnitt 2.
 
 ---
 
 # 2. Ziele
 
-Die Hauptziele dieses School Access Control Systems umfassen:
+Die Hauptziele dieses Schul-Zugangskontrolles umfassen:
 
 1. Implementierung eines sicheren, kartenbasierten Zutrittsmechanismus für Schüler und Mitarbeitende.  
 2. Bereitstellung eines Lehrer-Interfaces zur Verwaltung von Schüler-Berechtigungen, z. B. Zuweisen und Entziehen von Zugangskarten.  
@@ -27,18 +40,28 @@ Die Hauptziele dieses School Access Control Systems umfassen:
 
 Darüber hinaus demonstriert dieses Projekt Best Practices in DevOps, Zusammenwirken von Frontend und Backend sowie eine wartbare Struktur, die sich kontinuierlich erweitern lässt. Aus den Commits (siehe GitLog.md) geht hervor, dass sich diese Ziele im Lauf der Entwicklung fortwährend angepasst und erweitert haben, etwa durch neue Features oder Verfeinerungen.
 
+## 2.1 UN-Nachhaltigkeitsziele (Agenda 2030)
+
+Das Projekt „Schul-Zugangskontrolle“ trägt zur Erreichung der UN-Nachhaltigkeitsziele bei, indem es:
+
+- **Ziel 4: Hochwertige Bildung** fördert, indem es Schulen dabei unterstützt, sicherere und effizientere Lernumgebungen zu schaffen.  
+- **Ziel 9: Industrie, Innovation und Infrastruktur** unterstützt, indem es innovative Technologien und Lösungen in den Schulalltag integriert.  
+- **Ziel 16: Frieden, Gerechtigkeit und starke Institutionen** stärkt, indem es die Sicherheit und Ordnung in Schulen erhöht und die Verwaltung von Zugriffsrechten transparenter macht.  
+
+Durch die Umsetzung dieser Ziele trägt das Projekt dazu bei, eine nachhaltige und zukunftsfähige Bildungslandschaft zu schaffen, die auf Sicherheit, Effizienz und Innovation basiert.
+
 ---
 
 # 3. Vorgehensweise, Materialien und Methode
 
-In diesem Abschnitt wird beschrieben, wie das System entwickelt wurde. Dazu zählen Arbeitsabläufe, verwendete Komponenten, der Aufbau des Codes sowie die Herangehensweise an das Projekt.
+In diesem Abschnitt wird beschrieben, wie das System entwickelt wurde. Dazu zählen Arbeitsabläufe, verwendete Komponenten, der Aufbau des Codes sowie die Herangehensweise an das Projekt. Um den Projekt zu machen, habe ich zuerst Word-Dokumente geschrieben, wo ich meine Idee erklärt habe. Ich wollte dass mein Projekt in einer Schule benutzt wird, deswegen habe ich zuerst, bevor ich angefangen haben zu programmieren, alles schön gescrieben mit veranschaulichenden Diagrammen.
 
 ## 3.1 Materialien und Werkzeuge
 
 • Node.js (Express) für das Backend.  
-• React Native für den plattformübergreifenden Einsatz auf Mobilgeräten.  
+• React Native für den plattformübergreifenden Einsatz auf Mobilgeräten und Web.
 • SQLite für eine leichtgewichtige, dateibasierte Datenbankverwaltung.  
-• Visual Studio Code oder eine andere aktuelle IDE für Entwicklung und Wartung.  
+• Visual Studio Code IDE für Entwicklung und Wartung.  
 • Zusätzliche Libraries wie „react-native-paper“ und „react-native-paper-dates“ für UI-Design und Datumsfunktionen.
 
 ### 3.1.1 Eingesetzte Technologien
@@ -50,7 +73,7 @@ In diesem Abschnitt wird beschrieben, wie das System entwickelt wurde. Dazu zäh
 - **SQLite**: Als lokal eingebettete Datenbank kommt SQLite zum Einsatz, um Schüler, Lehrer, Karten, Berechtigungen und Protokolle effizient zu speichern. Der Vorteil liegt in der einfachen Handhabung und geringen Ressourcenanforderung.  
 - **react-native-paper** und **react-native-paper-dates**: Diese UI-Bibliotheken stellen sofort nutzbare Komponenten (Buttons, Textfelder, Datepicker etc.) für ein konsistentes und ansprechendes Frontend bereit.  
 - **Git**: Über Git werden alle Codeänderungen versionskontrolliert. Dadurch lassen sich einzelne Entwicklungsstände jederzeit wiederherstellen und Weiterentwicklungen in separaten Branches gestalten, ohne die Stabilität der Hauptversion zu gefährden.  
-- **Mermaid**: Mit Mermaid lassen sich Diagramme (Sequenz- und Klassendiagramme etc.) im Code oder in Markdown-Dateien einbinden und so Projektabläufe und -strukturen verständlich visualisieren. Dies ist beispielsweise in „Acess Flow Diagram.mermaid“ und „Teacher Permission Assigment Flow.mermaid“ umgesetzt.  
+- **Mermaid**: Mit Mermaid lassen sich Diagramme (Sequenz- und Klassendiagramme etc.) im Code oder in Markdown-Dateien einbinden und so Projektabläufe und -strukturen verständlich visualisieren. OJO! TODO: Dies ist beispielsweise in „Acess Flow Diagram.mermaid“ und „Teacher Permission Assigment Flow.mermaid“ umgesetzt.  
 - **TypeScript** (optional in Teilen): Für strengere Typisierung und bessere Wartbarkeit kann zusätzlich TypeScript verwendet werden, wodurch Fehler bereits beim Kompilieren erkannt werden können.  
 
 Alle diese Technologien wurden gewählt, um ein leicht zugängliches, erweiterbares und performantes System zu schaffen, das sowohl von Entwicklern als auch von Endanwendern effektiv genutzt werden kann.
@@ -58,6 +81,8 @@ Alle diese Technologien wurden gewählt, um ein leicht zugängliches, erweiterba
 ## 3.2 Methodik
 
 Die Entwicklung stützte sich auf Code und Konzepte aus „Idea.md“, UML-Designs in „IdeaClassDiagram.mermaid“ sowie Ablaufdiagramme in „Acess Flow Diagram.mermaid“ und „Teacher Permission Assigment Flow.mermaid“. Ein Beispiel für das Zusammenspiel zeigt sich im folgenden Code-Schnipsel für Node.js-Routen, der verdeutlicht, wie Lehrende im System Karten zuweisen können:
+
+Den ganzes Code kann man nicht hier zeigen da es mehr als 2000 Zeilen sind, aber hier sind wichtige Teile:
 
 ```js
 // teacher.js: Beispiel für das Zuweisen einer Karte
@@ -105,11 +130,7 @@ Diese Funktionen wurden via React-Native-Oberfläche implementiert und über Exp
 Das System erlaubt Lehrenden, Karten für wiederkehrende Nutzungen zu konfigurieren (z. B. für Schüler, die regelmäßig Laborräume aufsuchen). Das Feld isRecurring (Bool, 0 oder 1) und das String-Feld recurrencePattern (z. B. „daily“, „weekly“ usw.) ermöglichen es, wiederholt Zugänge zu gewähren. Dies wird im Frontend über einen einfachen Schalter gesteuert.
 
 ### 3.2.5 Stetige Integration
-In der 
-
-GitLog.md
-
- lassen sich zahlreiche kleine Commits erkennen, bei denen jeweils neue Funktionen oder Fehlerbehebungen umgesetzt wurden. So wurden beispielsweise DatePicker mit der Zeit ergänzt, das Guard Panel eingeführt und UI-Komponenten überarbeitet. Dieses iterative Vorgehen macht den Entwicklungsprozess flexibel und transparenter.
+Durch Git lassen sich zahlreiche kleine Commits erkennen, bei denen jeweils neue Funktionen oder Fehlerbehebungen umgesetzt wurden. So wurden beispielsweise DatePicker mit der Zeit ergänzt, das Guard Panel eingeführt und UI-Komponenten überarbeitet. Dieses iterative Vorgehen macht den Entwicklungsprozess flexibel und transparenter.
 
 ### 3.2.6 Einsatz von Git und Expo
 **Git** dient als zentrale Versionsverwaltung:  
@@ -128,7 +149,7 @@ Beides zusammen trägt zu einem sicheren und effizienten Arbeitsablauf bei: Git 
 
 # 4. Ergebnisse
 
-Das School Access Control System erfüllt die folgenden Hauptfunktionen:
+Das Schul-Zugangskontrolle erfüllt die folgenden Hauptfunktionen:
 
 1. **Kartenbasierter Zugriff für Schüler**  
    Schüler halten ihre Karte an ein Lesegrät (NFC/RFID). Das System fragt die zugehörige Route ab, überprüft die Gültigkeit der Rechte und protokolliert das Ergebnis.
@@ -158,11 +179,11 @@ Beide Hauptfaktoren – Sicherheit und Komfort – werden durch das vorliegende 
 • **Sicherheit**: Nur Karteninhaber mit gültigen Rechten erhalten Zugang, während die AccessLog-Tabelle eine lückenlose Nachverfolgung ermöglicht.  
 • **Komfort**: Lehrende können Zugriffsrechte eigenständig verwalten; das Frontend ist übersichtlich. Admins haben einen eigenen Bereich mit erweiterten Optionen.
 
-Die ersten Commits (GitLog.md) zeigen, dass man anfangs mit In-Memory-Lösungen arbeitete. Später wurde SQLite integriert. Außerdem wurde die UI fortlaufend verbessert (z. B. Material UI oder Date/Time-Picker). Diese schrittweise Vorgehensweise ist ein valides Beispiel für agiles Arbeiten.
+Die ersten Commits zeigen, dass ich anfangs mit In-Memory-Lösungen arbeitete. Später wurde SQLite integriert. Außerdem wurde die UI fortlaufend verbessert (z. B. Material UI oder Date/Time-Picker). Diese schrittweise Vorgehensweise ist ein valides Beispiel für agiles Arbeiten.
 
 ## 5.2 Fazit
 
-Das School Access Control System bietet eine durchdachte, modular aufgebaute Lösung mit:
+Das Schul-Zugangskontrolle bietet eine durchdachte, modular aufgebaute Lösung mit:
 
 • Kartenbasiertem Zugriff für Schüler  
 • Einfachem Teacher Interface für tägliche Verwaltungsaufgaben  
@@ -179,11 +200,7 @@ Die klare Unterteilung in Node.js-Routen (admin.js, teacher.js, guard.js), ein R
 2. **Hauptanwendungsfälle**: Kartenvorzeigen, Lehrer-Interface für Verwaltung, Guard-Validierung und Admin-Oberfläche für Lehrermanagement.  
 3. **Datenmodell**: Tabellen für Cards, Permissions, Students, Teachers und AccessLogs sorgen für die nötige Struktur.  
 4. **Workflow**: System verwaltet die Eingänge, protokolliert jeden Zutritt und gestattet autorisierten Nutzern bequeme Konfiguration.  
-5. **Iterative Entwicklung**: Häufige Commits in 
-
-GitLog.md
-
- zeigen, wie Schritt für Schritt die Funktionen gewachsen sind.
+5. **Iterative Entwicklung**: Häufige Commits in Git zeigen, wie Schritt für Schritt die Funktionen gewachsen sind.
 
 ---
 
@@ -286,4 +303,4 @@ Dieses Snippet aus „IdeaClassDiagram.mermaid“ zeigt, wie sich Teacher, Card 
 
 ---
 
-Diese ~25-seitige (geschätzte) Markdown-Dokumentation versucht, alle Aspekte des Projekts – Frontend, Backend, Hardware, Logs und Diagramme – zu einem stimmigen Ganzen zu verbinden und folgt der Struktur von PaperStructure.md. Weitergehende Erweiterungen, Detailanpassungen oder stilistische Veränderungen können jederzeit ergänzt werden; dennoch sollte diese Dokumentation eine solide Basis für Interessierte, Entwickler oder Administratoren bilden, die das School Access Control System verstehen oder weiterentwickeln möchten.
+Diese ~25-seitige (geschätzte) Markdown-Dokumentation versucht, alle Aspekte des Projekts – Frontend, Backend, Hardware, Logs und Diagramme – zu einem stimmigen Ganzen zu verbinden und folgt der Struktur von PaperStructure.md. Weitergehende Erweiterungen, Detailanpassungen oder stilistische Veränderungen können jederzeit ergänzt werden; dennoch sollte diese Dokumentation eine solide Basis für Interessierte, Entwickler oder Administratoren bilden, die das Schul-Zugangskontrolle verstehen oder weiterentwickeln möchten.
