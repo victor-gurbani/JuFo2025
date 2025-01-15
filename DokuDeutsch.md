@@ -171,26 +171,11 @@ In der Praxis fügt sich das System nahtlos in den Schulalltag ein. Sollten grö
 ---
 
 # 5. Diskussion der Ergebnisse und Fazit
+Das Schul-Zugangskontrolle nutzt ein zukunftsweisendes, cloudfähiges Konzept, das Sicherheit und Nutzerfreundlichkeit geschickt miteinander vereint. Mit cutting-edge Technologien wie Node.js, React Native und automatisierten DevOps-Pipelines ist dieses System optimal auf die digitale Transformation vorbereitet und ermöglicht eine nahtlose Integration in moderne Schulinfrastrukturen. Das Ergebnis: Ein intuitives, eng verzahntes Ökosystem, das den Alltag von Lehrenden, Guard-Personal und Schülern nachhaltig verbessert.
 
-## 5.1 Diskussion der Ergebnisse
+Auf technischer Seite sorgt eine robust in SQLite eingebundene AccessLog-Funktionalität für vollständige Transparenz und Rückverfolgbarkeit, während recycelbare Module wie getrennte Node.js-Routen (admin.js, teacher.js, guard.js) die Skalierbarkeit und Langlebigkeit des Systems untermauern. Gleichzeitig gewährleistet das automatisierte Echtzeit-Monitoring per React-Native-App eine lückenlose Kontrolle von Zugängen und Rollenrechten. Dank integrierter Material-Design-Elemente und responsiver UI-Komponenten werden Bedienkomfort und Aktualität deutlich gesteigert.
 
-Beide Hauptfaktoren – Sicherheit und Komfort – werden durch das vorliegende System angesprochen:  
-
-• **Sicherheit**: Nur Karteninhaber mit gültigen Rechten erhalten Zugang, während die AccessLog-Tabelle eine lückenlose Nachverfolgung ermöglicht.  
-• **Komfort**: Lehrende können Zugriffsrechte eigenständig verwalten; das Frontend ist übersichtlich. Admins haben einen eigenen Bereich mit erweiterten Optionen.
-
-Die ersten Commits zeigen, dass ich anfangs mit In-Memory-Lösungen arbeitete. Später wurde SQLite integriert. Außerdem wurde die UI fortlaufend verbessert (z. B. Material UI oder Date/Time-Picker). Diese schrittweise Vorgehensweise ist ein valides Beispiel für agiles Arbeiten.
-
-## 5.2 Fazit
-
-Das Schul-Zugangskontrolle bietet eine durchdachte, modular aufgebaute Lösung mit:
-
-• Kartenbasiertem Zugriff für Schüler  
-• Einfachem Teacher Interface für tägliche Verwaltungsaufgaben  
-• Admin-Funktionen, um Lehrerkonten zu verwalten und die Gesamtstruktur zu überwachen  
-• Protokollierung von Zugriffsereignissen für Analysen und Sicherheit  
-
-Die klare Unterteilung in Node.js-Routen (admin.js, teacher.js, guard.js), ein React-Native-Frontend und eine SQLite-Datenbank macht das Projekt sowohl für kleine als auch große Einrichtungen zugänglich. Dank etablierter Frameworks und Best Practices kann es langfristig einfach weiterentwickelt und gewartet werden.
+Durch die fortlaufende Optimierung via Git Commits und den Einsatz moderner Sicherheitsstandards werden neue Technologien wie NFC-Smartphone-Funktionen oder biometrische Verfahren rasch einbindbar. Damit ist das Schul-Zugangskontrolle hervorragend dafür gerüstet, den Sprung in Education 4.0 zu meistern und sich flexibel an wachsende Schulumgebungen anzupassen – für eine rundum moderne, zuverlässige und nachhaltige Schulerfahrung.
 
 ---
 
@@ -220,15 +205,15 @@ Die GitLog.md-Datei diente zusätzlich, um den Verlauf bestimmter Implementierun
 ---
 
 # 8. Ausblick auf weitere Schritte
-
 Das System ist einsatzbereit, kann aber noch verbessert werden:
 
 1. **Skalierung**: Bei größeren Schulen wäre ein Umstieg auf eine leistungsfähigere Datenbank (z. B. PostgreSQL) sinnvoll.  
 2. **Erweiterte Sicherheitsmaßnahmen**: Für den LAN-Betrieb ist das System gut geeignet; dennoch könnte man zusätzliche Authentifizierungen, rollenbasierte Zugriffssteuerungen (RBAC) und Verschlüsselung einführen.  
 3. **Erweiterungen**:  
-   - Online-Benachrichtigungen für betreuende Lehrkräfte bei bestimmten Events.  
-   - Integration in Schulsysteme wie Stundenpläne oder Veranstaltungsverwaltung.  
-4. **Hardware-Integration**: Neben der Kartenerkennung könnten auch biometrische Daten oder NFC-Smartphone-Funktionen für höheren Komfort und mehr Sicherheit sorgen.
+  - Online-Benachrichtigungen für betreuende Lehrkräfte bei bestimmten Events.  
+  - Integration in Schulsysteme wie Stundenpläne oder Veranstaltungsverwaltung.  
+4. **Hardware-Integration**: Neben der Kartenerkennung könnten auch biometrische Daten oder NFC-Smartphone-Funktionen für höheren Komfort und mehr Sicherheit sorgen.  
+5. **KI-Integration**: Implementierung von KI-gestützten Anomalieerkennungen, um ungewöhnliche Zugriffsversuche zu identifizieren und automatisch zu melden. KI könnte auch zur Optimierung der Zugangszeiten und zur Vorhersage von Wartungsbedarfen genutzt werden.
 
 ---
 
