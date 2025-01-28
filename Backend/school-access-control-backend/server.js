@@ -4,6 +4,11 @@ const cors = require("cors");
 const sqlite3 = require("sqlite3").verbose(); // SQLite library
 const checkPermission = require("./middleware/checkPermission");
 
+// Initialize Express app
+const app = express();
+app.use(bodyParser.json());
+app.use(cors());
+
 // Initialize SQLite database
 const db = new sqlite3.Database("./database.db", (err) => {
   if (err) {
@@ -80,11 +85,11 @@ const db = new sqlite3.Database("./database.db", (err) => {
       db.run(
         `CREATE TABLE IF NOT EXISTS accessLogs (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          timestamp TEXT,
           direction TEXT,
           student TEXT,
           card TEXT,
           wasApproved INTEGER,
+          timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (student) REFERENCES students(id),
           FOREIGN KEY (card) REFERENCES cards(uid)
         )`,
@@ -120,10 +125,6 @@ const adminRoutes = require("./routes/admin")(db);
 const teacherRoutes = require("./routes/teacher")(db);
 const guardRoutes = require("./routes/guard")(db);
 const cardRoutes = require("./routes/cards")(db);
-
-const app = express();
-app.use(bodyParser.json());
-app.use(cors());
 
 // Example routes
 app.use("/admin", adminRoutes);
