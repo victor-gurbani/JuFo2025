@@ -1,3 +1,20 @@
+// Permission Levels: admin, tutor, teacher, guard, student
+/* 
+Admin has full access to all endpoints
+Tutor can invalidate cards, assign cards, and view permissions (basically a teacher with extra permissions)
+Teachers can assign cards and view permissions
+Guards can view permissions and cards
+Student is not used in this project 
+*/
+
+const roleHierarchy = {
+  student: 0,
+  guard: 1,
+  teacher: 2,
+  tutor: 3,
+  admin: 4
+};
+
 module.exports = (db, requiredLevel) => {
   return (req, res, next) => {
     const teacherId = req.body.teacherId || req.query.teacherId; // Must be passed by the client
@@ -12,18 +29,14 @@ module.exports = (db, requiredLevel) => {
       if (!row) return res.status(404).json({ error: "Teacher not found" });
 
       const { permissionLevel } = row;
+      const userLevel = roleHierarchy[permissionLevel.toLowerCase()] || -1;
+      const requiredLevelNum = roleHierarchy[requiredLevel.toLowerCase()] || 0;
 
-      // If user is admin, allow them to proceed no matter what
-      if (permissionLevel === "admin") {
+      if (userLevel >= requiredLevelNum) {
         return next();
-      }
-
-      // Otherwise, check if the permission matches the required level
-      if (permissionLevel !== requiredLevel) {
+      } else {
         return res.status(403).json({ error: "Insufficient permissions" });
       }
-
-      next();
     });
   };
 };
