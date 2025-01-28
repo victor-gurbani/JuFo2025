@@ -10,17 +10,28 @@ module.exports = (db) => {
     const updateCardQuery = `UPDATE cards SET lastAssigned = ?, isValid = 1 WHERE uid = ?`;
     db.run(updateCardQuery, [studentId, cardUID], function (err) {
       if (err) return res.status(500).json({ error: err.message });
-      if (this.changes === 0) return res.status(404).json({ error: "Card not found" });
+      
+      if (this.changes === 0) {
+        const insertCardQuery = `INSERT INTO cards (uid, lastAssigned, isValid) VALUES (?, ?, 1)`;
+        db.run(insertCardQuery, [cardUID, studentId], function (insertErr) {
+          if (insertErr) return res.status(500).json({ error: insertErr.message });
+          insertPermission();
+        });
+      } else {
+        insertPermission();
+      }
 
-      const insertPermissionQuery = `
-        INSERT INTO permissions (
-          startDate, endDate, isRecurring, recurrencePattern, isValid, assignedStudent, assignedBy, associatedCard
-        ) VALUES (?, ?, ?, ?, 1, ?, ?, ?)
-      `;
-      db.run(insertPermissionQuery, [startDate, endDate, isRecurring ? 1 : 0, recurrencePattern || "", studentId, req.body.teacherId, cardUID], function (permErr) {
-        if (permErr) return res.status(500).json({ error: permErr.message });
-        res.json({ success: true, cardUID, studentId });
-      });
+      function insertPermission() {
+        const insertPermissionQuery = `
+          INSERT INTO permissions (
+            startDate, endDate, isRecurring, recurrencePattern, isValid, assignedStudent, assignedBy, associatedCard
+          ) VALUES (?, ?, ?, ?, 1, ?, ?, ?)
+        `;
+        db.run(insertPermissionQuery, [startDate, endDate, isRecurring ? 1 : 0, recurrencePattern || "", studentId, req.body.teacherId, cardUID], function (permErr) {
+          if (permErr) return res.status(500).json({ error: permErr.message });
+          res.json({ success: true, cardUID, studentId });
+        });
+      }
     });
   });
 
