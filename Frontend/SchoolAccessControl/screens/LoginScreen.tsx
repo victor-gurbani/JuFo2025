@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { View } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title } from "react-native-paper";
 
@@ -6,6 +6,7 @@ export default function LoginScreen({ navigation }) {
   const [role, setRole] = useState("");
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const textInputRef = useRef<TextInput>(null);
 
   const handleLogin = () => {
     const trimmedRole = role.trim().toLowerCase();
@@ -24,11 +25,14 @@ export default function LoginScreen({ navigation }) {
           <Title>Login</Title>
           <Text>Login as (admin/teacher/guard):</Text>
           <TextInput
+            ref={textInputRef}
             label="Enter role"
             value={role}
             onChangeText={setRole}
             mode="outlined"
             style={{ marginVertical: 10 }}
+            onSubmitEditing={handleLogin}
+            returnKeyType="done"
           />
           <Button mode="contained" onPress={handleLogin}>
             Login
