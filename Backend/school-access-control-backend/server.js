@@ -94,6 +94,23 @@ const db = new sqlite3.Database("./database.db", (err) => {
           }
         }
       );
+
+      // Check if admin user exists, if not, create it
+      db.get(`SELECT * FROM teachers WHERE id = ?`, ['admin'], (err, row) => {
+        if (err) {
+          console.error("Error checking for admin user:", err.message);
+        } else if (!row) {
+          db.run(`INSERT INTO teachers (id, name, permissionLevel) VALUES (?, ?, ?)`, ['admin', 'Administrator', 'admin'], (insertErr) => {
+            if (insertErr) {
+              console.error("Error creating admin user:", insertErr.message);
+            } else {
+              console.log("Admin user created successfully.");
+            }
+          });
+        } else {
+          console.log("Admin user already exists.");
+        }
+      });
     });
   }
 });
