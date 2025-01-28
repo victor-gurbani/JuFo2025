@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { View, ScrollView } from "react-native";
-import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, Switch } from "react-native-paper";
+import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph } from "react-native-paper";
 import api from "../services/api";
 
 export default function AdminPanel() {
   const [dashboard, setDashboard] = useState("");
   const [teachers, setTeachers] = useState([]);
+  const [cards, setCards] = useState([]); // New state for cards
   const [teacherId, setTeacherId] = useState("");
   const [teacherName, setTeacherName] = useState("");
   const [teacherPermission, setTeacherPermission] = useState("");
@@ -20,12 +21,22 @@ export default function AdminPanel() {
 
     // Load teacher list
     loadTeachers();
+
+    // Load cards list
+    loadCards(); // Fetch cards on mount
   }, []);
 
   const loadTeachers = () => {
     api
       .get("/admin/teachers")
       .then((res) => setTeachers(res.data))
+      .catch((err) => showSnackbar("Error: " + err));
+  };
+
+  const loadCards = () => { // New function to load cards
+    api
+      .get("/admin/cards")
+      .then((res) => setCards(res.data))
       .catch((err) => showSnackbar("Error: " + err));
   };
 
@@ -123,6 +134,22 @@ export default function AdminPanel() {
           <Card.Actions>
             <Button onPress={() => deleteTeacher(t.id)}>Delete</Button>
           </Card.Actions>
+        </Card>
+      ))}
+
+      {/* New Section to Display All Cards */}
+      <Text style={{ marginVertical: 20, fontWeight: "bold" }}>
+        All Cards
+      </Text>
+      <Button mode="contained" onPress={loadCards} style={{ marginBottom: 10 }}>
+        Refresh Cards
+      </Button>
+      {cards.map((c: any) => (
+        <Card key={c.uid} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
+          <Card.Content>
+            <Title>Card UID: {c.uid}</Title>
+            <Paragraph>Is Valid: {c.isValid ? "Yes" : "No"}</Paragraph>
+          </Card.Content>
         </Card>
       ))}
 

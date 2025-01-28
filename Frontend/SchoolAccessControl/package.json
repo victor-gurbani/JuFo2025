@@ -16,15 +16,16 @@
     "@react-navigation/native-stack": "^7.2.0",
     "axios": "^1.7.9",
     "expo": "~52.0.20",
+    "expo-dev-client": "~5.0.9",
     "expo-status-bar": "~2.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-native": "0.76.5",
     "react-native-datepicker": "^1.7.2",
+    "react-native-nfc-manager": "^3.16.1",
     "react-native-paper": "^5.12.5",
     "react-native-paper-dates": "^0.22.28",
-    "react-native-web": "^0.19.13",
-    "expo-dev-client": "~5.0.8"
+    "react-native-web": "^0.19.13"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

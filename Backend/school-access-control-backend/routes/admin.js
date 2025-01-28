@@ -1,10 +1,20 @@
 const express = require("express");
+const checkPermission = require("../middleware/checkPermission");
 
 module.exports = (db) => {
   const router = express.Router();
 
-  // List all teachers
-  router.get("/teachers", (req, res) => {
+  // Get all cards (allow only admins)
+  router.get("/cards", checkPermission(db, "admin"), (req, res) => {
+    const query = `SELECT * FROM cards`;
+    db.all(query, [], (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    });
+  });
+
+  // List all teachers (allow only admins)
+  router.get("/teachers", checkPermission(db, "admin"), (req, res) => {
     const query = `SELECT * FROM teachers`;
     db.all(query, [], (err, rows) => {
       if (err) return res.status(500).json({ error: err.message });
@@ -12,8 +22,8 @@ module.exports = (db) => {
     });
   });
 
-  // Create a teacher
-  router.post("/teachers", (req, res) => {
+  // Create a teacher (allow only admins)
+  router.post("/teachers", checkPermission(db, "admin"), (req, res) => {
     const { id, name, permissionLevel } = req.body;
     const query = `INSERT INTO teachers (id, name, permissionLevel) VALUES (?, ?, ?)`;
     db.run(query, [id, name, permissionLevel], function (err) {
@@ -22,8 +32,8 @@ module.exports = (db) => {
     });
   });
 
-  // Update a teacher
-  router.put("/teachers/:id", (req, res) => {
+  // Update a teacher (allow only admins)
+  router.put("/teachers/:id", checkPermission(db, "admin"), (req, res) => {
     const { name, permissionLevel } = req.body;
     const query = `UPDATE teachers SET name = ?, permissionLevel = ? WHERE id = ?`;
     db.run(query, [name, permissionLevel, req.params.id], function (err) {
@@ -33,8 +43,8 @@ module.exports = (db) => {
     });
   });
 
-  // Delete a teacher
-  router.delete("/teachers/:id", (req, res) => {
+  // Delete a teacher (allow only admins)
+  router.delete("/teachers/:id", checkPermission(db, "admin"), (req, res) => {
     const query = `DELETE FROM teachers WHERE id = ?`;
     db.run(query, [req.params.id], function (err) {
       if (err) return res.status(500).json({ error: err.message });
@@ -43,8 +53,8 @@ module.exports = (db) => {
     });
   });
 
-  // Example admin dashboard endpoint
-  router.get("/dashboard", (req, res) => {
+  // Example admin dashboard endpoint (allow only admins)
+  router.get("/dashboard", checkPermission(db, "admin"), (req, res) => {
     res.json({ message: "Admin Dashboard" });
   });
 
