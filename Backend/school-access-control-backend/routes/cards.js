@@ -45,15 +45,26 @@ module.exports = (db) => {
   // Update a card (allow admins and tutors)
   router.put("/:uid", checkPermission(db, "tutor"), (req, res) => {
     const { lastAssigned, isValid } = req.body;
-    const query = `UPDATE cards SET lastAssigned = ?, isValid = ? WHERE uid = ?`;
-    db.run(query, [lastAssigned, isValid ? 1 : 0, req.params.uid], function (err) {
+    const { uid } = req.params;
+
+    const updateQuery = `UPDATE cards SET lastAssigned = ?, isValid = ? WHERE uid = ?`;
+    const insertQuery = `INSERT INTO cards (uid, lastAssigned, isValid) VALUES (?, ?, ?)`;
+
+    db.run(updateQuery, [lastAssigned, isValid ? 1 : 0, uid], function (err) {
       if (err) {
         return res.status(500).json({ error: "Failed to update card" });
       }
       if (this.changes === 0) {
-        return res.status(404).json({ error: "Card not found" });
+        // If no rows were updated, insert the card
+        db.run(insertQuery, [uid, lastAssigned, isValid ? 1 : 0], function (err) {
+          if (err) {
+            return res.status(500).json({ error: "Failed to create card" });
+          }
+          res.json({ uid, lastAssigned, isValid });
+        });
+      } else {
+        res.json({ uid, lastAssigned, isValid });
       }
-      res.json({ uid: req.params.uid, lastAssigned, isValid });
     });
   });
 
