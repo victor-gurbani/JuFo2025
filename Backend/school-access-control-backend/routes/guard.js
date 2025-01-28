@@ -7,31 +7,49 @@ module.exports = (db) => {
   // Validate a card swipe (allow guards, teachers, tutors, admins)
   router.post("/validate", checkPermission(db, "guard"), (req, res) => {
     const { cardUID } = req.body;
-    const query = `
+    const cardQuery = `
       SELECT c.uid, c.lastAssigned, c.isValid
       FROM cards c
       WHERE c.uid = ?
       LIMIT 1
     `;
-    db.get(query, [cardUID], (err, row) => {
+    const permissionsQuery = `
+      SELECT p.id, p.startDate, p.endDate, p.isRecurring, p.recurrencePattern, p.assignedStudent, t.name AS assignedBy
+      FROM permissions p
+      JOIN teachers t ON p.assignedBy = t.id
+      WHERE p.associatedCard = ? AND p.isValid = 1
+    `;
+
+    db.get(cardQuery, [cardUID], (err, cardRow) => {
       if (err) return res.status(500).json({ error: err.message });
-      if (!row) return res.json({ valid: false });
+      if (!cardRow) return res.json({ valid: false });
 
       // Check if the card is valid
-      if (row.isValid !== 1) {
+      if (cardRow.isValid !== 1) {
         return res.json({ valid: false });
       }
 
-      // Optionally, you can add more logic here, such as checking permissions
+      // Fetch permissions related to the card
+      db.all(permissionsQuery, [cardUID], (permErr, permRows) => {
+        if (permErr) return res.status(500).json({ error: permErr.message });
 
-      // Return card details along with validation result
-      res.json({
-        valid: true,
-        card: {
-          uid: row.uid,
-          lastAssigned: row.lastAssigned,
-          isValid: row.isValid === 1
-        }
+        res.json({
+          valid: true,
+          card: {
+            uid: cardRow.uid,
+            lastAssigned: cardRow.lastAssigned,
+            isValid: cardRow.isValid === 1,
+          },
+          permissions: permRows.map((perm) => ({
+            id: perm.id,
+            startDate: perm.startDate,
+            endDate: perm.endDate,
+            isRecurring: perm.isRecurring === 1,
+            recurrencePattern: perm.recurrencePattern,
+            assignedStudent: perm.assignedStudent,
+            assignedBy: perm.assignedBy,
+          })),
+        });
       });
     });
   });

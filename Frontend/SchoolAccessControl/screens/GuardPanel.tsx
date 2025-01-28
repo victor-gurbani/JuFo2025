@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { View, ScrollView } from "react-native";
-import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph } from "react-native-paper";
+import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable } from "react-native-paper";
 import api from "../services/api";
 
 export default function GuardPanel() {
@@ -10,6 +10,7 @@ export default function GuardPanel() {
   const [result, setResult] = useState("");
   const [visible, setVisible] = useState(false);
   const [cardInfo, setCardInfo] = useState<any>(null); // State to store card information
+  const [permissions, setPermissions] = useState<any[]>([]); // State to store permissions related to the card
   const [cards, setCards] = useState<any[]>([]); // State to store all cards (if needed)
   const textInputRef = useRef<TextInput>(null);
 
@@ -20,7 +21,7 @@ export default function GuardPanel() {
   // Helper function to append guardId to requests
   const apiWithGuardId = (method: string, url: string, body?: any) => {
     if (method === "GET" || method === "DELETE") {
-      return api[method.toLowerCase()](`${url}?guardId=${currentGuardId}`);
+      return api[method.toLowerCase()](`${url}?guardId=${currentGuardId}`); 
     } else {
       return api[method.toLowerCase()](url, { ...body, guardId: currentGuardId });
     }
@@ -53,9 +54,11 @@ export default function GuardPanel() {
         if (res.data.valid) {
           setResult("Access Granted");
           setCardInfo(res.data.card); // Set card information
+          setPermissions(res.data.permissions); // Set permissions related to the card
         } else {
           setResult("Access Denied");
           setCardInfo(null); // Clear card information
+          setPermissions([]); // Clear permissions
         }
         setVisible(true);
         // Clear the UID after validation
@@ -65,8 +68,9 @@ export default function GuardPanel() {
       })
       .catch(() => {
         setResult("Error");
-        setVisible(true);
         setCardInfo(null); // Clear card information
+        setPermissions([]); // Clear permissions
+        setVisible(true);
         // Keep the TextInput focused
         textInputRef.current?.focus();
       });
@@ -120,6 +124,36 @@ export default function GuardPanel() {
                     <Paragraph>
                       <Text style={{ fontWeight: "bold" }}>Is Valid:</Text> {cardInfo.isValid ? "Yes" : "No"}
                     </Paragraph>
+                  </Card.Content>
+                </Card>
+              )}
+
+              {/* Display Permissions if available */}
+              {permissions.length > 0 && (
+                <Card style={{ marginTop: 20 }} elevation={2}>
+                  <Card.Content>
+                    <Title>Permissions</Title>
+                    <DataTable>
+                      <DataTable.Header>
+                        <DataTable.Title>ID</DataTable.Title>
+                        <DataTable.Title>Student ID</DataTable.Title>
+                        <DataTable.Title>Assigned By</DataTable.Title>
+                        <DataTable.Title>Start Date</DataTable.Title>
+                        <DataTable.Title>End Date</DataTable.Title>
+                        <DataTable.Title>Recurring</DataTable.Title>
+                      </DataTable.Header>
+
+                      {permissions.map((perm) => (
+                        <DataTable.Row key={perm.id}>
+                          <DataTable.Cell>{perm.id}</DataTable.Cell>
+                          <DataTable.Cell>{perm.assignedStudent}</DataTable.Cell>
+                          <DataTable.Cell>{perm.assignedBy}</DataTable.Cell>
+                          <DataTable.Cell>{perm.startDate}</DataTable.Cell>
+                          <DataTable.Cell>{perm.endDate}</DataTable.Cell>
+                          <DataTable.Cell>{perm.isRecurring ? "Yes" : "No"}</DataTable.Cell>
+                        </DataTable.Row>
+                      ))}
+                    </DataTable>
                   </Card.Content>
                 </Card>
               )}

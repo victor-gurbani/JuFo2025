@@ -71,5 +71,31 @@ module.exports = (db) => {
     });
   });
 
+  // Get permissions for a specific card (allow guards, admins)
+  router.get("/:uid/permissions", checkPermission(db, "guard"), (req, res) => {
+    const { uid } = req.params;
+    const permissionsQuery = `
+      SELECT p.id, p.startDate, p.endDate, p.isRecurring, p.recurrencePattern, p.assignedStudent, t.name AS assignedBy
+      FROM permissions p
+      JOIN teachers t ON p.assignedBy = t.id
+      WHERE p.associatedCard = ? AND p.isValid = 1
+    `;
+
+    db.all(permissionsQuery, [uid], (err, permRows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(
+        permRows.map((perm) => ({
+          id: perm.id,
+          startDate: perm.startDate,
+          endDate: perm.endDate,
+          isRecurring: perm.isRecurring === 1,
+          recurrencePattern: perm.recurrencePattern,
+          assignedStudent: perm.assignedStudent,
+          assignedBy: perm.assignedBy,
+        }))
+      );
+    });
+  });
+
   return router;
 };
