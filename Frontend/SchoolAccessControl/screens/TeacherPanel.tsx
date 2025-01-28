@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, ScrollView } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, Switch } from "react-native-paper";
 import { DatePickerModal, TimePickerModal } from "react-native-paper-dates";
@@ -38,6 +38,12 @@ export default function TeacherPanel() {
       return api[method.toLowerCase()](url, { ...body, teacherId: currentTeacherId });
     }
   };
+
+  useEffect(() => {
+    if (currentTeacherId) {
+      handleViewPermissions();
+    }
+  }, [currentTeacherId]);
 
   const handleAssignCard = () => {
     if (!startDate || !startTime || !endDate || !endTime) {
@@ -92,142 +98,148 @@ export default function TeacherPanel() {
 
   return (
     <ScrollView style={{ margin: 20 }}>
-      <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
-        <Card.Content>
-          <TextInput
-            label="Current Teacher ID"
-            value={currentTeacherId}
-            onChangeText={setCurrentTeacherId}
-            mode="outlined"
-            style={{ marginBottom: 10 }}
-          />
-          <Title>Assign a Card</Title>
-          <TextInput
-            label="Student ID"
-            value={studentId}
-            onChangeText={setStudentId}
-            mode="outlined"
-            style={{ marginBottom: 10 }}
-          />
-          <TextInput
-            label="Card UID"
-            value={cardUID}
-            onChangeText={setCardUID}
-            mode="outlined"
-            style={{ marginBottom: 10 }}
-          />
-          <Button mode="outlined" onPress={() => setStartDatePickerVisible(true)} style={{ marginBottom: 10 }}>
-            Select Start Date
-          </Button>
-          <DatePickerModal
-            mode="single"
-            locale="en"
-            visible={isStartDatePickerVisible}
-            onDismiss={() => setStartDatePickerVisible(false)}
-            date={startDate}
-            onConfirm={(params: { date: Date }) => {
-              setStartDate(params.date);
-              setStartDatePickerVisible(false);
-            }}
-          />
-          <Paragraph>Selected Start Date: {startDate?.toDateString() || "None"}</Paragraph>
+      <TextInput
+        label="Current Teacher ID"
+        value={currentTeacherId}
+        onChangeText={setCurrentTeacherId}
+        mode="outlined"
+        style={{ marginBottom: 10 }}
+      />
+      {currentTeacherId ? (
+        <>
+          <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
+            <Card.Content>
+              <Title>Assign a Card</Title>
+              <TextInput
+                label="Student ID"
+                value={studentId}
+                onChangeText={setStudentId}
+                mode="outlined"
+                style={{ marginBottom: 10 }}
+              />
+              <TextInput
+                label="Card UID"
+                value={cardUID}
+                onChangeText={setCardUID}
+                mode="outlined"
+                style={{ marginBottom: 10 }}
+              />
+              <Button mode="outlined" onPress={() => setStartDatePickerVisible(true)} style={{ marginBottom: 10 }}>
+                Select Start Date
+              </Button>
+              <DatePickerModal
+                mode="single"
+                locale="en"
+                visible={isStartDatePickerVisible}
+                onDismiss={() => setStartDatePickerVisible(false)}
+                date={startDate}
+                onConfirm={(params: { date: Date }) => {
+                  setStartDate(params.date);
+                  setStartDatePickerVisible(false);
+                }}
+              />
+              <Paragraph>Selected Start Date: {startDate?.toDateString() || "None"}</Paragraph>
 
-          <Button mode="outlined" onPress={() => setStartTimePickerVisible(true)} style={{ marginBottom: 10 }}>
-            Select Start Time
-          </Button>
-          <TimePickerModal
-            visible={isStartTimePickerVisible}
-            onDismiss={() => setStartTimePickerVisible(false)}
-            onConfirm={(params) => {
-              setStartTime(params.hours != null ? new Date(0, 0, 0, params.hours, params.minutes) : undefined);
-              setStartTimePickerVisible(false);
-            }}
-          />
-          <Paragraph>Selected Start Time: {startTime?.toLocaleTimeString() || "None"}</Paragraph>
+              <Button mode="outlined" onPress={() => setStartTimePickerVisible(true)} style={{ marginBottom: 10 }}>
+                Select Start Time
+              </Button>
+              <TimePickerModal
+                visible={isStartTimePickerVisible}
+                onDismiss={() => setStartTimePickerVisible(false)}
+                onConfirm={(params) => {
+                  setStartTime(params.hours != null ? new Date(0, 0, 0, params.hours, params.minutes) : undefined);
+                  setStartTimePickerVisible(false);
+                }}
+              />
+              <Paragraph>Selected Start Time: {startTime?.toLocaleTimeString() || "None"}</Paragraph>
 
-          <Button mode="outlined" onPress={() => setEndDatePickerVisible(true)} style={{ marginBottom: 10 }}>
-            Select End Date
-          </Button>
-          <DatePickerModal
-            mode="single"
-            locale="en"
-            visible={isEndDatePickerVisible}
-            onDismiss={() => setEndDatePickerVisible(false)}
-            date={endDate}
-            onConfirm={(params: { date: Date }) => {
-              setEndDate(params.date);
-              setEndDatePickerVisible(false);
-            }}
-          />
-          <Paragraph>Selected End Date: {endDate?.toDateString() || "None"}</Paragraph>
+              <Button mode="outlined" onPress={() => setEndDatePickerVisible(true)} style={{ marginBottom: 10 }}>
+                Select End Date
+              </Button>
+              <DatePickerModal
+                mode="single"
+                locale="en"
+                visible={isEndDatePickerVisible}
+                onDismiss={() => setEndDatePickerVisible(false)}
+                date={endDate}
+                onConfirm={(params: { date: Date }) => {
+                  setEndDate(params.date);
+                  setEndDatePickerVisible(false);
+                }}
+              />
+              <Paragraph>Selected End Date: {endDate?.toDateString() || "None"}</Paragraph>
 
-          <Button mode="outlined" onPress={() => setEndTimePickerVisible(true)} style={{ marginBottom: 10 }}>
-            Select End Time
-          </Button>
-          <TimePickerModal
-            visible={isEndTimePickerVisible}
-            onDismiss={() => setEndTimePickerVisible(false)}
-            onConfirm={(params) => {
-              setEndTime(params.hours != null ? new Date(0, 0, 0, params.hours, params.minutes) : undefined);
-              setEndTimePickerVisible(false);
-            }}
-          />
-          <Paragraph>Selected End Time: {endTime?.toLocaleTimeString() || "None"}</Paragraph>
+              <Button mode="outlined" onPress={() => setEndTimePickerVisible(true)} style={{ marginBottom: 10 }}>
+                Select End Time
+              </Button>
+              <TimePickerModal
+                visible={isEndTimePickerVisible}
+                onDismiss={() => setEndTimePickerVisible(false)}
+                onConfirm={(params) => {
+                  setEndTime(params.hours != null ? new Date(0, 0, 0, params.hours, params.minutes) : undefined);
+                  setEndTimePickerVisible(false);
+                }}
+              />
+              <Paragraph>Selected End Time: {endTime?.toLocaleTimeString() || "None"}</Paragraph>
 
-          <TextInput
-            label="Recurrence Pattern"
-            value={recurrencePattern}
-            onChangeText={setRecurrencePattern}
-            mode="outlined"
-            style={{ marginBottom: 10 }}
-          />
-          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
-            <Paragraph>Recurring: </Paragraph>
-            <Switch value={isRecurring} onValueChange={setIsRecurring} />
-          </View>
-          <Button mode="contained" onPress={handleAssignCard}>
-            Assign Card
-          </Button>
-        </Card.Content>
-      </Card>
+              <TextInput
+                label="Recurrence Pattern"
+                value={recurrencePattern}
+                onChangeText={setRecurrencePattern}
+                mode="outlined"
+                style={{ marginBottom: 10 }}
+              />
+              <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
+                <Paragraph>Recurring: </Paragraph>
+                <Switch value={isRecurring} onValueChange={setIsRecurring} />
+              </View>
+              <Button mode="contained" onPress={handleAssignCard}>
+                Assign Card
+              </Button>
+            </Card.Content>
+          </Card>
 
-      <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
-        <Card.Content>
-          <Title>Invalidate a Card</Title>
-          <TextInput
-            label="Card UID"
-            value={invalidateCardUID}
-            onChangeText={setInvalidateCardUID}
-            mode="outlined"
-            style={{ marginBottom: 10 }}
-          />
-          <Button mode="contained" onPress={handleInvalidateCard}>
-            Invalidate Card
-          </Button>
-        </Card.Content>
-      </Card>
+          <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
+            <Card.Content>
+              <Title>Invalidate a Card</Title>
+              <TextInput
+                label="Card UID"
+                value={invalidateCardUID}
+                onChangeText={setInvalidateCardUID}
+                mode="outlined"
+                style={{ marginBottom: 10 }}
+              />
+              <Button mode="contained" onPress={handleInvalidateCard}>
+                Invalidate Card
+              </Button>
+            </Card.Content>
+          </Card>
 
-      <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
-        <Card.Content>
-          <Title>View Permissions</Title>
-          <Button mode="contained" onPress={handleViewPermissions} style={{ marginBottom: 10 }}>
-            Load Permissions
-          </Button>
-          {permissions.map((perm, i) => (
-            <Paragraph key={i} style={{ marginTop: 5 }}>
-              {JSON.stringify(perm)}
-            </Paragraph>
-          ))}
-        </Card.Content>
-      </Card>
+          <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
+            <Card.Content>
+              <Title>View Permissions</Title>
+              <Button mode="contained" onPress={handleViewPermissions} style={{ marginBottom: 10 }}>
+                Load Permissions
+              </Button>
+              {permissions.map((perm, i) => (
+                <Paragraph key={i} style={{ marginTop: 5 }}>
+                  {JSON.stringify(perm)}
+                </Paragraph>
+              ))}
+            </Card.Content>
+          </Card>
 
-      <Snackbar
-        visible={snackbarVisible}
-        onDismiss={() => setSnackbarVisible(false)}
-        duration={Snackbar.DURATION_SHORT}
-      >
-        {snackbarMessage}
-      </Snackbar>
+          <Snackbar
+            visible={snackbarVisible}
+            onDismiss={() => setSnackbarVisible(false)}
+            duration={Snackbar.DURATION_SHORT}
+          >
+            {snackbarMessage}
+          </Snackbar>
+        </>
+      ) : (
+        <Text>Please enter your Teacher ID to proceed.</Text>
+      )}
     </ScrollView>
   );
 }
