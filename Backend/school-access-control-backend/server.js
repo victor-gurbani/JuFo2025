@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const sqlite3 = require("sqlite3").verbose(); // SQLite library
+const checkPermission = require("./middleware/checkPermission");
 
 // Initialize SQLite database
 const db = new sqlite3.Database("./database.db", (err) => {

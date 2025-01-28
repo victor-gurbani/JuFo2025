@@ -6,6 +6,7 @@ import api from "../services/api";
 import "react-native-paper-dates"; // For date formatting
 
 export default function TeacherPanel() {
+  const [currentTeacherId, setCurrentTeacherId] = useState("");
   const [studentId, setStudentId] = useState("");
   const [cardUID, setCardUID] = useState("");
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -27,6 +28,15 @@ export default function TeacherPanel() {
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
     setSnackbarVisible(true);
+  };
+
+  // Helper to pass teacherId
+  const apiWithTeacherId = (method: string, url: string, body?: any) => {
+    if (method === "GET" || method === "DELETE") {
+      return api[method.toLowerCase()](`${url}?teacherId=${currentTeacherId}`);
+    } else {
+      return api[method.toLowerCase()](url, { ...body, teacherId: currentTeacherId });
+    }
   };
 
   const handleAssignCard = () => {
@@ -51,11 +61,14 @@ export default function TeacherPanel() {
       endTime.getMinutes()
     );
 
-    api.post("/teacher/assign-card", {
+    const startDateTimeISO = startDateTime.toISOString();
+    const endDateTimeISO = endDateTime.toISOString();
+
+    apiWithTeacherId("POST", "/teacher/assign-card", {
       studentId,
       cardUID,
-      startDate: startDateTime.toISOString(),
-      endDate: endDateTime.toISOString(),
+      startDate: startDateTimeISO,
+      endDate: endDateTimeISO,
       isRecurring,
       recurrencePattern,
     })
@@ -64,13 +77,15 @@ export default function TeacherPanel() {
   };
 
   const handleInvalidateCard = () => {
-    api.post("/teacher/invalidate-card", { cardUID: invalidateCardUID })
+    apiWithTeacherId("POST", "/teacher/invalidate-card", {
+      cardUID: invalidateCardUID
+    })
       .then(() => showSnackbar("Card invalidated"))
       .catch((err) => showSnackbar("Error: " + err));
   };
 
   const handleViewPermissions = () => {
-    api.get("/teacher/permissions")
+    apiWithTeacherId("GET", "/teacher/permissions")
       .then((res) => setPermissions(res.data))
       .catch((err) => showSnackbar("Error: " + err));
   };
@@ -79,6 +94,13 @@ export default function TeacherPanel() {
     <ScrollView style={{ margin: 20 }}>
       <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
         <Card.Content>
+          <TextInput
+            label="Current Teacher ID"
+            value={currentTeacherId}
+            onChangeText={setCurrentTeacherId}
+            mode="outlined"
+            style={{ marginBottom: 10 }}
+          />
           <Title>Assign a Card</Title>
           <TextInput
             label="Student ID"

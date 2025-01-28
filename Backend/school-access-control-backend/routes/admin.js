@@ -53,7 +53,7 @@ module.exports = (db) => {
     });
   });
 
-  // Example admin dashboard endpoint (allow only admins)
+  // Example admin dashboard endpoint (only admins)
   router.get("/dashboard", checkPermission(db, "admin"), (req, res) => {
     res.json({ message: "Admin Dashboard" });
   });
