@@ -4,49 +4,56 @@ import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph } from "react
 import api from "../services/api";
 
 export default function AdminPanel() {
+  // Add a state to store the current admin/teacher’s ID
+  const [currentTeacherId, setCurrentTeacherId] = useState("");
   const [dashboard, setDashboard] = useState("");
   const [teachers, setTeachers] = useState([]);
-  const [cards, setCards] = useState([]); // New state for cards
+  const [cards, setCards] = useState([]);
   const [teacherId, setTeacherId] = useState("");
   const [teacherName, setTeacherName] = useState("");
   const [teacherPermission, setTeacherPermission] = useState("");
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
+  // Example of how we pass teacherId: we define an internal function that sets default config
+  const apiWithTeacherId = (method: string, url: string, body?: any) => {
+    if (method === "GET" || method === "DELETE") {
+      return api[method.toLowerCase()](`${url}?teacherId=${currentTeacherId}`);
+    } else {
+      return api[method.toLowerCase()](url, { ...body, teacherId: currentTeacherId });
+    }
+  };
+
   useEffect(() => {
-    // Load admin dashboard info
-    api.get("/admin/dashboard").then((response) => {
-      setDashboard(response.data.message);
-    });
+    // Make sure we pass teacherId in the request
+    apiWithTeacherId("GET", "/admin/dashboard")
+      .then((response) => {
+        setDashboard(response.data.message);
+      })
+      .catch((err) => showSnackbar("Error: " + err));
 
-    // Load teacher list
     loadTeachers();
-
-    // Load cards list
-    loadCards(); // Fetch cards on mount
+    loadCards();
   }, []);
 
   const loadTeachers = () => {
-    api
-      .get("/admin/teachers")
+    apiWithTeacherId("GET", "/admin/teachers")
       .then((res) => setTeachers(res.data))
       .catch((err) => showSnackbar("Error: " + err));
   };
 
-  const loadCards = () => { // New function to load cards
-    api
-      .get("/admin/cards")
+  const loadCards = () => {
+    apiWithTeacherId("GET", "/admin/cards")
       .then((res) => setCards(res.data))
       .catch((err) => showSnackbar("Error: " + err));
   };
 
   const createTeacher = () => {
-    api
-      .post("/admin/teachers", {
-        id: teacherId,
-        name: teacherName,
-        permissionLevel: teacherPermission,
-      })
+    apiWithTeacherId("POST", "/admin/teachers", {
+      id: teacherId,
+      name: teacherName,
+      permissionLevel: teacherPermission
+    })
       .then(() => {
         showSnackbar("Teacher created");
         setTeacherId("");
@@ -58,11 +65,10 @@ export default function AdminPanel() {
   };
 
   const updateTeacher = () => {
-    api
-      .put(`/admin/teachers/${teacherId}`, {
-        name: teacherName,
-        permissionLevel: teacherPermission,
-      })
+    apiWithTeacherId("PUT", `/admin/teachers/${teacherId}`, {
+      name: teacherName,
+      permissionLevel: teacherPermission
+    })
       .then(() => {
         showSnackbar("Teacher updated");
         loadTeachers();
@@ -71,8 +77,7 @@ export default function AdminPanel() {
   };
 
   const deleteTeacher = (id: string) => {
-    api
-      .delete(`/admin/teachers/${id}`)
+    apiWithTeacherId("DELETE", `/admin/teachers/${id}`)
       .then(() => {
         showSnackbar("Teacher deleted");
         loadTeachers();
@@ -87,6 +92,14 @@ export default function AdminPanel() {
 
   return (
     <ScrollView style={{ margin: 20 }}>
+      {/* This input allows the user/admin to define who they are */}
+      <TextInput
+        label="Current Admin / Teacher ID"
+        value={currentTeacherId}
+        onChangeText={setCurrentTeacherId}
+        style={{ marginVertical: 5 }}
+      />
+
       <Text style={{ fontWeight: "bold", marginBottom: 10 }}>Admin Panel</Text>
       <Text>Dashboard: {dashboard}</Text>
 
@@ -137,10 +150,7 @@ export default function AdminPanel() {
         </Card>
       ))}
 
-      {/* New Section to Display All Cards */}
-      <Text style={{ marginVertical: 20, fontWeight: "bold" }}>
-        All Cards
-      </Text>
+      <Text style={{ marginVertical: 20, fontWeight: "bold" }}>All Cards</Text>
       <Button mode="contained" onPress={loadCards} style={{ marginBottom: 10 }}>
         Refresh Cards
       </Button>
