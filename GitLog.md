@@ -1,3 +1,65 @@
+Date:   Tue Jan 28 22:51:32 2025 +0100
+Comment: guards more perms
+
+Date:   Tue Jan 28 22:40:23 2025 +0100
+Comment: guardpanel has auth
+
+Date:   Tue Jan 28 22:29:23 2025 +0100
+Comment: ok teachers can "create cards now"
+
+Date:   Tue Jan 28 22:24:12 2025 +0100
+Comment: cards will be created on demand
+
+Date:   Tue Jan 28 22:20:53 2025 +0100
+Comment: added role hierarchy, route for specific card info, guards can view card info
+
+Date:   Tue Jan 28 22:01:23 2025 +0100
+Comment: finallyyyy
+
+Date:   Tue Jan 28 21:53:59 2025 +0100
+Comment: quick server admin creation
+
+Date:   Tue Jan 28 21:16:49 2025 +0100
+Comment: Big change: more "auth" and permissions
+
+Date:   Tue Jan 28 18:30:51 2025 +0100
+Comment: added enter to "send" for guard and _login_
+
+Date:   Tue Jan 28 13:23:58 2025 +0100
+Comment: remove NFC package
+
+Date:   Tue Jan 28 13:10:40 2025 +0100
+Comment: changed api target and created sample database
+
+
+
+Date:   Tue Jan 28 11:52:39 2025 +0100
+Comment: Merge remote-tracking branch 'origin/main'
+
+Date:   Tue Jan 28 11:51:26 2025 +0100
+Comment: Big update: added midleware verification for permissions, added cards to the admin panel
+
+Date:   Tue Jan 21 09:00:41 2025 +0100
+Comment: Update eas.json
+
+Date:   Thu Jan 16 00:09:08 2025 +0100
+Comment: slight changes to doku and now in drive
+
+Date:   Tue Jan 14 23:22:27 2025 +0100
+Comment: Big change to doku and will put it now in gdrive
+
+Date:   Sun Jan 12 10:02:16 2025 +0100
+Comment: Added technologies
+
+Date:   Thu Jan 9 16:18:23 2025 +0100
+Comment: some changes
+
+Date:   Thu Jan 9 16:14:12 2025 +0100
+Comment: added doku deutsch md
+
+Date:   Tue Jan 7 23:33:47 2025 +0100
+Comment: added Doku.md
+
 Date:   Mon Jan 6 23:21:56 2025 +0100
 Comment: margin, app and test customcard (unused)
 
