@@ -19,30 +19,40 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <View style={{ margin: 20 }}>
-      <Card elevation={5} style={{ margin: 10 }}>
-        <Card.Content>
-          <Title>Login</Title>
-          <Text>Login as (admin/teacher/guard):</Text>
-          <TextInput
-            ref={textInputRef}
-            label="Enter role"
-            value={role}
-            onChangeText={setRole}
-            mode="outlined"
-            style={{ marginVertical: 10 }}
-            onSubmitEditing={handleLogin}
-            returnKeyType="done"
-          />
-          <Button mode="contained" onPress={handleLogin}>
-            Login
-          </Button>
-        </Card.Content>
-      </Card>
+    <View style={{ flex: 1 }}>
+      <View style={{ margin: 20 }}>
+        <Card elevation={5} style={{ margin: 10 }}>
+          <Card.Content>
+            <Title>Login</Title>
+            <Text>Login as (admin/teacher/guard):</Text>
+            <TextInput
+              ref={textInputRef}
+              label="Enter role"
+              value={role}
+              onChangeText={setRole}
+              mode="outlined"
+              style={{ marginVertical: 10 }}
+              onSubmitEditing={handleLogin}
+              returnKeyType="done"
+            />
+            <Button mode="contained" onPress={handleLogin}>
+              Login
+            </Button>
+          </Card.Content>
+        </Card>
+      </View>
       <Snackbar
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
         duration={Snackbar.DURATION_SHORT}
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          elevation: 3
+        }}
       >
         {snackbarMessage}
       </Snackbar>
