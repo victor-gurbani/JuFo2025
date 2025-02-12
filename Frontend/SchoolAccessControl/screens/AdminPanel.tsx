@@ -93,95 +93,104 @@ export default function AdminPanel() {
   };
 
   return (
-    <ScrollView style={{ margin: 20 }}>
-      {/* Input field for Admin/Teacher ID */}
-      <TextInput
-        label="Current Admin / Teacher ID"
-        value={currentTeacherId}
-        onChangeText={setCurrentTeacherId}
-        style={{ marginVertical: 5 }}
-        mode="outlined"
-      />
+    <View style={{ flex: 1 }}>
+      <ScrollView style={{ margin: 20 }}>
+        {/* Input field for Admin/Teacher ID */}
+        <TextInput
+          label="Current Admin / Teacher ID"
+          value={currentTeacherId}
+          onChangeText={setCurrentTeacherId}
+          style={{ marginVertical: 5 }}
+          mode="outlined"
+        />
 
-      {currentTeacherId ? (
-        <>
-          <Text style={{ fontWeight: "bold", marginBottom: 10 }}>Admin Panel</Text>
-          <Text>Dashboard: {dashboard}</Text>
+        {currentTeacherId ? (
+          <>
+            <Text style={{ fontWeight: "bold", marginBottom: 10 }}>Admin Panel</Text>
+            <Text>Dashboard: {dashboard}</Text>
 
-          <Text style={{ marginTop: 20, fontWeight: "bold" }}>
-            Create or Update Teacher
-          </Text>
-          <TextInput
-            label="Teacher ID"
-            value={teacherId}
-            onChangeText={setTeacherId}
-            style={{ marginVertical: 5 }}
-            mode="outlined"
-          />
-          <TextInput
-            label="Teacher Name"
-            value={teacherName}
-            onChangeText={setTeacherName}
-            style={{ marginVertical: 5 }}
-            mode="outlined"
-          />
-          <TextInput
-            label="Permission Level"
-            value={teacherPermission}
-            onChangeText={setTeacherPermission}
-            style={{ marginVertical: 5 }}
-            mode="outlined"
-          />
+            <Text style={{ marginTop: 20, fontWeight: "bold" }}>
+              Create or Update Teacher
+            </Text>
+            <TextInput
+              label="Teacher ID"
+              value={teacherId}
+              onChangeText={setTeacherId}
+              style={{ marginVertical: 5 }}
+              mode="outlined"
+            />
+            <TextInput
+              label="Teacher Name"
+              value={teacherName}
+              onChangeText={setTeacherName}
+              style={{ marginVertical: 5 }}
+              mode="outlined"
+            />
+            <TextInput
+              label="Permission Level"
+              value={teacherPermission}
+              onChangeText={setTeacherPermission}
+              style={{ marginVertical: 5 }}
+              mode="outlined"
+            />
 
-          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <Button mode="contained" onPress={createTeacher} style={{ margin: 5 }}>
-              Create Teacher
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <Button mode="contained" onPress={createTeacher} style={{ margin: 5 }}>
+                Create Teacher
+              </Button>
+              <Button mode="contained" onPress={updateTeacher} style={{ margin: 5 }}>
+                Update Teacher
+              </Button>
+            </View>
+
+            <Text style={{ marginVertical: 20, fontWeight: "bold" }}>
+              Current Teachers
+            </Text>
+            {teachers.map((t: any) => (
+              <Card key={t.id} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
+                <Card.Content>
+                  <Title>ID: {t.id}</Title>
+                  <Paragraph>Name: {t.name}</Paragraph>
+                  <Paragraph>Permission: {t.permissionLevel}</Paragraph>
+                </Card.Content>
+                <Card.Actions>
+                  <Button onPress={() => deleteTeacher(t.id)}>Delete</Button>
+                </Card.Actions>
+              </Card>
+            ))}
+
+            <Text style={{ marginVertical: 20, fontWeight: "bold" }}>All Cards</Text>
+            <Button mode="contained" onPress={loadCards} style={{ marginBottom: 10 }}>
+              Refresh Cards
             </Button>
-            <Button mode="contained" onPress={updateTeacher} style={{ margin: 5 }}>
-              Update Teacher
-            </Button>
-          </View>
-
-          <Text style={{ marginVertical: 20, fontWeight: "bold" }}>
-            Current Teachers
-          </Text>
-          {teachers.map((t: any) => (
-            <Card key={t.id} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
-              <Card.Content>
-                <Title>ID: {t.id}</Title>
-                <Paragraph>Name: {t.name}</Paragraph>
-                <Paragraph>Permission: {t.permissionLevel}</Paragraph>
-              </Card.Content>
-              <Card.Actions>
-                <Button onPress={() => deleteTeacher(t.id)}>Delete</Button>
-              </Card.Actions>
-            </Card>
-          ))}
-
-          <Text style={{ marginVertical: 20, fontWeight: "bold" }}>All Cards</Text>
-          <Button mode="contained" onPress={loadCards} style={{ marginBottom: 10 }}>
-            Refresh Cards
-          </Button>
-          {cards.map((c: any) => (
-            <Card key={c.uid} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
-              <Card.Content>
-                <Title>Card UID: {c.uid}</Title>
-                <Paragraph>Is Valid: {c.isValid ? "Yes" : "No"}</Paragraph>
-              </Card.Content>
-            </Card>
-          ))}
-
-          <Snackbar
-            visible={snackbarVisible}
-            onDismiss={() => setSnackbarVisible(false)}
-            duration={3000}
-          >
-            {snackbarMessage}
-          </Snackbar>
-        </>
-      ) : (
-        <Text>Please enter your Admin or Teacher ID to proceed.</Text>
-      )}
-    </ScrollView>
+            {cards.map((c: any) => (
+              <Card key={c.uid} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
+                <Card.Content>
+                  <Title>Card UID: {c.uid}</Title>
+                  <Paragraph>Is Valid: {c.isValid ? "Yes" : "No"}</Paragraph>
+                </Card.Content>
+              </Card>
+            ))}
+          </>
+        ) : (
+          <Text>Please enter your Admin or Teacher ID to proceed.</Text>
+        )}
+      </ScrollView>
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={3000}
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          elevation: 3
+        }}
+      >
+        {snackbarMessage}
+      </Snackbar>
+    </View>
   );
 }
