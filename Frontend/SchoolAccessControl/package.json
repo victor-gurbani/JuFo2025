@@ -24,7 +24,8 @@
     "react-native-datepicker": "^1.7.2",
     "react-native-paper": "^5.12.5",
     "react-native-paper-dates": "^0.22.28",
-    "react-native-web": "^0.19.13"
+    "react-native-web": "^0.19.13",
+    "expo-router": "~4.0.17"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
