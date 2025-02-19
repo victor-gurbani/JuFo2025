@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, ScrollView } from "react-native";
-import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, Switch } from "react-native-paper";
+import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, Switch, DataTable } from "react-native-paper";
 import { DatePickerModal, TimePickerModal } from "react-native-paper-dates";
 import api from "../services/api";
 import "react-native-paper-dates"; // For date formatting
@@ -233,11 +233,36 @@ export default function TeacherPanel() {
                 <Button mode="contained" onPress={handleViewPermissions} style={{ marginBottom: 10 }}>
                   Load Permissions
                 </Button>
-                {permissions.map((perm, i) => (
-                  <Paragraph key={i} style={{ marginTop: 5 }}>
-                    {JSON.stringify(perm)}
-                  </Paragraph>
-                ))}
+                {permissions.length > 0 ? (
+                  <Card style={{ marginTop: 10 }} elevation={2}>
+                    <Card.Content>
+                      <Title>Permissions</Title>
+                      <DataTable>
+                        <DataTable.Header>
+                          <DataTable.Title>ID</DataTable.Title>
+                          <DataTable.Title>Student ID</DataTable.Title>
+                          <DataTable.Title>Assigned By</DataTable.Title>
+                          <DataTable.Title>Start Date</DataTable.Title>
+                          <DataTable.Title>End Date</DataTable.Title>
+                          <DataTable.Title>Recurring</DataTable.Title>
+                        </DataTable.Header>
+
+                        {permissions.map((perm, i) => (
+                          <DataTable.Row key={i}>
+                            <DataTable.Cell>{perm.id}</DataTable.Cell>
+                            <DataTable.Cell>{perm.assignedStudent}</DataTable.Cell>
+                            <DataTable.Cell>{perm.assignedBy}</DataTable.Cell>
+                            <DataTable.Cell>{perm.startDate}</DataTable.Cell>
+                            <DataTable.Cell>{perm.endDate}</DataTable.Cell>
+                            <DataTable.Cell>{perm.isRecurring ? "Yes" : "No"}</DataTable.Cell>
+                          </DataTable.Row>
+                        ))}
+                      </DataTable>
+                    </Card.Content>
+                  </Card>
+                ) : (
+                  <Paragraph style={{ marginTop: 5 }}>No permissions to display.</Paragraph>
+                )}
               </Card.Content>
             </Card>
           </>
