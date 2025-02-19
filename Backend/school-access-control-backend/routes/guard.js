@@ -33,6 +33,18 @@ module.exports = (db) => {
       db.all(permissionsQuery, [cardUID], (permErr, permRows) => {
         if (permErr) return res.status(500).json({ error: permErr.message });
 
+        // Validate date and time
+        const now = new Date();
+        const validPermissions = permRows.filter(perm => {
+          const startDate = new Date(perm.startDate);
+          const endDate = new Date(perm.endDate);
+          return now >= startDate && now <= endDate;
+        });
+
+        if (validPermissions.length === 0) {
+          return res.json({ valid: false });
+        }
+
         res.json({
           valid: true,
           card: {
@@ -40,7 +52,7 @@ module.exports = (db) => {
             lastAssigned: cardRow.lastAssigned,
             isValid: cardRow.isValid === 1,
           },
-          permissions: permRows.map((perm) => ({
+          permissions: validPermissions.map((perm) => ({
             id: perm.id,
             startDate: perm.startDate,
             endDate: perm.endDate,
