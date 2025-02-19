@@ -109,7 +109,31 @@ export default function GuardPanel() {
                 <Button mode="contained" onPress={handleValidation}>
                   Validate
                 </Button>
-                <Paragraph style={{ marginTop: 10 }}>{result}</Paragraph>
+
+                {/* New styled result card */}
+                {result && (
+                  <Card 
+                    style={{ 
+                      marginTop: 20,
+                      backgroundColor: result === "Access Granted" ? "#4CAF50" : "#f44336",
+                      elevation: 4
+                    }}
+                  >
+                    <Card.Content>
+                      <Text 
+                        style={{ 
+                          fontSize: 24,
+                          fontWeight: "bold",
+                          textAlign: "center",
+                          color: "white",
+                          padding: 10
+                        }}
+                      >
+                        {result}
+                      </Text>
+                    </Card.Content>
+                  </Card>
+                )}
 
                 {/* Display Card Information if available */}
                 {cardInfo && (
