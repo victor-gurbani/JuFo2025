@@ -14,20 +14,17 @@ module.exports = (db) => {
       LIMIT 1
     `;
     const permissionsQuery = `
-      SELECT p.id, p.startDate, p.endDate, p.isRecurring, p.recurrencePattern, p.assignedStudent, t.name AS assignedBy
+      SELECT p.*, t.name AS assignedBy, s.photoUrl AS studentPhoto
       FROM permissions p
       JOIN teachers t ON p.assignedBy = t.id
+      LEFT JOIN students s ON p.assignedStudent = s.id
       WHERE p.associatedCard = ? AND p.isValid = 1
     `;
-
     db.get(cardQuery, [cardUID], (err, cardRow) => {
       if (err) return res.status(500).json({ error: err.message });
       if (!cardRow) return res.json({ valid: false });
-
-      // Check if the card is valid
-      if (cardRow.isValid !== 1) {
-        return res.json({ valid: false });
-      }
+      if (cardRow.isValid !== 1) return res.json({ valid: false });
+      
 
       // Fetch permissions related to the card
       db.all(permissionsQuery, [cardUID], (permErr, permRows) => {
@@ -61,6 +58,7 @@ module.exports = (db) => {
               lastAssigned: cardRow.lastAssigned,
               isValid: cardRow.isValid === 1,
             },
+            photoUrl: validPermissions[0].studentPhoto,
             permissions: validPermissions.map((perm) => ({
               id: perm.id,
               startDate: perm.startDate,

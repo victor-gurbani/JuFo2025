@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, ScrollView } from "react-native";
+import { View, ScrollView, Image } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
 import api from "../services/api";
+import * as ImagePicker from 'expo-image-picker';
 
 export default function AdminPanel() {
   // State to store the current admin/teacher's ID
@@ -16,6 +17,7 @@ export default function AdminPanel() {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [accessLogs, setAccessLogs] = useState<any[]>([]);
+  const [photoUrl, setPhotoUrl] = useState("");
 
   const permissionLevels = ["guard", "teacher", "tutor", "admin"];
 
@@ -61,6 +63,28 @@ export default function AdminPanel() {
       .catch((err) => showSnackbar("Error loading access logs: " + err));
   };
 
+  const pickImage = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        showSnackbar("Permission to access camera roll is required!");
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets[0].uri) {
+        setPhotoUrl(result.assets[0].uri);
+      }
+    } catch (error) {
+      showSnackbar("Error picking image: " + error.message);
+    }
+  };
+
   const createTeacher = () => {
     if (!teacherId || !teacherName || !teacherPermission) {
       showSnackbar("Please fill in all fields.");
@@ -70,13 +94,15 @@ export default function AdminPanel() {
     apiWithTeacherId("POST", "/admin/teachers", {
       id: teacherId,
       name: teacherName,
-      permissionLevel: teacherPermission
+      permissionLevel: teacherPermission,
+      photoUrl: photoUrl
     })
       .then(() => {
         showSnackbar("Teacher created");
         setTeacherId("");
         setTeacherName("");
         setTeacherPermission("");
+        setPhotoUrl("");
         loadTeachers();
       })
       .catch((err) => showSnackbar("Error: " + err));
@@ -166,6 +192,20 @@ export default function AdminPanel() {
                   ))}
                 </Picker>
               </View>
+            </View>
+
+            <View style={{ marginVertical: 10 }}>
+              <Button mode="outlined" onPress={pickImage}>
+                Pick Teacher Photo
+              </Button>
+              {photoUrl ? (
+                <View style={{ marginTop: 10, alignItems: 'center' }}>
+                  <Image
+                    source={{ uri: photoUrl }}
+                    style={{ width: 100, height: 100, borderRadius: 50 }}
+                  />
+                </View>
+              ) : null}
             </View>
 
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>

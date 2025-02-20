@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, ScrollView } from "react-native";
+import { View, ScrollView, Image } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable } from "react-native-paper";
 import api from "../services/api";
 
@@ -12,6 +12,7 @@ export default function GuardPanel() {
   const [cardInfo, setCardInfo] = useState<any>(null); // State to store card information
   const [permissions, setPermissions] = useState<any[]>([]); // State to store permissions related to the card
   const [cards, setCards] = useState<any[]>([]); // State to store all cards (if needed)
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null); // Add photo URL state
   const textInputRef = useRef<TextInput>(null);
 
   // Snackbar message state
@@ -59,11 +60,13 @@ export default function GuardPanel() {
           setResult("Access Granted");
           setCardInfo(res.data.card);
           setPermissions(res.data.permissions);
+          setPhotoUrl(res.data.photoUrl);
           showSnackbar("Card validation successful");
         } else {
           setResult("Access Denied");
           setCardInfo(null);
           setPermissions([]);
+          setPhotoUrl(null);
           showSnackbar("Invalid card or expired permissions");
         }
         setVisible(true);
@@ -74,6 +77,7 @@ export default function GuardPanel() {
         setResult("Error");
         setCardInfo(null);
         setPermissions([]);
+        setPhotoUrl(null);
         setVisible(true);
         showSnackbar(`Error validating card: ${error.response?.data?.error || error.message}`);
         textInputRef.current?.focus();
@@ -187,6 +191,27 @@ export default function GuardPanel() {
                           </DataTable>
                         </View>
                       </ScrollView>
+                    </Card.Content>
+                  </Card>
+                )}
+
+                {/* Display Student Photo if available */}
+                {photoUrl && (
+                  <Card style={{ marginTop: 20 }} elevation={2}>
+                    <Card.Content>
+                      <Title>Student Photo</Title>
+                      <View style={{ alignItems: 'center', marginTop: 10 }}>
+                        <Image
+                          source={{ uri: photoUrl }}
+                          style={{ 
+                            width: 200, 
+                            height: 200, 
+                            borderRadius: 10,
+                            backgroundColor: '#f0f0f0'
+                          }}
+                          resizeMode="cover"
+                        />
+                      </View>
                     </Card.Content>
                   </Card>
                 )}
