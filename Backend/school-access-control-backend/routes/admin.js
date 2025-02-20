@@ -62,6 +62,25 @@ module.exports = (db) => {
     });
   });
 
+  // Get all students (only admins)
+  router.get("/students", checkPermission(db, "admin"), (req, res) => {
+    const query = `SELECT * FROM students`;
+    db.all(query, [], (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    });
+  });
+
+  // Delete a student (only admins)
+  router.delete("/students/:id", checkPermission(db, "admin"), (req, res) => {
+    const query = `DELETE FROM students WHERE id = ?`;
+    db.run(query, [req.params.id], function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      if (this.changes === 0) return res.status(404).json({ error: "Student not found" });
+      res.json({ success: true });
+    });
+  });
+
   // Example admin dashboard endpoint (only admins)
   router.get("/dashboard", checkPermission(db, "admin"), (req, res) => {
     res.json({ message: "Admin Dashboard" });

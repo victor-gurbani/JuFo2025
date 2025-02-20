@@ -18,6 +18,7 @@ export default function AdminPanel() {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [accessLogs, setAccessLogs] = useState<any[]>([]);
   const [photoUrl, setPhotoUrl] = useState("");
+  const [students, setStudents] = useState<any[]>([]);
 
   const permissionLevels = ["guard", "teacher", "tutor", "admin"];
 
@@ -61,6 +62,21 @@ export default function AdminPanel() {
     apiWithTeacherId("GET", "/admin/access-logs")
       .then((res) => setAccessLogs(res.data))
       .catch((err) => showSnackbar("Error loading access logs: " + err));
+  };
+
+  const loadStudents = () => {
+    apiWithTeacherId("GET", "/admin/students")
+      .then((res) => setStudents(res.data))
+      .catch((err) => showSnackbar("Error loading students: " + err));
+  };
+
+  const deleteStudent = (id: string) => {
+    apiWithTeacherId("DELETE", `/admin/students/${id}`)
+      .then(() => {
+        showSnackbar("Student deleted");
+        loadStudents();
+      })
+      .catch((err) => showSnackbar("Error: " + err));
   };
 
   const pickImage = async () => {
@@ -332,6 +348,22 @@ export default function AdminPanel() {
                 </ScrollView>
               </Card.Content>
             </Card>
+
+            <Text style={{ marginVertical: 20, fontWeight: "bold" }}>Students</Text>
+            <Button mode="contained" onPress={loadStudents} style={{ marginBottom: 10 }}>
+              Refresh Students
+            </Button>
+            {students.map((s) => (
+              <Card key={s.id} style={{ marginBottom: 10 }}>
+                <Card.Content>
+                  <Title>Student ID: {s.id}</Title>
+                  {s.photoUrl ? <Image source={{ uri: s.photoUrl }} style={{ width: 60, height: 60 }} /> : null}
+                </Card.Content>
+                <Card.Actions>
+                  <Button onPress={() => deleteStudent(s.id)}>Delete</Button>
+                </Card.Actions>
+              </Card>
+            ))}
           </>
         ) : (
           <Text>Please enter your Admin or Teacher ID to proceed.</Text>
