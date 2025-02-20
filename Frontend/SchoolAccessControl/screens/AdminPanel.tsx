@@ -54,6 +54,11 @@ export default function AdminPanel() {
   };
 
   const createTeacher = () => {
+    if (!teacherId || !teacherName || !teacherPermission) {
+      showSnackbar("Please fill in all fields.");
+      return;
+    }
+
     apiWithTeacherId("POST", "/admin/teachers", {
       id: teacherId,
       name: teacherName,
