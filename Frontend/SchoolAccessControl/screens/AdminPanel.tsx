@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, ScrollView, Image } from "react-native";
-import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable } from "react-native-paper";
+import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable, SegmentedButtons } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
 import api from "../services/api";
 import * as ImagePicker from 'expo-image-picker';
@@ -19,6 +19,7 @@ export default function AdminPanel() {
   const [accessLogs, setAccessLogs] = useState<any[]>([]);
   const [photoUrl, setPhotoUrl] = useState("");
   const [students, setStudents] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState('teachers');
 
   const permissionLevels = ["guard", "teacher", "tutor", "admin"];
 
@@ -174,196 +175,254 @@ export default function AdminPanel() {
 
         {currentTeacherId ? (
           <>
-            <Text style={{ fontWeight: "bold", marginBottom: 10 }}>Admin Panel</Text>
-            <Text>Dashboard: {dashboard}</Text>
-
-            <Text style={{ marginTop: 20, fontWeight: "bold" }}>
-              Create or Update Teacher
-            </Text>
-            <TextInput
-              label="Teacher ID"
-              value={teacherId}
-              onChangeText={setTeacherId}
-              style={{ marginVertical: 5 }}
-              mode="outlined"
-            />
-            <TextInput
-              label="Teacher Name"
-              value={teacherName}
-              onChangeText={setTeacherName}
-              style={{ marginVertical: 5 }}
-              mode="outlined"
+            <SegmentedButtons
+              value={activeTab}
+              onValueChange={setActiveTab}
+              buttons={[
+                { value: 'teachers', label: 'Teachers' },
+                { value: 'students', label: 'Students' },
+                { value: 'cards', label: 'Cards & Logs' }
+              ]}
+              style={{ marginVertical: 10 }}
             />
 
-            <View style={{ marginVertical: 5 }}>
-              <Text>Permission Level</Text>
-              <View style={{ 
-                borderWidth: 1, 
-                borderColor: '#666',
-                borderRadius: 4,
-                marginTop: 5
-              }}>
-                <Picker
-                  selectedValue={teacherPermission}
-                  onValueChange={(itemValue) => setTeacherPermission(itemValue.toLowerCase())}
-                  style={{ height: 50 }}
-                >
-                  <Picker.Item label="Select a permission level" value="" />
-                  {permissionLevels.map((level) => (
-                    <Picker.Item 
-                      key={level} 
-                      label={level.charAt(0).toUpperCase() + level.slice(1)} 
-                      value={level} 
-                    />
-                  ))}
-                </Picker>
-              </View>
-            </View>
+            {activeTab === 'teachers' && (
+              <>
+                <Text style={{ fontWeight: "bold", marginBottom: 10 }}>Admin Panel</Text>
+                <Text>Dashboard: {dashboard}</Text>
 
-            <View style={{ marginVertical: 10 }}>
-              <Button mode="outlined" onPress={pickImage}>
-                Pick Teacher Photo
-              </Button>
-              {photoUrl ? (
-                <View style={{ marginTop: 10, alignItems: 'center' }}>
-                  <Image
-                    source={{ uri: photoUrl }}
-                    style={{ width: 100, height: 100, borderRadius: 50 }}
-                  />
-                </View>
-              ) : null}
-            </View>
+                <Text style={{ marginTop: 20, fontWeight: "bold" }}>
+                  Create or Update Teacher
+                </Text>
+                <TextInput
+                  label="Teacher ID"
+                  value={teacherId}
+                  onChangeText={setTeacherId}
+                  style={{ marginVertical: 5 }}
+                  mode="outlined"
+                />
+                <TextInput
+                  label="Teacher Name"
+                  value={teacherName}
+                  onChangeText={setTeacherName}
+                  style={{ marginVertical: 5 }}
+                  mode="outlined"
+                />
 
-            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-              <Button mode="contained" onPress={createTeacher} style={{ margin: 5 }}>
-                Create Teacher
-              </Button>
-              <Button mode="contained" onPress={updateTeacher} style={{ margin: 5 }}>
-                Update Teacher
-              </Button>
-            </View>
-
-            <Text style={{ marginVertical: 20, fontWeight: "bold" }}>
-              Current Teachers
-            </Text>
-            {teachers.map((t: any) => (
-              <Card key={t.id} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
-                <Card.Content>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    {t.photoUrl ? (
-                      <Image
-                        source={{ uri: t.photoUrl }}
-                        style={{
-                          width: 60,
-                          height: 60,
-                          borderRadius: 30,
-                          marginRight: 15,
-                          backgroundColor: '#f0f0f0'
-                        }}
-                      />
-                    ) : (
-                      <View 
-                        style={{
-                          width: 60,
-                          height: 60,
-                          borderRadius: 30,
-                          marginRight: 15,
-                          backgroundColor: '#e0e0e0',
-                          justifyContent: 'center',
-                          alignItems: 'center'
-                        }}
-                      >
-                        <Text style={{ fontSize: 24, color: '#666' }}>
-                          {t.name.charAt(0).toUpperCase()}
-                        </Text>
-                      </View>
-                    )}
-                    <View style={{ flex: 1 }}>
-                      <Title>ID: {t.id}</Title>
-                      <Paragraph>Name: {t.name}</Paragraph>
-                      <Paragraph>Permission: {t.permissionLevel}</Paragraph>
-                    </View>
+                <View style={{ marginVertical: 5 }}>
+                  <Text>Permission Level</Text>
+                  <View style={{ 
+                    borderWidth: 1, 
+                    borderColor: '#666',
+                    borderRadius: 4,
+                    marginTop: 5
+                  }}>
+                    <Picker
+                      selectedValue={teacherPermission}
+                      onValueChange={(itemValue) => setTeacherPermission(itemValue.toLowerCase())}
+                      style={{ height: 50 }}
+                    >
+                      <Picker.Item label="Select a permission level" value="" />
+                      {permissionLevels.map((level) => (
+                        <Picker.Item 
+                          key={level} 
+                          label={level.charAt(0).toUpperCase() + level.slice(1)} 
+                          value={level} 
+                        />
+                      ))}
+                    </Picker>
                   </View>
-                </Card.Content>
-                <Card.Actions>
-                  <Button 
-                    onPress={() => {
-                      setTeacherId(t.id);
-                      setTeacherName(t.name);
-                      setTeacherPermission(t.permissionLevel);
-                      setPhotoUrl(t.photoUrl || '');
-                    }}
-                    style={{ marginRight: 8 }}
-                  >
-                    Edit
+                </View>
+
+                <View style={{ marginVertical: 10 }}>
+                  <Button mode="outlined" onPress={pickImage}>
+                    Pick Teacher Photo
                   </Button>
-                  <Button onPress={() => deleteTeacher(t.id)}>Delete</Button>
-                </Card.Actions>
-              </Card>
-            ))}
+                  {photoUrl ? (
+                    <View style={{ marginTop: 10, alignItems: 'center' }}>
+                      <Image
+                        source={{ uri: photoUrl }}
+                        style={{ width: 100, height: 100, borderRadius: 50 }}
+                      />
+                    </View>
+                  ) : null}
+                </View>
 
-            <Text style={{ marginVertical: 20, fontWeight: "bold" }}>All Cards</Text>
-            <Button mode="contained" onPress={loadCards} style={{ marginBottom: 10 }}>
-              Refresh Cards
-            </Button>
-            {cards.map((c: any) => (
-              <Card key={c.uid} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
-                <Card.Content>
-                  <Title>Card UID: {c.uid}</Title>
-                  <Paragraph>Is Valid: {c.isValid ? "Yes" : "No"}</Paragraph>
-                </Card.Content>
-              </Card>
-            ))}
+                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                  <Button mode="contained" onPress={createTeacher} style={{ margin: 5 }}>
+                    Create Teacher
+                  </Button>
+                  <Button mode="contained" onPress={updateTeacher} style={{ margin: 5 }}>
+                    Update Teacher
+                  </Button>
+                </View>
 
-            <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
-              <Card.Content>
-                <Title>Access Logs</Title>
-                <Button mode="contained" onPress={loadAccessLogs} style={{ marginBottom: 10 }}>
-                  Refresh Logs
+                <Text style={{ marginVertical: 20, fontWeight: "bold" }}>
+                  Current Teachers
+                </Text>
+                {teachers.map((t: any) => (
+                  <Card key={t.id} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
+                    <Card.Content>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        {t.photoUrl ? (
+                          <Image
+                            source={{ uri: t.photoUrl }}
+                            style={{
+                              width: 60,
+                              height: 60,
+                              borderRadius: 30,
+                              marginRight: 15,
+                              backgroundColor: '#f0f0f0'
+                            }}
+                          />
+                        ) : (
+                          <View 
+                            style={{
+                              width: 60,
+                              height: 60,
+                              borderRadius: 30,
+                              marginRight: 15,
+                              backgroundColor: '#e0e0e0',
+                              justifyContent: 'center',
+                              alignItems: 'center'
+                            }}
+                          >
+                            <Text style={{ fontSize: 24, color: '#666' }}>
+                              {t.name.charAt(0).toUpperCase()}
+                            </Text>
+                          </View>
+                        )}
+                        <View style={{ flex: 1 }}>
+                          <Title>ID: {t.id}</Title>
+                          <Paragraph>Name: {t.name}</Paragraph>
+                          <Paragraph>Permission: {t.permissionLevel}</Paragraph>
+                        </View>
+                      </View>
+                    </Card.Content>
+                    <Card.Actions>
+                      <Button 
+                        onPress={() => {
+                          setTeacherId(t.id);
+                          setTeacherName(t.name);
+                          setTeacherPermission(t.permissionLevel);
+                          setPhotoUrl(t.photoUrl || '');
+                        }}
+                        style={{ marginRight: 8 }}
+                      >
+                        Edit
+                      </Button>
+                      <Button onPress={() => deleteTeacher(t.id)}>Delete</Button>
+                    </Card.Actions>
+                  </Card>
+                ))}
+              </>
+            )}
+
+            {activeTab === 'students' && (
+              <>
+                <Text style={{ marginVertical: 20, fontWeight: "bold" }}>Students</Text>
+                <Button mode="contained" onPress={loadStudents} style={{ marginBottom: 10 }}>
+                  Refresh Students
                 </Button>
-                <ScrollView horizontal={true}>
-                  <DataTable>
-                    <DataTable.Header>
-                      <DataTable.Title style={{ width: 200 }}>Timestamp</DataTable.Title>
-                      <DataTable.Title style={{ width: 150 }}>Student</DataTable.Title>
-                      <DataTable.Title style={{ width: 150 }}>Card UID</DataTable.Title>
-                      <DataTable.Title style={{ width: 100 }}>Direction</DataTable.Title>
-                      <DataTable.Title style={{ width: 100 }}>Approved</DataTable.Title>
-                    </DataTable.Header>
+                {students.map((s) => (
+                  <Card key={s.id} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
+                    <Card.Content>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        {s.photoUrl ? (
+                          <Image
+                            source={{ uri: s.photoUrl }}
+                            style={{
+                              width: 60,
+                              height: 60,
+                              borderRadius: 30,
+                              marginRight: 15,
+                              backgroundColor: '#f0f0f0'
+                            }}
+                          />
+                        ) : (
+                          <View style={{
+                            width: 60,
+                            height: 60,
+                            borderRadius: 30,
+                            marginRight: 15,
+                            backgroundColor: '#e0e0e0',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                          }}>
+                            <Text style={{ fontSize: 24, color: '#666' }}>
+                              {s.id.charAt(0).toUpperCase()}
+                            </Text>
+                          </View>
+                        )}
+                        <View style={{ flex: 1 }}>
+                          <Title>ID: {s.id}</Title>
+                          {s.name && <Paragraph>Name: {s.name}</Paragraph>}
+                          {s.classGroup && <Paragraph>Class: {s.classGroup}</Paragraph>}
+                          {s.assignedCards && <Paragraph>Cards: {s.assignedCards}</Paragraph>}
+                          {s.assignedTeachers && (
+                            <Paragraph>Teachers: {s.assignedTeachers}</Paragraph>
+                          )}
+                        </View>
+                      </View>
+                    </Card.Content>
+                    <Card.Actions>
+                      <Button onPress={() => deleteStudent(s.id)}>Delete</Button>
+                    </Card.Actions>
+                  </Card>
+                ))}
+              </>
+            )}
 
-                    {accessLogs.map((log) => (
-                      <DataTable.Row key={log.id}>
-                        <DataTable.Cell style={{ width: 200 }}>
-                          {new Date(log.timestamp * 1000).toLocaleString()}
-                        </DataTable.Cell>
-                        <DataTable.Cell style={{ width: 150 }}>{log.student}</DataTable.Cell>
-                        <DataTable.Cell style={{ width: 150 }}>{log.cardUID}</DataTable.Cell>
-                        <DataTable.Cell style={{ width: 100 }}>{log.direction}</DataTable.Cell>
-                        <DataTable.Cell style={{ width: 100 }}>
-                          {log.wasApproved ? "Yes" : "No"}
-                        </DataTable.Cell>
-                      </DataTable.Row>
-                    ))}
-                  </DataTable>
-                </ScrollView>
-              </Card.Content>
-            </Card>
+            {activeTab === 'cards' && (
+              <>
+                <Text style={{ marginVertical: 20, fontWeight: "bold" }}>All Cards</Text>
+                <Button mode="contained" onPress={loadCards} style={{ marginBottom: 10 }}>
+                  Refresh Cards
+                </Button>
+                {cards.map((c: any) => (
+                  <Card key={c.uid} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
+                    <Card.Content>
+                      <Title>Card UID: {c.uid}</Title>
+                      <Paragraph>Is Valid: {c.isValid ? "Yes" : "No"}</Paragraph>
+                    </Card.Content>
+                  </Card>
+                ))}
 
-            <Text style={{ marginVertical: 20, fontWeight: "bold" }}>Students</Text>
-            <Button mode="contained" onPress={loadStudents} style={{ marginBottom: 10 }}>
-              Refresh Students
-            </Button>
-            {students.map((s) => (
-              <Card key={s.id} style={{ marginBottom: 10 }}>
-                <Card.Content>
-                  <Title>Student ID: {s.id}</Title>
-                  {s.photoUrl ? <Image source={{ uri: s.photoUrl }} style={{ width: 60, height: 60 }} /> : null}
-                </Card.Content>
-                <Card.Actions>
-                  <Button onPress={() => deleteStudent(s.id)}>Delete</Button>
-                </Card.Actions>
-              </Card>
-            ))}
+                <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
+                  <Card.Content>
+                    <Title>Access Logs</Title>
+                    <Button mode="contained" onPress={loadAccessLogs} style={{ marginBottom: 10 }}>
+                      Refresh Logs
+                    </Button>
+                    <ScrollView horizontal={true}>
+                      <DataTable>
+                        <DataTable.Header>
+                          <DataTable.Title style={{ width: 200 }}>Timestamp</DataTable.Title>
+                          <DataTable.Title style={{ width: 150 }}>Student</DataTable.Title>
+                          <DataTable.Title style={{ width: 150 }}>Card UID</DataTable.Title>
+                          <DataTable.Title style={{ width: 100 }}>Direction</DataTable.Title>
+                          <DataTable.Title style={{ width: 100 }}>Approved</DataTable.Title>
+                        </DataTable.Header>
+
+                        {accessLogs.map((log) => (
+                          <DataTable.Row key={log.id}>
+                            <DataTable.Cell style={{ width: 200 }}>
+                              {new Date(log.timestamp * 1000).toLocaleString()}
+                            </DataTable.Cell>
+                            <DataTable.Cell style={{ width: 150 }}>{log.student}</DataTable.Cell>
+                            <DataTable.Cell style={{ width: 150 }}>{log.cardUID}</DataTable.Cell>
+                            <DataTable.Cell style={{ width: 100 }}>{log.direction}</DataTable.Cell>
+                            <DataTable.Cell style={{ width: 100 }}>
+                              {log.wasApproved ? "Yes" : "No"}
+                            </DataTable.Cell>
+                          </DataTable.Row>
+                        ))}
+                      </DataTable>
+                    </ScrollView>
+                  </Card.Content>
+                </Card>
+              </>
+            )}
           </>
         ) : (
           <Text>Please enter your Admin or Teacher ID to proceed.</Text>
