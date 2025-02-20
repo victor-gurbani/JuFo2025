@@ -24,22 +24,31 @@ module.exports = (db) => {
 
   // Create a teacher (allow only admins)
   router.post("/teachers", checkPermission(db, "admin"), (req, res) => {
-    const { id, name, permissionLevel } = req.body;
-    const query = `INSERT INTO teachers (id, name, permissionLevel) VALUES (?, ?, ?)`;
-    db.run(query, [id, name, permissionLevel], function (err) {
+    const { id, name, permissionLevel, photoUrl } = req.body;
+    const query = `
+      INSERT INTO teachers (id, name, permissionLevel, photoUrl) 
+      VALUES (?, ?, ?, ?)
+    `;
+    
+    db.run(query, [id, name, permissionLevel, photoUrl], function (err) {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ id, name, permissionLevel });
+      res.json({ id, name, permissionLevel, photoUrl });
     });
   });
 
   // Update a teacher (allow only admins)
   router.put("/teachers/:id", checkPermission(db, "admin"), (req, res) => {
-    const { name, permissionLevel } = req.body;
-    const query = `UPDATE teachers SET name = ?, permissionLevel = ? WHERE id = ?`;
-    db.run(query, [name, permissionLevel, req.params.id], function (err) {
+    const { name, permissionLevel, photoUrl } = req.body;
+    const query = `
+      UPDATE teachers 
+      SET name = ?, permissionLevel = ?, photoUrl = ? 
+      WHERE id = ?
+    `;
+    
+    db.run(query, [name, permissionLevel, photoUrl, req.params.id], function (err) {
       if (err) return res.status(500).json({ error: err.message });
-      if (this.changes === 0) return res.status(404).json({ error: "Not found" });
-      res.json({ id: req.params.id, name, permissionLevel });
+      if (this.changes === 0) return res.status(404).json({ error: "Teacher not found" });
+      res.json({ id: req.params.id, name, permissionLevel, photoUrl });
     });
   });
 

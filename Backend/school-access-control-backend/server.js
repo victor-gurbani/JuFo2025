@@ -73,11 +73,20 @@ const db = new sqlite3.Database("./database.db", (err) => {
         `CREATE TABLE IF NOT EXISTS teachers (
           id TEXT PRIMARY KEY,
           name TEXT,
-          permissionLevel TEXT
+          permissionLevel TEXT,
+          photoUrl TEXT
         )`,
         (err) => {
           if (err) {
             console.error("Error creating teachers table:", err.message);
+          } else {
+            // Add photoUrl column if it doesn't exist
+            db.run(`ALTER TABLE teachers ADD COLUMN photoUrl TEXT`, (alterErr) => {
+              // Ignore error if column already exists
+              if (alterErr && !alterErr.message.includes('duplicate column')) {
+                console.error("Error adding photoUrl column:", alterErr.message);
+              }
+            });
           }
         }
       );
