@@ -44,10 +44,10 @@ module.exports = (db) => {
         // After validation, log the access attempt
         const logAccess = (isValid, studentId) => {
           const logQuery = `
-            INSERT INTO accessLogs (direction, student, card, wasApproved)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO accessLogs (direction, student, card, wasApproved, timestamp)
+            VALUES (?, ?, ?, ?, ?)
           `;
-          db.run(logQuery, ['ENTRY', studentId, cardUID, isValid ? 1 : 0], (logErr) => {
+          db.run(logQuery, ['ENTRY', studentId, cardUID, isValid ? 1 : 0, Math.floor(Date.now() / 1000)], (logErr) => {
             if (logErr) console.error("Error logging access:", logErr.message);
           });
         };
