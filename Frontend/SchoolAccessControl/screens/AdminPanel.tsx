@@ -109,12 +109,22 @@ export default function AdminPanel() {
   };
 
   const updateTeacher = () => {
+    if (!teacherId || !teacherName || !teacherPermission) {
+      showSnackbar("Please fill in all required fields.");
+      return;
+    }
+
     apiWithTeacherId("PUT", `/admin/teachers/${teacherId}`, {
       name: teacherName,
-      permissionLevel: teacherPermission
+      permissionLevel: teacherPermission,
+      photoUrl: photoUrl
     })
       .then(() => {
         showSnackbar("Teacher updated");
+        setTeacherId("");
+        setTeacherName("");
+        setTeacherPermission("");
+        setPhotoUrl("");
         loadTeachers();
       })
       .catch((err) => showSnackbar("Error: " + err));
@@ -223,11 +233,54 @@ export default function AdminPanel() {
             {teachers.map((t: any) => (
               <Card key={t.id} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
                 <Card.Content>
-                  <Title>ID: {t.id}</Title>
-                  <Paragraph>Name: {t.name}</Paragraph>
-                  <Paragraph>Permission: {t.permissionLevel}</Paragraph>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    {t.photoUrl ? (
+                      <Image
+                        source={{ uri: t.photoUrl }}
+                        style={{
+                          width: 60,
+                          height: 60,
+                          borderRadius: 30,
+                          marginRight: 15,
+                          backgroundColor: '#f0f0f0'
+                        }}
+                      />
+                    ) : (
+                      <View 
+                        style={{
+                          width: 60,
+                          height: 60,
+                          borderRadius: 30,
+                          marginRight: 15,
+                          backgroundColor: '#e0e0e0',
+                          justifyContent: 'center',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <Text style={{ fontSize: 24, color: '#666' }}>
+                          {t.name.charAt(0).toUpperCase()}
+                        </Text>
+                      </View>
+                    )}
+                    <View style={{ flex: 1 }}>
+                      <Title>ID: {t.id}</Title>
+                      <Paragraph>Name: {t.name}</Paragraph>
+                      <Paragraph>Permission: {t.permissionLevel}</Paragraph>
+                    </View>
+                  </View>
                 </Card.Content>
                 <Card.Actions>
+                  <Button 
+                    onPress={() => {
+                      setTeacherId(t.id);
+                      setTeacherName(t.name);
+                      setTeacherPermission(t.permissionLevel);
+                      setPhotoUrl(t.photoUrl || '');
+                    }}
+                    style={{ marginRight: 8 }}
+                  >
+                    Edit
+                  </Button>
                   <Button onPress={() => deleteTeacher(t.id)}>Delete</Button>
                 </Card.Actions>
               </Card>
