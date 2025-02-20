@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, ScrollView } from "react-native";
-import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph } from "react-native-paper";
+import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
 import api from "../services/api";
 
@@ -15,6 +15,7 @@ export default function AdminPanel() {
   const [teacherPermission, setTeacherPermission] = useState("");
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [accessLogs, setAccessLogs] = useState<any[]>([]);
 
   const permissionLevels = ["guard", "teacher", "tutor", "admin"];
 
@@ -38,6 +39,7 @@ export default function AdminPanel() {
 
       loadTeachers();
       loadCards();
+      loadAccessLogs();
     }
   }, [currentTeacherId]);
 
@@ -51,6 +53,12 @@ export default function AdminPanel() {
     apiWithTeacherId("GET", "/admin/cards")
       .then((res) => setCards(res.data))
       .catch((err) => showSnackbar("Error: " + err));
+  };
+
+  const loadAccessLogs = () => {
+    apiWithTeacherId("GET", "/admin/access-logs")
+      .then((res) => setAccessLogs(res.data))
+      .catch((err) => showSnackbar("Error loading access logs: " + err));
   };
 
   const createTeacher = () => {
@@ -197,6 +205,40 @@ export default function AdminPanel() {
                 </Card.Content>
               </Card>
             ))}
+
+            <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
+              <Card.Content>
+                <Title>Access Logs</Title>
+                <Button mode="contained" onPress={loadAccessLogs} style={{ marginBottom: 10 }}>
+                  Refresh Logs
+                </Button>
+                <ScrollView horizontal={true}>
+                  <DataTable>
+                    <DataTable.Header>
+                      <DataTable.Title style={{ width: 200 }}>Timestamp</DataTable.Title>
+                      <DataTable.Title style={{ width: 150 }}>Student</DataTable.Title>
+                      <DataTable.Title style={{ width: 150 }}>Card UID</DataTable.Title>
+                      <DataTable.Title style={{ width: 100 }}>Direction</DataTable.Title>
+                      <DataTable.Title style={{ width: 100 }}>Approved</DataTable.Title>
+                    </DataTable.Header>
+
+                    {accessLogs.map((log) => (
+                      <DataTable.Row key={log.id}>
+                        <DataTable.Cell style={{ width: 200 }}>
+                          {new Date(log.timestamp).toLocaleString()}
+                        </DataTable.Cell>
+                        <DataTable.Cell style={{ width: 150 }}>{log.studentName}</DataTable.Cell>
+                        <DataTable.Cell style={{ width: 150 }}>{log.cardUID}</DataTable.Cell>
+                        <DataTable.Cell style={{ width: 100 }}>{log.direction}</DataTable.Cell>
+                        <DataTable.Cell style={{ width: 100 }}>
+                          {log.wasApproved ? "Yes" : "No"}
+                        </DataTable.Cell>
+                      </DataTable.Row>
+                    ))}
+                  </DataTable>
+                </ScrollView>
+              </Card.Content>
+            </Card>
           </>
         ) : (
           <Text>Please enter your Admin or Teacher ID to proceed.</Text>
