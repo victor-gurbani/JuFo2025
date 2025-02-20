@@ -47,31 +47,35 @@ export default function GuardPanel() {
   }, [currentGuardId]);
 
   const handleValidation = () => {
-    if (uid.trim() === "") return;
+    if (uid.trim() === "") {
+      showSnackbar("Please enter a card UID");
+      return;
+    }
 
+    setResult("Validating...");
     apiWithGuardId("POST", "/guard/validate", { cardUID: uid })
       .then((res) => {
         if (res.data.valid) {
           setResult("Access Granted");
-          setCardInfo(res.data.card); // Set card information
-          setPermissions(res.data.permissions); // Set permissions related to the card
+          setCardInfo(res.data.card);
+          setPermissions(res.data.permissions);
+          showSnackbar("Card validation successful");
         } else {
           setResult("Access Denied");
-          setCardInfo(null); // Clear card information
-          setPermissions([]); // Clear permissions
+          setCardInfo(null);
+          setPermissions([]);
+          showSnackbar("Invalid card or expired permissions");
         }
         setVisible(true);
-        // Clear the UID after validation
         setUid("");
-        // Keep the TextInput focused
         textInputRef.current?.focus();
       })
-      .catch(() => {
+      .catch((error) => {
         setResult("Error");
-        setCardInfo(null); // Clear card information
-        setPermissions([]); // Clear permissions
+        setCardInfo(null);
+        setPermissions([]);
         setVisible(true);
-        // Keep the TextInput focused
+        showSnackbar(`Error validating card: ${error.response?.data?.error || error.message}`);
         textInputRef.current?.focus();
       });
   };

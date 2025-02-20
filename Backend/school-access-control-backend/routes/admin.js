@@ -58,5 +58,25 @@ module.exports = (db) => {
     res.json({ message: "Admin Dashboard" });
   });
 
+  // Add this route in admin.js
+  router.get("/access-logs", checkPermission(db, "admin"), (req, res) => {
+    const query = `
+      SELECT 
+        al.*,
+        s.name as studentName,
+        c.uid as cardUID
+      FROM accessLogs al
+      LEFT JOIN students s ON al.student = s.id
+      LEFT JOIN cards c ON al.card = c.uid
+      ORDER BY al.timestamp DESC
+      LIMIT 100
+    `;
+    
+    db.all(query, [], (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    });
+  });
+
   return router;
 };

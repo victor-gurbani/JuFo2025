@@ -41,27 +41,40 @@ module.exports = (db) => {
           return now >= startDate && now <= endDate;
         });
 
-        if (validPermissions.length === 0) {
+        // After validation, log the access attempt
+        const logAccess = (isValid, studentId) => {
+          const logQuery = `
+            INSERT INTO accessLogs (direction, student, card, wasApproved)
+            VALUES (?, ?, ?, ?)
+          `;
+          db.run(logQuery, ['ENTRY', studentId, cardUID, isValid ? 1 : 0], (logErr) => {
+            if (logErr) console.error("Error logging access:", logErr.message);
+          });
+        };
+
+        if (validPermissions.length > 0) {
+          logAccess(true, validPermissions[0].assignedStudent);
+          res.json({
+            valid: true,
+            card: {
+              uid: cardRow.uid,
+              lastAssigned: cardRow.lastAssigned,
+              isValid: cardRow.isValid === 1,
+            },
+            permissions: validPermissions.map((perm) => ({
+              id: perm.id,
+              startDate: perm.startDate,
+              endDate: perm.endDate,
+              isRecurring: perm.isRecurring === 1,
+              recurrencePattern: perm.recurrencePattern,
+              assignedStudent: perm.assignedStudent,
+              assignedBy: perm.assignedBy,
+            })),
+          });
+        } else {
+          logAccess(false, cardRow.lastAssigned);
           return res.json({ valid: false });
         }
-
-        res.json({
-          valid: true,
-          card: {
-            uid: cardRow.uid,
-            lastAssigned: cardRow.lastAssigned,
-            isValid: cardRow.isValid === 1,
-          },
-          permissions: validPermissions.map((perm) => ({
-            id: perm.id,
-            startDate: perm.startDate,
-            endDate: perm.endDate,
-            isRecurring: perm.isRecurring === 1,
-            recurrencePattern: perm.recurrencePattern,
-            assignedStudent: perm.assignedStudent,
-            assignedBy: perm.assignedBy,
-          })),
-        });
       });
     });
   });
