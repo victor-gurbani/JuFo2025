@@ -6,7 +6,10 @@ const checkPermission = require("./middleware/checkPermission");
 
 // Initialize Express app
 const app = express();
-app.use(bodyParser.json());
+
+// Increase payload size limits to 50MB
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(cors());
 
 // Initialize SQLite database
