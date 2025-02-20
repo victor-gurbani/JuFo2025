@@ -158,27 +158,31 @@ export default function GuardPanel() {
                   <Card style={{ marginTop: 20 }} elevation={2}>
                     <Card.Content>
                       <Title>Permissions</Title>
-                      <DataTable>
-                        <DataTable.Header>
-                          <DataTable.Title>ID</DataTable.Title>
-                          <DataTable.Title>Student ID</DataTable.Title>
-                          <DataTable.Title>Assigned By</DataTable.Title>
-                          <DataTable.Title>Start Date</DataTable.Title>
-                          <DataTable.Title>End Date</DataTable.Title>
-                          <DataTable.Title>Recurring</DataTable.Title>
-                        </DataTable.Header>
+                      <ScrollView horizontal={true} style={{ marginHorizontal: -16 }}>
+                        <View style={{ minWidth: 800 }}>  {/* Adjust minWidth based on your content */}
+                          <DataTable>
+                            <DataTable.Header>
+                              <DataTable.Title style={{ width: 100 }}>ID</DataTable.Title>
+                              <DataTable.Title style={{ width: 150 }}>Student ID</DataTable.Title>
+                              <DataTable.Title style={{ width: 150 }}>Assigned By</DataTable.Title>
+                              <DataTable.Title style={{ width: 200 }}>Start Date</DataTable.Title>
+                              <DataTable.Title style={{ width: 200 }}>End Date</DataTable.Title>
+                              <DataTable.Title style={{ width: 100 }}>Recurring</DataTable.Title>
+                            </DataTable.Header>
 
-                        {permissions.map((perm) => (
-                          <DataTable.Row key={perm.id}>
-                            <DataTable.Cell>{perm.id}</DataTable.Cell>
-                            <DataTable.Cell>{perm.assignedStudent}</DataTable.Cell>
-                            <DataTable.Cell>{perm.assignedBy}</DataTable.Cell>
-                            <DataTable.Cell>{perm.startDate}</DataTable.Cell>
-                            <DataTable.Cell>{perm.endDate}</DataTable.Cell>
-                            <DataTable.Cell>{perm.isRecurring ? "Yes" : "No"}</DataTable.Cell>
-                          </DataTable.Row>
-                        ))}
-                      </DataTable>
+                            {permissions.map((perm) => (
+                              <DataTable.Row key={perm.id}>
+                                <DataTable.Cell style={{ width: 100 }}>{perm.id}</DataTable.Cell>
+                                <DataTable.Cell style={{ width: 150 }}>{perm.assignedStudent}</DataTable.Cell>
+                                <DataTable.Cell style={{ width: 150 }}>{perm.assignedBy}</DataTable.Cell>
+                                <DataTable.Cell style={{ width: 200 }}>{perm.startDate}</DataTable.Cell>
+                                <DataTable.Cell style={{ width: 200 }}>{perm.endDate}</DataTable.Cell>
+                                <DataTable.Cell style={{ width: 100 }}>{perm.isRecurring ? "Yes" : "No"}</DataTable.Cell>
+                              </DataTable.Row>
+                            ))}
+                          </DataTable>
+                        </View>
+                      </ScrollView>
                     </Card.Content>
                   </Card>
                 )}

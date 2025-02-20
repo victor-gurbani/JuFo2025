@@ -1,10 +1,11 @@
 TODO:
-- Change the poorly formatted permissions in the admin panel to match those in the guard panel.
-- Guard panel should autovalidate the date and time of the card swipe.
-- Access Log should be displayed in the admin panel and be recorded in the database.
-- Use List for permissionlevel in teacherpanel
+- Change the poorly formatted permissions in the admin panel to match those in the guard panel. DONE
+- Guard panel should autovalidate the date and time of the card swipe. DONE
+- Access Log should be displayed in the admin panel and be recorded in the database. !!
+- Use List for permissionlevel in teacherpanel DONE
 - move snackbar to the right position DONE
 - clear the input fields after submitting in teacherpanel DONE
 
-
 - Add a feature to the admin panel to add and remove permissions directly wihtout needing to reenter the ID of the people
+- Add a feature to admin panel to invalidate cards and view info about the card
+
