@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { View, ScrollView } from "react-native";
+import { View, ScrollView, Image } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, Switch, DataTable } from "react-native-paper";
 import { DatePickerModal, TimePickerModal } from "react-native-paper-dates";
 import api from "../services/api";
 import "react-native-paper-dates"; // For date formatting
+import * as ImagePicker from 'expo-image-picker';
 
 export default function TeacherPanel() {
   const [currentTeacherId, setCurrentTeacherId] = useState("");
@@ -21,6 +22,7 @@ export default function TeacherPanel() {
   const [recurrencePattern, setRecurrencePattern] = useState("");
   const [permissions, setPermissions] = useState<any[]>([]);
   const [invalidateCardUID, setInvalidateCardUID] = useState("");
+  const [studentPhotoUrl, setStudentPhotoUrl] = useState("");
 
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -44,6 +46,28 @@ export default function TeacherPanel() {
       handleViewPermissions();
     }
   }, [currentTeacherId]);
+
+  const pickStudentImage = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        showSnackbar("Permission to access camera roll is required!");
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets[0].uri) {
+        setStudentPhotoUrl(result.assets[0].uri);
+      }
+    } catch (error) {
+      showSnackbar("Error picking image: " + error.message);
+    }
+  };
 
   const handleAssignCard = () => {
     if (!startDate || !startTime || !endDate || !endTime) {
@@ -77,6 +101,7 @@ export default function TeacherPanel() {
       endDate: endDateTimeISO,
       isRecurring,
       recurrencePattern,
+      studentPhotoUrl
     })
       .then(() => {
         showSnackbar("Card assigned");
@@ -89,6 +114,7 @@ export default function TeacherPanel() {
         setEndTime(undefined);
         setIsRecurring(false);
         setRecurrencePattern("");
+        setStudentPhotoUrl("");
       })
       .catch((err) => showSnackbar("Error: " + err));
   };
@@ -136,6 +162,24 @@ export default function TeacherPanel() {
                   mode="outlined"
                   style={{ marginBottom: 10 }}
                 />
+                <View style={{ marginVertical: 10 }}>
+                  <Button mode="outlined" onPress={pickStudentImage}>
+                    Pick Student Photo
+                  </Button>
+                  {studentPhotoUrl ? (
+                    <View style={{ marginTop: 10, alignItems: 'center' }}>
+                      <Image
+                        source={{ uri: studentPhotoUrl }}
+                        style={{ 
+                          width: 100, 
+                          height: 100, 
+                          borderRadius: 50,
+                          backgroundColor: '#f0f0f0'
+                        }}
+                      />
+                    </View>
+                  ) : null}
+                </View>
                 <Button mode="outlined" onPress={() => setStartDatePickerVisible(true)} style={{ marginBottom: 10 }}>
                   Select Start Date
                 </Button>

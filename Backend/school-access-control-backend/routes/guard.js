@@ -17,7 +17,7 @@ module.exports = (db) => {
       SELECT p.*, t.name AS assignedBy, s.photoUrl AS studentPhoto
       FROM permissions p
       JOIN teachers t ON p.assignedBy = t.id
-      LEFT JOIN teachers s ON p.assignedStudent = s.id
+      LEFT JOIN students s ON p.assignedStudent = s.id
       WHERE p.associatedCard = ? AND p.isValid = 1
     `;
     db.get(cardQuery, [cardUID], (err, cardRow) => {
