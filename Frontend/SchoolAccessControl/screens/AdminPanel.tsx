@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, ScrollView } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph } from "react-native-paper";
+import { Picker } from "@react-native-picker/picker";
 import api from "../services/api";
 
 export default function AdminPanel() {
@@ -14,6 +15,8 @@ export default function AdminPanel() {
   const [teacherPermission, setTeacherPermission] = useState("");
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  const permissionLevels = ["guard", "teacher", "tutor", "admin"];
 
   // Helper function to append teacherId to requests
   const apiWithTeacherId = (method: string, url: string, body?: any) => {
@@ -126,13 +129,31 @@ export default function AdminPanel() {
               style={{ marginVertical: 5 }}
               mode="outlined"
             />
-            <TextInput
-              label="Permission Level"
-              value={teacherPermission}
-              onChangeText={setTeacherPermission}
-              style={{ marginVertical: 5 }}
-              mode="outlined"
-            />
+
+            <View style={{ marginVertical: 5 }}>
+              <Text>Permission Level</Text>
+              <View style={{ 
+                borderWidth: 1, 
+                borderColor: '#666',
+                borderRadius: 4,
+                marginTop: 5
+              }}>
+                <Picker
+                  selectedValue={teacherPermission}
+                  onValueChange={(itemValue) => setTeacherPermission(itemValue.toLowerCase())}
+                  style={{ height: 50 }}
+                >
+                  <Picker.Item label="Select a permission level" value="" />
+                  {permissionLevels.map((level) => (
+                    <Picker.Item 
+                      key={level} 
+                      label={level.charAt(0).toUpperCase() + level.slice(1)} 
+                      value={level} 
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
 
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
               <Button mode="contained" onPress={createTeacher} style={{ margin: 5 }}>
