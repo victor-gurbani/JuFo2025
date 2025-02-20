@@ -68,6 +68,15 @@ const db = new sqlite3.Database("./database.db", (err) => {
         (err) => {
           if (err) {
             console.error("Error creating students table:", err.message);
+          } else {
+            db.run(`
+              CREATE INDEX IF NOT EXISTS idx_students_id ON students(id);
+              CREATE INDEX IF NOT EXISTS idx_students_tutor ON students(tutor);
+            `, (err) => {
+              if (err) {
+                console.error("Error creating indexes:", err.message);
+              }
+            });
           }
         }
       );
