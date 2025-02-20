@@ -17,7 +17,7 @@ const roleHierarchy = {
 
 module.exports = (db, requiredLevel) => {
   return (req, res, next) => {
-    const teacherId = req.body.teacherId || req.query.teacherId || req.body.guardId || req.query.guardId; // Must be passed by the client
+    const teacherId = (req.body.teacherId || req.query.teacherId || req.body.guardId || req.query.guardId || "").toLowerCase(); // Must be passed by the client
     // if (!teacherId) {
     //   return res.status(400).json({ error: "Teacher ID is required." });
     // }
