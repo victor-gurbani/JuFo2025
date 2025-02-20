@@ -17,7 +17,7 @@ module.exports = (db) => {
       SELECT p.*, t.name AS assignedBy, s.photoUrl AS studentPhoto
       FROM permissions p
       JOIN teachers t ON p.assignedBy = t.id
-      LEFT JOIN students s ON p.assignedStudent = s.id
+      LEFT JOIN teachers s ON p.assignedStudent = s.id
       WHERE p.associatedCard = ? AND p.isValid = 1
     `;
     db.get(cardQuery, [cardUID], (err, cardRow) => {
@@ -58,7 +58,7 @@ module.exports = (db) => {
               lastAssigned: cardRow.lastAssigned,
               isValid: cardRow.isValid === 1,
             },
-            photoUrl: validPermissions[0].studentPhoto,
+            photoUrl: validPermissions[0].studentPhoto || null, // Use null as default
             permissions: validPermissions.map((perm) => ({
               id: perm.id,
               startDate: perm.startDate,
