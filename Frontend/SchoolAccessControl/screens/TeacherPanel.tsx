@@ -133,6 +133,11 @@ export default function TeacherPanel() {
       .catch((err) => showSnackbar("Error: " + err));
   };
 
+  const formatTimeString = (date?: Date) => {
+    if (!date) return "Not set";
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={{ margin: 20 }}>
@@ -180,9 +185,59 @@ export default function TeacherPanel() {
                     </View>
                   ) : null}
                 </View>
-                <Button mode="outlined" onPress={() => setStartDatePickerVisible(true)} style={{ marginBottom: 10 }}>
-                  Select Start Date
-                </Button>
+                <View style={{ marginVertical: 15 }}>
+                  <Title style={{ marginBottom: 10 }}>Access Period</Title>
+                  
+                  {/* Start Date/Time Row */}
+                  <View style={{ flexDirection: 'row', marginBottom: 15 }}>
+                    <View style={{ flex: 1, marginRight: 10 }}>
+                      <Text style={{ marginBottom: 5 }}>Start Date</Text>
+                      <Button 
+                        mode="outlined" 
+                        onPress={() => setStartDatePickerVisible(true)}
+                        icon="calendar"
+                      >
+                        {startDate ? startDate.toLocaleDateString() : "Select Date"}
+                      </Button>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ marginBottom: 5 }}>Start Time</Text>
+                      <Button 
+                        mode="outlined" 
+                        onPress={() => setStartTimePickerVisible(true)}
+                        icon="clock-outline"
+                      >
+                        {formatTimeString(startTime)}
+                      </Button>
+                    </View>
+                  </View>
+              
+                  {/* End Date/Time Row */}
+                  <View style={{ flexDirection: 'row', marginBottom: 15 }}>
+                    <View style={{ flex: 1, marginRight: 10 }}>
+                      <Text style={{ marginBottom: 5 }}>End Date</Text>
+                      <Button 
+                        mode="outlined" 
+                        onPress={() => setEndDatePickerVisible(true)}
+                        icon="calendar"
+                      >
+                        {endDate ? endDate.toLocaleDateString() : "Select Date"}
+                      </Button>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ marginBottom: 5 }}>End Time</Text>
+                      <Button 
+                        mode="outlined" 
+                        onPress={() => setEndTimePickerVisible(true)}
+                        icon="clock-outline"
+                      >
+                        {formatTimeString(endTime)}
+                      </Button>
+                    </View>
+                  </View>
+                </View>
+              
+                {/* Keep existing DatePickerModal and TimePickerModal components */}
                 <DatePickerModal
                   mode="single"
                   locale="en"
@@ -194,11 +249,6 @@ export default function TeacherPanel() {
                     setStartDatePickerVisible(false);
                   }}
                 />
-                <Paragraph>Selected Start Date: {startDate?.toDateString() || "None"}</Paragraph>
-
-                <Button mode="outlined" onPress={() => setStartTimePickerVisible(true)} style={{ marginBottom: 10 }}>
-                  Select Start Time
-                </Button>
                 <TimePickerModal
                   visible={isStartTimePickerVisible}
                   onDismiss={() => setStartTimePickerVisible(false)}
@@ -207,11 +257,6 @@ export default function TeacherPanel() {
                     setStartTimePickerVisible(false);
                   }}
                 />
-                <Paragraph>Selected Start Time: {startTime?.toLocaleTimeString() || "None"}</Paragraph>
-
-                <Button mode="outlined" onPress={() => setEndDatePickerVisible(true)} style={{ marginBottom: 10 }}>
-                  Select End Date
-                </Button>
                 <DatePickerModal
                   mode="single"
                   locale="en"
@@ -223,11 +268,6 @@ export default function TeacherPanel() {
                     setEndDatePickerVisible(false);
                   }}
                 />
-                <Paragraph>Selected End Date: {endDate?.toDateString() || "None"}</Paragraph>
-
-                <Button mode="outlined" onPress={() => setEndTimePickerVisible(true)} style={{ marginBottom: 10 }}>
-                  Select End Time
-                </Button>
                 <TimePickerModal
                   visible={isEndTimePickerVisible}
                   onDismiss={() => setEndTimePickerVisible(false)}
@@ -236,20 +276,37 @@ export default function TeacherPanel() {
                     setEndTimePickerVisible(false);
                   }}
                 />
-                <Paragraph>Selected End Time: {endTime?.toLocaleTimeString() || "None"}</Paragraph>
-
-                <TextInput
-                  label="Recurrence Pattern"
-                  value={recurrencePattern}
-                  onChangeText={setRecurrencePattern}
-                  mode="outlined"
-                  style={{ marginBottom: 10 }}
-                />
-                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
-                  <Paragraph>Recurring: </Paragraph>
-                  <Switch value={isRecurring} onValueChange={setIsRecurring} />
-                </View>
-                <Button mode="contained" onPress={handleAssignCard}>
+              
+                {/* Recurring Section */}
+                <Card style={{ marginVertical: 15, backgroundColor: '#f5f5f5' }}>
+                  <Card.Content>
+                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                      <View>
+                        <Title style={{ fontSize: 16 }}>Recurring Access</Title>
+                        <Text style={{ color: '#666' }}>Enable for repeating schedules</Text>
+                      </View>
+                      <Switch value={isRecurring} onValueChange={setIsRecurring} />
+                    </View>
+                    {isRecurring && (
+                      <TextInput
+                        label="Recurrence Pattern"
+                        value={recurrencePattern}
+                        onChangeText={setRecurrencePattern}
+                        mode="outlined"
+                        style={{ marginTop: 10 }}
+                        placeholder="e.g., Every Monday and Wednesday"
+                      />
+                    )}
+                  </Card.Content>
+                </Card>
+              
+                {/* Assign Button */}
+                <Button 
+                  mode="contained" 
+                  onPress={handleAssignCard}
+                  style={{ marginTop: 10 }}
+                  icon="card-account-details"
+                >
                   Assign Card
                 </Button>
               </Card.Content>
