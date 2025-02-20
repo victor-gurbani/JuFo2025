@@ -225,9 +225,9 @@ export default function AdminPanel() {
                     {accessLogs.map((log) => (
                       <DataTable.Row key={log.id}>
                         <DataTable.Cell style={{ width: 200 }}>
-                          {new Date(log.timestamp).toLocaleString()}
+                          {new Date(log.timestamp * 1000).toLocaleString()}
                         </DataTable.Cell>
-                        <DataTable.Cell style={{ width: 150 }}>{log.studentName}</DataTable.Cell>
+                        <DataTable.Cell style={{ width: 150 }}>{log.student}</DataTable.Cell>
                         <DataTable.Cell style={{ width: 150 }}>{log.cardUID}</DataTable.Cell>
                         <DataTable.Cell style={{ width: 100 }}>{log.direction}</DataTable.Cell>
                         <DataTable.Cell style={{ width: 100 }}>
