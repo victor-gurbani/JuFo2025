@@ -5,7 +5,8 @@ TODO:
 - Use List for permissionlevel in teacherpanel DONE
 - move snackbar to the right position DONE
 - clear the input fields after submitting in teacherpanel DONE
+- Add photos for teachers and students and show them respectively in admin and in guard nicely DONE
+- Add a feature to the admin panel to add and remove permissions directly wihtout needing to reenter the ID of the people DONE
 
-- Add a feature to the admin panel to add and remove permissions directly wihtout needing to reenter the ID of the people
-- Add a feature to admin panel to invalidate cards and view info about the card
 
+- Add a feature to admin panel to invalidate cards and view info about the card No thanks
