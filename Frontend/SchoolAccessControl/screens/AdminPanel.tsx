@@ -44,6 +44,7 @@ export default function AdminPanel() {
       loadTeachers();
       loadCards();
       loadAccessLogs();
+      loadStudents();
     }
   }, [currentTeacherId]);
 
