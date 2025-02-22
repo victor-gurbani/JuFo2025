@@ -1,5 +1,6 @@
 const express = require("express");
 const checkPermission = require("../middleware/checkPermission");
+const { processImage } = require('../utils/imageProcessor');
 
 module.exports = (db) => {
   const router = express.Router();
@@ -23,33 +24,49 @@ module.exports = (db) => {
   });
 
   // Create a teacher (allow only admins)
-  router.post("/teachers", checkPermission(db, "admin"), (req, res) => {
-    const { id, name, permissionLevel, photoUrl } = req.body;
-    const query = `
-      INSERT INTO teachers (id, name, permissionLevel, photoUrl) 
-      VALUES (?, ?, ?, ?)
-    `;
-    
-    db.run(query, [id, name, permissionLevel, photoUrl], function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ id, name, permissionLevel, photoUrl });
-    });
+  router.post("/teachers", checkPermission(db, "admin"), async (req, res) => {
+    try {
+      const { id, name, permissionLevel, photoUrl } = req.body;
+      
+      // Process the image if one was provided
+      const processedPhotoUrl = photoUrl ? await processImage(photoUrl) : null;
+      
+      const query = `
+        INSERT INTO teachers (id, name, permissionLevel, photoUrl) 
+        VALUES (?, ?, ?, ?)
+      `;
+      
+      db.run(query, [id, name, permissionLevel, processedPhotoUrl], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ id, name, permissionLevel, photoUrl: processedPhotoUrl });
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   });
 
   // Update a teacher (allow only admins)
-  router.put("/teachers/:id", checkPermission(db, "admin"), (req, res) => {
-    const { name, permissionLevel, photoUrl } = req.body;
-    const query = `
-      UPDATE teachers 
-      SET name = ?, permissionLevel = ?, photoUrl = ? 
-      WHERE id = ?
-    `;
-    
-    db.run(query, [name, permissionLevel, photoUrl, req.params.id], function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      if (this.changes === 0) return res.status(404).json({ error: "Teacher not found" });
-      res.json({ id: req.params.id, name, permissionLevel, photoUrl });
-    });
+  router.put("/teachers/:id", checkPermission(db, "admin"), async (req, res) => {
+    try {
+      const { name, permissionLevel, photoUrl } = req.body;
+      
+      // Process the image if one was provided
+      const processedPhotoUrl = photoUrl ? await processImage(photoUrl) : null;
+      
+      const query = `
+        UPDATE teachers 
+        SET name = ?, permissionLevel = ?, photoUrl = ? 
+        WHERE id = ?
+      `;
+      
+      db.run(query, [name, permissionLevel, processedPhotoUrl, req.params.id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) return res.status(404).json({ error: "Teacher not found" });
+        res.json({ id: req.params.id, name, permissionLevel, photoUrl: processedPhotoUrl });
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   });
 
   // Delete a teacher (allow only admins)
