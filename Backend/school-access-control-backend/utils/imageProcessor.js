@@ -10,24 +10,34 @@ async function processImage(base64Image) {
 
     // Check if the image is HEIC
     if (base64Image.startsWith('data:image/heic;base64,')) {
-      const heicBuffer = await heicConvert({
-      buffer: imageBuffer,
-      format: 'JPEG', // or 'PNG'
-      quality: 1 // between 0 and 1
-      });
-      processedImageBuffer = heicBuffer;
+      try {
+        const heicBuffer = await heicConvert({
+          buffer: imageBuffer,
+          format: 'PNG', // Convert HEIC to PNG
+          quality: 1
+        });
+        processedImageBuffer = Buffer.from(heicBuffer.data); // Extract data as Buffer
+      } catch (heicError) {
+        console.error('HEIC conversion error:', heicError);
+        throw new Error('Failed to convert HEIC image');
+      }
     } else {
       processedImageBuffer = imageBuffer;
     }
 
     // Process image with sharp
-    processedImageBuffer = await sharp(processedImageBuffer)
-      .resize(1024, 1024, {
-      fit: 'cover',
-      background: { r: 255, g: 255, b: 255, alpha: 1 }
-      })
-      .png()
-      .toBuffer();
+    try {
+      processedImageBuffer = await sharp(processedImageBuffer)
+        .resize(1024, 1024, {
+          fit: 'cover',
+          background: { r: 255, g: 255, b: 255, alpha: 1 }
+        })
+        .png()
+        .toBuffer();
+    } catch (sharpError) {
+      console.error('Sharp processing error:', sharpError);
+      throw new Error('Failed to process image with Sharp');
+    }
 
     // Convert back to base64
     return `data:image/png;base64,${processedImageBuffer.toString('base64')}`;

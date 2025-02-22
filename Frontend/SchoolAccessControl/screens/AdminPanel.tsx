@@ -92,11 +92,15 @@ export default function AdminPanel() {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        quality: 1,
+        quality: 0.5,
+        base64: true
       });
 
-      if (!result.canceled && result.assets[0].uri) {
-        setPhotoUrl(result.assets[0].uri);
+      if (!result.canceled && result.assets[0]) {
+        const base64Image = result.assets[0].uri?.startsWith('data:image/')
+          ? result.assets[0].uri
+          : `data:image/${result.assets[0].uri.split('.').pop()?.toLowerCase() || 'jpg'};base64,${result.assets[0].base64}`;
+        setPhotoUrl(base64Image);
       }
     } catch (error) {
       showSnackbar("Error picking image: " + error.message);
