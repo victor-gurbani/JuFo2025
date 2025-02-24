@@ -10,4 +10,9 @@ TODO:
 - Allow admins to view Student info and delete it like teachers DONE
 
 - Add a feature to admin panel to invalidate cards and view info about the card
-- Convert images uploaded to consistent format (gives internal server error rn)
+- Convert images uploaded to consistent format (gives internal server error rn) DONE
+
+- Add interactive poster
+- add domain name
+- add certificates
+- use expo-router
