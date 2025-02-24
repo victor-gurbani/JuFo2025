@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { View, ScrollView, Image } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable } from "react-native-paper";
 import api from "../services/api";
+import { useRouter } from 'expo-router';
 
 export default function GuardPanel() {
+  const router = useRouter();
   // State variables
   const [currentGuardId, setCurrentGuardId] = useState("");
   const [uid, setUid] = useState("");

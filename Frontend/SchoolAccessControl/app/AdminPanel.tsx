@@ -4,8 +4,10 @@ import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable, S
 import { Picker } from "@react-native-picker/picker";
 import api from "../services/api";
 import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
 
 export default function AdminPanel() {
+  const router = useRouter();
   // State to store the current admin/teacher's ID
   const [currentTeacherId, setCurrentTeacherId] = useState("");
   const [dashboard, setDashboard] = useState("");

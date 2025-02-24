@@ -5,8 +5,10 @@ import { DatePickerModal, TimePickerModal } from "react-native-paper-dates";
 import api from "../services/api";
 import "react-native-paper-dates"; // For date formatting
 import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
 
 export default function TeacherPanel() {
+  const router = useRouter();
   const [currentTeacherId, setCurrentTeacherId] = useState("");
   const [studentId, setStudentId] = useState("");
   const [cardUID, setCardUID] = useState("");
