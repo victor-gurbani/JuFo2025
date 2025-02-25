@@ -1,7 +1,7 @@
 TODO:
 - Change the poorly formatted permissions in the admin panel to match those in the guard panel. DONE
 - Guard panel should autovalidate the date and time of the card swipe. DONE
-- Access Log should be displayed in the admin panel and be recorded in the database. !!
+- Access Log should be displayed in the admin panel and be recorded in the database. DONE
 - Use List for permissionlevel in teacherpanel DONE
 - move snackbar to the right position DONE
 - clear the input fields after submitting in teacherpanel DONE
@@ -13,6 +13,6 @@ TODO:
 - Convert images uploaded to consistent format (gives internal server error rn) DONE
 
 - Add interactive poster
-- add domain name
+- add domain name DONE
 - add certificates
-- use expo-router
+- use expo-router DONE
