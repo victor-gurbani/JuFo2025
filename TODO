@@ -16,3 +16,6 @@ TODO:
 - add domain name DONE
 - add certificates
 - use expo-router DONE
+
+- add login through email and better security measures
+- obfucate and compile to bytecode
