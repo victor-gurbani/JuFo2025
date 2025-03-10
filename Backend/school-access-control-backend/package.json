@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "obfuscate": "javascript-obfuscator ./routes --output ./dist/routes",
+    "compile": "node compile.js",
+    "build": "npm run obfuscate && npm run compile",
+    "start:secure": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -12,10 +16,14 @@
   "dependencies": {
     "body-parser": "^1.20.3",
     "buffer": "^6.0.3",
+    "bytenode": "^1.5.7",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "heic-convert": "^2.1.0",
     "sharp": "^0.33.5",
     "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "javascript-obfuscator": "^4.1.1"
   }
 }
