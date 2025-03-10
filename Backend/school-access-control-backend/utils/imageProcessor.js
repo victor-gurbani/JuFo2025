@@ -39,10 +39,20 @@ async function processImage(base64Image) {
       throw new Error('Failed to process image with Sharp');
     }
 
-    // Convert back to base64
-    return `data:image/png;base64,${processedImageBuffer.toString('base64')}`;
+    // Add explicit cleanup
+    if (processedImageBuffer !== imageBuffer) {
+      imageBuffer = null; // Help garbage collection
+    }
+    
+    const result = `data:image/png;base64,${processedImageBuffer.toString('base64')}`;
+    processedImageBuffer = null; // Help garbage collection
+    
+    return result;
   } catch (error) {
     console.error('Image processing error:', error);
+    // Clean up on error too
+    imageBuffer = null;
+    processedImageBuffer = null;
     throw new Error('Failed to process image');
   }
 }

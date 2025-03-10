@@ -12,6 +12,15 @@ app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(cors());
 
+// Memory usage logging
+const logMemoryUsage = () => {
+  const used = process.memoryUsage();
+  console.log(`Memory usage - rss: ${Math.round(used.rss / 1024 / 1024)}MB, heapTotal: ${Math.round(used.heapTotal / 1024 / 1024)}MB, heapUsed: ${Math.round(used.heapUsed / 1024 / 1024)}MB`);
+};
+
+// Log every 5 minutes
+setInterval(logMemoryUsage, 5 * 60 * 1000);
+
 // Initialize SQLite database
 const db = new sqlite3.Database("./database.db", (err) => {
   if (err) {

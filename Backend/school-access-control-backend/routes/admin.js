@@ -115,6 +115,10 @@ module.exports = (db) => {
 
   // Add this route in admin.js
   router.get("/access-logs", checkPermission(db, "admin"), (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+    
     const query = `
       SELECT 
         al.*,
@@ -124,10 +128,10 @@ module.exports = (db) => {
       LEFT JOIN students s ON al.student = s.id
       LEFT JOIN cards c ON al.card = c.uid
       ORDER BY al.timestamp DESC
-      LIMIT 100
+      LIMIT ? OFFSET ?
     `;
     
-    db.all(query, [], (err, rows) => {
+    db.all(query, [limit, offset], (err, rows) => {
       if (err) return res.status(500).json({ error: err.message });
       res.json(rows);
     });

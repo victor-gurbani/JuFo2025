@@ -22,6 +22,9 @@ export default function AdminPanel() {
   const [photoUrl, setPhotoUrl] = useState("");
   const [students, setStudents] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('teachers');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalLogs, setTotalLogs] = useState(0);
 
   const permissionLevels = ["guard", "teacher", "tutor", "admin"];
 
@@ -45,10 +48,15 @@ export default function AdminPanel() {
 
       loadTeachers();
       loadCards();
-      loadAccessLogs();
       loadStudents();
     }
   }, [currentTeacherId]);
+
+  useEffect(() => {
+    if (currentTeacherId && activeTab === 'cards') {
+      loadAccessLogs();
+    }
+  }, [currentTeacherId, currentPage, pageSize, activeTab]);
 
   const loadTeachers = () => {
     apiWithTeacherId("GET", "/admin/teachers")
@@ -63,8 +71,14 @@ export default function AdminPanel() {
   };
 
   const loadAccessLogs = () => {
-    apiWithTeacherId("GET", "/admin/access-logs")
-      .then((res) => setAccessLogs(res.data))
+    apiWithTeacherId("GET", `/admin/access-logs?page=${currentPage}&limit=${pageSize}`)
+      .then((res) => {
+        setAccessLogs(res.data);
+        // If backend returns total count in headers or response
+        if (res.headers && res.headers['x-total-count']) {
+          setTotalLogs(parseInt(res.headers['x-total-count']));
+        }
+      })
       .catch((err) => showSnackbar("Error loading access logs: " + err));
   };
 
@@ -426,6 +440,50 @@ export default function AdminPanel() {
                         ))}
                       </DataTable>
                     </ScrollView>
+                    
+                    {/* Add pagination controls */}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 15 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Text style={{ marginRight: 10 }}>Page Size: </Text>
+                        <SegmentedButtons
+                          value={pageSize.toString()}
+                          onValueChange={(value) => {
+                            setPageSize(parseInt(value));
+                            setCurrentPage(1); // Reset to first page when changing page size
+                          }}
+                          buttons={[
+                            { value: '10', label: '10' },
+                            { value: '20', label: '20' },
+                            { value: '50', label: '50' },
+                          ]}
+                          style={{ width: 200 }}
+                        />
+                      </View>
+                      
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Button 
+                          mode="outlined" 
+                          onPress={() => {
+                            if (currentPage > 1) {
+                              setCurrentPage(currentPage - 1);
+                            }
+                          }}
+                          disabled={currentPage <= 1}
+                        >
+                          Previous
+                        </Button>
+                        <Text style={{ marginHorizontal: 15 }}>Page {currentPage}</Text>
+                        <Button 
+                          mode="outlined" 
+                          onPress={() => {
+                            setCurrentPage(currentPage + 1);
+                          }}
+                          disabled={accessLogs.length < pageSize} // Disable if current page has fewer items than page size
+                        >
+                          Next
+                        </Button>
+                      </View>
+                    </View>
                   </Card.Content>
                 </Card>
               </>
