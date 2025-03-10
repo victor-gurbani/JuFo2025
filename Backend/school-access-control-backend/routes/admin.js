@@ -119,21 +119,35 @@ module.exports = (db) => {
     const limit = parseInt(req.query.limit) || 20;
     const offset = (page - 1) * limit;
     
-    const query = `
-      SELECT 
-        al.*,
-        s.name as studentName,
-        c.uid as cardUID
+    // First, get the total count of logs
+    const countQuery = `
+      SELECT COUNT(*) as total
       FROM accessLogs al
-      LEFT JOIN students s ON al.student = s.id
-      LEFT JOIN cards c ON al.card = c.uid
-      ORDER BY al.timestamp DESC
-      LIMIT ? OFFSET ?
     `;
     
-    db.all(query, [limit, offset], (err, rows) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json(rows);
+    db.get(countQuery, [], (countErr, countResult) => {
+      if (countErr) return res.status(500).json({ error: countErr.message });
+      
+      // Set the total count header
+      res.setHeader('x-total-count', countResult.total);
+      
+      // Then get the paginated data
+      const query = `
+        SELECT 
+          al.*,
+          s.name as studentName,
+          c.uid as cardUID
+        FROM accessLogs al
+        LEFT JOIN students s ON al.student = s.id
+        LEFT JOIN cards c ON al.card = c.uid
+        ORDER BY al.timestamp DESC
+        LIMIT ? OFFSET ?
+      `;
+      
+      db.all(query, [limit, offset], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+      });
     });
   });
 
