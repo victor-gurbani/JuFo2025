@@ -5,6 +5,7 @@ import { Picker } from "@react-native-picker/picker";
 import api from "../services/api";
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import { useWindowDimensions } from 'react-native';
 
 export default function AdminPanel() {
   const router = useRouter();
@@ -31,7 +32,8 @@ export default function AdminPanel() {
   // Helper function to append teacherId to requests
   const apiWithTeacherId = (method: string, url: string, body?: any) => {
     if (method === "GET" || method === "DELETE") {
-      return api[method.toLowerCase()](`${url}?teacherId=${currentTeacherId}`);
+      const separator = url.includes('?') ? '&' : '?';
+      return api[method.toLowerCase()](`${url}${separator}teacherId=${currentTeacherId}`);
     } else {
       return api[method.toLowerCase()](url, { ...body, teacherId: currentTeacherId });
     }
@@ -181,6 +183,8 @@ export default function AdminPanel() {
     setSnackbarMessage(message);
     setSnackbarVisible(true);
   };
+
+  const { width } = useWindowDimensions();
 
   return (
     <View style={{ flex: 1 }}>
@@ -441,10 +445,25 @@ export default function AdminPanel() {
                       </DataTable>
                     </ScrollView>
                     
-                    {/* Add pagination controls */}
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 15 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Text style={{ marginRight: 10 }}>Page Size: </Text>
+                    {/* Responsive pagination controls */}
+                    <View style={{ 
+                      flexDirection: width > 800 ? 'row' : 'column', 
+                      marginTop: 15,
+                      gap: 15,
+                      justifyContent: width > 800 ? 'space-between' : 'flex-start',
+                      alignItems: width > 800 ? 'center' : 'stretch'
+                    }}>
+                      <View style={{ 
+                        flexDirection: width > 400 ? 'row' : 'column', 
+                        alignItems: width > 400 ? 'center' : 'flex-start',
+                        width: width > 800 ? undefined : '100%'
+                      }}>
+                        <Text style={{ 
+                          marginRight: width > 400 ? 10 : 0, 
+                          marginBottom: width > 400 ? 0 : 5 
+                        }}>
+                          Page Size:
+                        </Text>
                         <SegmentedButtons
                           value={pageSize.toString()}
                           onValueChange={(value) => {
@@ -456,11 +475,19 @@ export default function AdminPanel() {
                             { value: '20', label: '20' },
                             { value: '50', label: '50' },
                           ]}
-                          style={{ width: 200 }}
+                          style={{ 
+                            width: width > 400 ? 200 : '100%', 
+                            maxWidth: width > 800 ? 200 : '100%'
+                          }}
                         />
                       </View>
                       
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <View style={{ 
+                        flexDirection: 'row', 
+                        alignItems: 'center', 
+                        justifyContent: width > 800 ? 'flex-end' : 'center',
+                        width: width > 800 ? undefined : '100%'
+                      }}>
                         <Button 
                           mode="outlined" 
                           onPress={() => {
@@ -469,8 +496,10 @@ export default function AdminPanel() {
                             }
                           }}
                           disabled={currentPage <= 1}
+                          icon="chevron-left"
+                          contentStyle={{ flexDirection: 'row-reverse' }}
                         >
-                          Previous
+                          {width > 500 ? "Previous" : ""}
                         </Button>
                         <Text style={{ marginHorizontal: 15 }}>Page {currentPage}</Text>
                         <Button 
@@ -479,8 +508,9 @@ export default function AdminPanel() {
                             setCurrentPage(currentPage + 1);
                           }}
                           disabled={accessLogs.length < pageSize} // Disable if current page has fewer items than page size
+                          icon="chevron-right"
                         >
-                          Next
+                          {width > 500 ? "Next" : ""}
                         </Button>
                       </View>
                     </View>
