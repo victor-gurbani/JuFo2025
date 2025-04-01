@@ -161,8 +161,8 @@ module.exports = (db) => {
             similarity: 0 
           });
         }
-        console.log("Reference photo URL:", row.photoUrl);
-        console.log("Snapshot image data:", snapshotImage);
+        console.log("Reference photo URL:", row.photoUrl.slice(0, 15));
+        console.log("Snapshot image data:", snapshotImage.slice(0, 15));
         // Process the snapshot image using utility
         const snapshotBuffer = processImage(snapshotImage);
 
