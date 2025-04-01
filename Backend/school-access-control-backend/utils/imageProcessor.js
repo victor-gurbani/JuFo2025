@@ -26,16 +26,28 @@ async function processImage(base64Image) {
       try {
         heicBuffer = await heicConvert({
           buffer: imageBuffer,
-          format: 'PNG', // Convert HEIC/HEIF to PNG
+          format: 'PNG',
           quality: 1
         });
         
-        // Create processed buffer and immediately clear reference to original heic data
-        processedImageBuffer = Buffer.from(heicBuffer.data);
+        // Add validation to prevent errors
+        if (!heicBuffer) {
+          throw new Error('HEIC conversion returned empty buffer');
+        }
+        
+        // Check if heicBuffer is already a Buffer or has a data property
+        if (Buffer.isBuffer(heicBuffer)) {
+          processedImageBuffer = Buffer.from(heicBuffer);
+        } else if (heicBuffer.data && Buffer.isBuffer(heicBuffer.data)) {
+          processedImageBuffer = Buffer.from(heicBuffer.data);
+        } else {
+          throw new Error('Unexpected HEIC conversion result format');
+        }
+        
         heicBuffer = null; // Help garbage collection
       } catch (conversionError) {
         console.error('HEIC/HEIF conversion error:', conversionError);
-        throw new Error(`Failed to convert ${isHeicFormat ? 'HEIC' : 'HEIF'} image`);
+        throw new Error(`Failed to convert ${isHeicFormat ? 'HEIC' : 'HEIF'} image: ${conversionError.message}`);
       }
     } else {
       // For non-HEIC/HEIF formats, we still need to clone the buffer to avoid issues
