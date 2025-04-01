@@ -476,58 +476,93 @@ export default function AdminPanel() {
                 >
                   {isLoadingStudents ? "Loading..." : "Refresh Students"}
                 </Button>
-                {students.map((s) => (
-                  <Card key={s.id} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
-                    <Card.Content>
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        {s.photoUrl ? (
-                          <Image
-                            source={{ uri: s.photoUrl }}
+
+                {isLoadingStudents ? (
+                  // Loading placeholders for students
+                  Array(3).fill(0).map((_, index) => (
+                    <Card key={`student-loading-${index}`} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
+                      <Card.Content>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                          <View 
                             style={{
                               width: 60,
                               height: 60,
                               borderRadius: 30,
                               marginRight: 15,
-                              backgroundColor: '#f0f0f0'
+                              backgroundColor: '#e0e0e0'
                             }}
                           />
-                        ) : (
-                          <View style={{
-                            width: 60,
-                            height: 60,
-                            borderRadius: 30,
-                            marginRight: 15,
-                            backgroundColor: '#e0e0e0',
-                            justifyContent: 'center',
-                            alignItems: 'center'
-                          }}>
-                            <Text style={{ fontSize: 24, color: '#666' }}>
-                              {s.id.charAt(0).toUpperCase()}
-                            </Text>
+                          <View style={{ flex: 1 }}>
+                            <View style={{ height: 18, width: '60%', backgroundColor: '#e0e0e0', borderRadius: 4, marginBottom: 8 }} />
+                            <View style={{ height: 14, width: '40%', backgroundColor: '#e0e0e0', borderRadius: 4, marginBottom: 8 }} />
+                            <View style={{ height: 14, width: '70%', backgroundColor: '#e0e0e0', borderRadius: 4, marginBottom: 8 }} />
+                            <View style={{ height: 14, width: '50%', backgroundColor: '#e0e0e0', borderRadius: 4 }} />
                           </View>
-                        )}
-                        <View style={{ flex: 1 }}>
-                          <Title>ID: {s.id}</Title>
-                          {s.name && <Paragraph>Name: {s.name}</Paragraph>}
-                          {s.classGroup && <Paragraph>Class: {s.classGroup}</Paragraph>}
-                          {s.assignedCards && <Paragraph>Cards: {s.assignedCards}</Paragraph>}
-                          {s.assignedTeachers && (
-                            <Paragraph>Teachers: {s.assignedTeachers}</Paragraph>
-                          )}
                         </View>
-                      </View>
-                    </Card.Content>
-                    <Card.Actions>
-                      <Button 
-                        onPress={() => deleteStudent(s.id)}
-                        disabled={isDeletingStudent === s.id}
-                        loading={isDeletingStudent === s.id}
-                      >
-                        {isDeletingStudent === s.id ? "Deleting..." : "Delete"}
-                      </Button>
-                    </Card.Actions>
-                  </Card>
-                ))}
+                      </Card.Content>
+                      <Card.Actions>
+                        <View style={{ height: 36, width: 80, backgroundColor: '#e0e0e0', borderRadius: 4 }} />
+                      </Card.Actions>
+                    </Card>
+                  ))
+                ) : students.length > 0 ? (
+                  students.map((s) => (
+                    <Card key={s.id} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
+                      <Card.Content>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                          {s.photoUrl ? (
+                            <Image
+                              source={{ uri: s.photoUrl }}
+                              style={{
+                                width: 60,
+                                height: 60,
+                                borderRadius: 30,
+                                marginRight: 15,
+                                backgroundColor: '#f0f0f0'
+                              }}
+                            />
+                          ) : (
+                            <View style={{
+                              width: 60,
+                              height: 60,
+                              borderRadius: 30,
+                              marginRight: 15,
+                              backgroundColor: '#e0e0e0',
+                              justifyContent: 'center',
+                              alignItems: 'center'
+                            }}>
+                              <Text style={{ fontSize: 24, color: '#666' }}>
+                                {s.id.charAt(0).toUpperCase()}
+                              </Text>
+                            </View>
+                          )}
+                          <View style={{ flex: 1 }}>
+                            <Title>ID: {s.id}</Title>
+                            {s.name && <Paragraph>Name: {s.name}</Paragraph>}
+                            {s.classGroup && <Paragraph>Class: {s.classGroup}</Paragraph>}
+                            {s.assignedCards && <Paragraph>Cards: {s.assignedCards}</Paragraph>}
+                            {s.assignedTeachers && (
+                              <Paragraph>Teachers: {s.assignedTeachers}</Paragraph>
+                            )}
+                          </View>
+                        </View>
+                      </Card.Content>
+                      <Card.Actions>
+                        <Button 
+                          onPress={() => deleteStudent(s.id)}
+                          disabled={isDeletingStudent === s.id}
+                          loading={isDeletingStudent === s.id}
+                        >
+                          {isDeletingStudent === s.id ? "Deleting..." : "Delete"}
+                        </Button>
+                      </Card.Actions>
+                    </Card>
+                  ))
+                ) : (
+                  <Text style={{ margin: 10, fontStyle: 'italic', color: '#666' }}>
+                    No students found. Students need to be added via the teacher panel.
+                  </Text>
+                )}
               </>
             )}
 
