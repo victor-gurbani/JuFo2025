@@ -1,35 +1,47 @@
 const express = require("express");
 const checkPermission = require("../middleware/checkPermission");
-// Import face-api.js for face comparison
-const faceapi = require('face-api.js');
-const { Canvas, Image, ImageData } = require('canvas');
-const canvas = require('canvas');
-const fetch = require('node-fetch');
-
-// Register canvas for face-api to work in Node.js environment
-faceapi.env.monkeyPatch({ fetch, Canvas, Image, ImageData });
+const faceapi = require("face-api.js"); // Need to install this package
+const canvas = require("canvas"); // Need to install this package
+const fs = require("fs");
+const path = require("path");
+require("@tensorflow/tfjs-node");
+// Patch nodejs environment for face-api.js
+const { Canvas, Image, ImageData } = canvas;
+faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
 
 module.exports = (db) => {
   const router = express.Router();
-  
-  // Initialize face-api.js models (call this during server startup)
   let modelsLoaded = false;
-  
-  const loadModels = async () => {
+
+  // Load face-api models on startup
+  async function loadModels() {
     try {
-      // Adjust these paths to where your models are located
-      const modelPath = './public/models';
-      await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelPath);
-      await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath);
-      await faceapi.nets.faceRecognitionNet.loadFromDisk(modelPath);
-      modelsLoaded = true;
-      console.log("Face recognition models loaded");
-    } catch (err) {
-      console.error("Error loading face recognition models:", err);
+      const modelsPath = path.join(__dirname, '../weights');
+      
+      // Make sure the models directory exists
+      if (!fs.existsSync(modelsPath)) {
+        fs.mkdirSync(modelsPath, { recursive: true });
+        console.log("Models directory created. Please download face-api models to this location.");
+        return false;
+      }
+      
+      // Load all required models
+      await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelsPath);
+      await faceapi.nets.faceLandmark68Net.loadFromDisk(modelsPath);
+      await faceapi.nets.faceRecognitionNet.loadFromDisk(modelsPath);
+      
+      console.log("Face recognition models loaded successfully");
+      return true;
+    } catch (error) {
+      console.error("Error loading face recognition models:", error);
+      return false;
     }
-  };
-  
-  loadModels();
+  }
+
+  // Initialize models
+  loadModels().then(result => {
+    modelsLoaded = result;
+  });
 
   // Validate a card swipe (allow guards, teachers, tutors, admins)
   router.post("/validate", checkPermission(db, "guard"), (req, res) => {
@@ -106,78 +118,125 @@ module.exports = (db) => {
 
   // New endpoint for face verification
   router.post("/verify-face", checkPermission(db, "guard"), async (req, res) => {
-    if (!modelsLoaded) {
-      return res.status(500).json({ error: "Face recognition models not loaded yet" });
-    }
-    
-    const { snapshotImage, cardUID } = req.body;
-    
-    if (!snapshotImage || !cardUID) {
-      return res.status(400).json({ error: "Missing snapshot image or card UID" });
-    }
-    
     try {
-      // Get student photo from database
-      const query = `
+      // Check if models are loaded
+      if (!modelsLoaded) {
+        return res.status(503).json({ 
+          error: "Face recognition service not available", 
+          message: "Face recognition models not loaded properly" 
+        });
+      }
+
+      const { snapshotImage, cardUID } = req.body;
+      
+      if (!snapshotImage || !cardUID) {
+        return res.status(400).json({ 
+          error: "Missing required data", 
+          message: "Both snapshot image and card UID are required" 
+        });
+      }
+
+      // Get the reference student photo for this card
+      const photoQuery = `
         SELECT s.photoUrl
         FROM students s
-        JOIN cards c ON c.lastAssigned = s.id
-        WHERE c.uid = ? AND c.isValid = 1
+        JOIN permissions p ON s.id = p.assignedStudent
+        JOIN cards c ON p.associatedCard = c.uid
+        WHERE c.uid = ? AND c.isValid = 1 AND p.isValid = 1
         LIMIT 1
       `;
-      
-      db.get(query, [cardUID], async (err, row) => {
-        if (err) return res.status(500).json({ error: err.message });
-        if (!row || !row.photoUrl) return res.status(404).json({ error: "Student photo not found" });
-        
-        const studentPhoto = row.photoUrl;
-        
-        try {
-          // Load images
-          const referenceImage = await canvas.loadImage(studentPhoto);
-          const snapshotImageObj = await canvas.loadImage(snapshotImage);
-          
-          // Detect faces
-          const referenceDetection = await faceapi.detectSingleFace(referenceImage)
-            .withFaceLandmarks().withFaceDescriptor();
-          
-          const snapshotDetection = await faceapi.detectSingleFace(snapshotImageObj)
-            .withFaceLandmarks().withFaceDescriptor();
-          
-          if (!referenceDetection || !snapshotDetection) {
-            return res.status(400).json({ 
-              match: false, 
-              similarity: 0,
-              error: !referenceDetection ? "No face detected in reference photo" : "No face detected in snapshot"
-            });
-          }
-          
-          // Compare faces using euclidean distance
-          const distance = faceapi.euclideanDistance(
-            referenceDetection.descriptor,
-            snapshotDetection.descriptor
-          );
-          
-          // Convert distance to similarity score (0-100%)
-          // Lower distance means higher similarity
-          const similarity = Math.max(0, Math.min(100, (1 - distance) * 100));
-          
-          // Determine if it's a match (customize threshold as needed)
-          const match = similarity > 70;
-          
-          res.json({
-            match,
-            similarity,
-            distance
-          });
-        } catch (err) {
-          console.error("Face comparison error:", err);
-          res.status(500).json({ error: "Error during face comparison: " + err.message });
+
+      db.get(photoQuery, [cardUID], async (err, row) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
         }
+
+        if (!row || !row.photoUrl) {
+          return res.status(404).json({ 
+            error: "Reference photo not found", 
+            match: false, 
+            similarity: 0 
+          });
+        }
+
+        // Process the snapshot image (remove data:image/jpeg;base64, prefix)
+        const snapshotBuffer = Buffer.from(
+          snapshotImage.replace(/^data:image\/\w+;base64,/, ""),
+          "base64"
+        );
+
+        // Process the reference image (remove data:image/jpeg;base64, prefix)
+        const referenceBuffer = Buffer.from(
+          row.photoUrl.replace(/^data:image\/\w+;base64,/, ""),
+          "base64"
+        );
+
+        // Load images
+        const snapshotImg = await canvas.loadImage(snapshotBuffer);
+        const referenceImg = await canvas.loadImage(referenceBuffer);
+
+        // Detect faces and get face descriptors
+        const snapshotDetection = await faceapi
+          .detectSingleFace(snapshotImg)
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+
+        const referenceDetection = await faceapi
+          .detectSingleFace(referenceImg)
+          .withFaceLandmarks()
+          .withFaceDescriptor();
+
+        // Check if faces were detected in both images
+        if (!snapshotDetection || !referenceDetection) {
+          return res.json({ 
+            match: false, 
+            similarity: 0, 
+            error: !referenceDetection ? "No face detected in reference photo" : "No face detected in snapshot"
+          });
+        }
+
+        // Calculate similarity using Euclidean distance
+        const distance = faceapi.euclideanDistance(
+          snapshotDetection.descriptor,
+          referenceDetection.descriptor
+        );
+
+        // Convert distance to similarity score (0-100%)
+        // Lower distance means higher similarity
+        // Typically, distances < 0.6 indicate same person
+        const threshold = 0.6;
+        const similarity = Math.max(0, Math.min(100, (1 - distance / threshold) * 100));
+        const match = distance < threshold;
+
+        // Log the verification attempt
+        const logQuery = `
+          INSERT INTO accessLogs (direction, student, card, wasApproved, timestamp)
+          VALUES (?, ?, ?, ?, ?)
+        `;
+        
+        db.run(logQuery, ['FACE_VERIFY', row.studentId, cardUID, match ? 1 : 0, Math.floor(Date.now() / 1000)], (logErr) => {
+          if (logErr) console.error("Error logging face verification:", logErr.message);
+        });
+
+        // Return the result
+        res.json({
+          match,
+          similarity,
+          distance,
+          facesDetected: {
+            snapshot: true,
+            reference: true
+          }
+        });
       });
     } catch (error) {
       console.error("Face verification error:", error);
-      res.status(500).json({ error: "Face verification failed: " + error.message });
+      res.status(500).json({ 
+        error: "Face verification failed", 
+        message: error.message,
+        match: false,
+        similarity: 0
+      });
     }
   });
 
