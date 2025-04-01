@@ -1,10 +1,13 @@
 const express = require("express");
 const checkPermission = require("../middleware/checkPermission");
-const faceapi = require("face-api.js"); // Need to install this package
-const canvas = require("canvas"); // Need to install this package
+const faceapi = require("face-api.js");
+const canvas = require("canvas");
 const fs = require("fs");
 const path = require("path");
 require("@tensorflow/tfjs-node");
+// Import the image processor utility
+const { processImage } = require("../utils/imageProcessor");
+
 // Patch nodejs environment for face-api.js
 const { Canvas, Image, ImageData } = canvas;
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
@@ -159,17 +162,11 @@ module.exports = (db) => {
           });
         }
 
-        // Process the snapshot image (remove data:image/jpeg;base64, prefix)
-        const snapshotBuffer = Buffer.from(
-          snapshotImage.replace(/^data:image\/\w+;base64,/, ""),
-          "base64"
-        );
+        // Process the snapshot image using utility
+        const snapshotBuffer = processImage(snapshotImage);
 
-        // Process the reference image (remove data:image/jpeg;base64, prefix)
-        const referenceBuffer = Buffer.from(
-          row.photoUrl.replace(/^data:image\/\w+;base64,/, ""),
-          "base64"
-        );
+        // Process the reference image using utility
+        const referenceBuffer = processImage(row.photoUrl);
 
         // Load images
         const snapshotImg = await canvas.loadImage(snapshotBuffer);
