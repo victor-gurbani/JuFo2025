@@ -13,6 +13,7 @@ export default function AdminPanel() {
   const [currentTeacherId, setCurrentTeacherId] = useState("");
   const [dashboard, setDashboard] = useState("");
   const [teachers, setTeachers] = useState([]);
+  const [teachersLoading, setTeachersLoading] = useState(false);
   const [cards, setCards] = useState([]);
   const [teacherId, setTeacherId] = useState("");
   const [teacherName, setTeacherName] = useState("");
@@ -61,9 +62,16 @@ export default function AdminPanel() {
   }, [currentTeacherId, currentPage, pageSize, activeTab]);
 
   const loadTeachers = () => {
+    setTeachersLoading(true);
     apiWithTeacherId("GET", "/admin/teachers")
-      .then((res) => setTeachers(res.data))
-      .catch((err) => showSnackbar("Error: " + err));
+      .then((res) => {
+        setTeachers(res.data);
+        setTeachersLoading(false);
+      })
+      .catch((err) => {
+        showSnackbar("Error: " + err);
+        setTeachersLoading(false);
+      });
   };
 
   const loadCards = () => {
@@ -285,61 +293,98 @@ export default function AdminPanel() {
                 <Text style={{ marginVertical: 20, fontWeight: "bold" }}>
                   Current Teachers
                 </Text>
-                {teachers.map((t: any) => (
-                  <Card key={t.id} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
-                    <Card.Content>
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        {t.photoUrl ? (
-                          <Image
-                            source={{ uri: t.photoUrl }}
-                            style={{
-                              width: 60,
-                              height: 60,
-                              borderRadius: 30,
-                              marginRight: 15,
-                              backgroundColor: '#f0f0f0'
-                            }}
-                          />
-                        ) : (
+
+                {teachersLoading ? (
+                  // Loading placeholders
+                  Array(3).fill(0).map((_, index) => (
+                    <Card key={`loading-${index}`} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
+                      <Card.Content>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                           <View 
                             style={{
                               width: 60,
                               height: 60,
                               borderRadius: 30,
                               marginRight: 15,
-                              backgroundColor: '#e0e0e0',
-                              justifyContent: 'center',
-                              alignItems: 'center'
+                              backgroundColor: '#e0e0e0'
                             }}
-                          >
-                            <Text style={{ fontSize: 24, color: '#666' }}>
-                              {t.name.charAt(0).toUpperCase()}
-                            </Text>
+                          />
+                          <View style={{ flex: 1 }}>
+                            <View style={{ height: 18, width: '70%', backgroundColor: '#e0e0e0', borderRadius: 4, marginBottom: 8 }} />
+                            <View style={{ height: 14, width: '50%', backgroundColor: '#e0e0e0', borderRadius: 4, marginBottom: 8 }} />
+                            <View style={{ height: 14, width: '40%', backgroundColor: '#e0e0e0', borderRadius: 4 }} />
                           </View>
-                        )}
-                        <View style={{ flex: 1 }}>
-                          <Title>ID: {t.id}</Title>
-                          <Paragraph>Name: {t.name}</Paragraph>
-                          <Paragraph>Permission: {t.permissionLevel}</Paragraph>
                         </View>
-                      </View>
-                    </Card.Content>
-                    <Card.Actions>
-                      <Button 
-                        onPress={() => {
-                          setTeacherId(t.id);
-                          setTeacherName(t.name);
-                          setTeacherPermission(t.permissionLevel);
-                          setPhotoUrl(t.photoUrl || '');
-                        }}
-                        style={{ marginRight: 8 }}
-                      >
-                        Edit
-                      </Button>
-                      <Button onPress={() => deleteTeacher(t.id)}>Delete</Button>
-                    </Card.Actions>
-                  </Card>
-                ))}
+                      </Card.Content>
+                      <Card.Actions>
+                        <View style={{ height: 36, width: 80, backgroundColor: '#e0e0e0', borderRadius: 4, marginRight: 8 }} />
+                        <View style={{ height: 36, width: 80, backgroundColor: '#e0e0e0', borderRadius: 4 }} />
+                      </Card.Actions>
+                    </Card>
+                  ))
+                ) : teachers.filter(t => t.id && t.id.trim() !== '').length > 0 ? (
+                  teachers
+                    .filter(t => t.id && t.id.trim() !== '')
+                    .map((t: any) => (
+                      <Card key={t.id} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
+                        <Card.Content>
+                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            {t.photoUrl ? (
+                              <Image
+                                source={{ uri: t.photoUrl }}
+                                style={{
+                                  width: 60,
+                                  height: 60,
+                                  borderRadius: 30,
+                                  marginRight: 15,
+                                  backgroundColor: '#f0f0f0'
+                                }}
+                              />
+                            ) : (
+                              <View 
+                                style={{
+                                  width: 60,
+                                  height: 60,
+                                  borderRadius: 30,
+                                  marginRight: 15,
+                                  backgroundColor: '#e0e0e0',
+                                  justifyContent: 'center',
+                                  alignItems: 'center'
+                                }}
+                              >
+                                <Text style={{ fontSize: 24, color: '#666' }}>
+                                  {t.name?.charAt(0)?.toUpperCase() || '?'}
+                                </Text>
+                              </View>
+                            )}
+                            <View style={{ flex: 1 }}>
+                              <Title>ID: {t.id}</Title>
+                              <Paragraph>Name: {t.name}</Paragraph>
+                              <Paragraph>Permission: {t.permissionLevel}</Paragraph>
+                            </View>
+                          </View>
+                        </Card.Content>
+                        <Card.Actions>
+                          <Button 
+                            onPress={() => {
+                              setTeacherId(t.id);
+                              setTeacherName(t.name);
+                              setTeacherPermission(t.permissionLevel);
+                              setPhotoUrl(t.photoUrl || '');
+                            }}
+                            style={{ marginRight: 8 }}
+                          >
+                            Edit
+                          </Button>
+                          <Button onPress={() => deleteTeacher(t.id)}>Delete</Button>
+                        </Card.Actions>
+                      </Card>
+                    ))
+                ) : (
+                  <Text style={{ margin: 10, fontStyle: 'italic', color: '#666' }}>
+                    No teachers found. Create a new teacher to get started.
+                  </Text>
+                )}
               </>
             )}
 
