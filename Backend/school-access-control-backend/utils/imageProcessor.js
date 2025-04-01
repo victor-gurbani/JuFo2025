@@ -1,4 +1,7 @@
 const sharp = require('sharp');
+const { promisify } = require('util');
+const fs = require('fs');
+
 const heicConvert = require('heic-convert');
 
 async function processImage(base64Image) {
