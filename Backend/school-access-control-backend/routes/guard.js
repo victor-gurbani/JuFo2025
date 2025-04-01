@@ -163,8 +163,11 @@ module.exports = (db) => {
         }
         console.log("Snapshot image data:", snapshotImage.slice(0, 20));
         // Process the snapshot image using utility
-        const snapshotBuffer = processImage(snapshotImage);
-
+        const snapshotBuffer = Buffer.from(
+          snapshotImage.replace(/^data:image\/\w+;base64,/, ""),
+          "base64"
+        );
+        
         console.log("Reference photo URL:", row.photoUrl.slice(0, 20));
         // Process the reference image using utility
         const referenceBuffer = Buffer.from(
