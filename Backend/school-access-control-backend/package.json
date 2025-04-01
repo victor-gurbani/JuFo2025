@@ -21,7 +21,8 @@
     "express": "^4.21.2",
     "heic-convert": "^2.1.0",
     "sharp": "^0.33.5",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "util": "^0.12.5"
   },
   "devDependencies": {
     "javascript-obfuscator": "^4.1.1"
