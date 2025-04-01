@@ -164,11 +164,13 @@ module.exports = (db) => {
         console.log("Snapshot image data:", snapshotImage.slice(0, 20));
         // Process the snapshot image using utility
         const snapshotBuffer = processImage(snapshotImage);
-        console.log("Snapshot photo URL:", snapshotBuffer.slice(0, 20));
+
         console.log("Reference photo URL:", row.photoUrl.slice(0, 20));
         // Process the reference image using utility
-        const referenceBuffer = processImage(row.photoUrl);
-        console.log("Processed reference buffer:", referenceBuffer.slice(0, 20));
+        const referenceBuffer = Buffer.from(
+          row.photoUrl.replace(/^data:image\/\w+;base64,/, ""),
+          "base64"
+        );
 
         // Load images
         const snapshotImg = await canvas.loadImage(snapshotBuffer);
