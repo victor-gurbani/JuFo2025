@@ -1,6 +1,6 @@
 const sharp = require('sharp');
 const heicConvert = require('heic-convert');
-
+// TODO fix garbage collection issue
 async function processImage(base64Image) {
   try {
     // Remove data:image/xyz;base64, prefix if present
@@ -40,19 +40,19 @@ async function processImage(base64Image) {
     }
 
     // Add explicit cleanup
-    if (processedImageBuffer !== imageBuffer) {
-      imageBuffer = null; // Help garbage collection
-    }
+    // if (processedImageBuffer !== imageBuffer) {
+    //   imageBuffer = null; // Help garbage collection
+    // }
     
     const result = `data:image/png;base64,${processedImageBuffer.toString('base64')}`;
-    processedImageBuffer = null; // Help garbage collection
+    // processedImageBuffer = null; // Help garbage collection
     
     return result;
   } catch (error) {
     console.error('Image processing error:', error);
     // Clean up on error too
-    imageBuffer = null;
-    processedImageBuffer = null;
+    // imageBuffer = null;
+    // processedImageBuffer = null;
     throw new Error('Failed to process image');
   }
 }
