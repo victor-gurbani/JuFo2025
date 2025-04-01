@@ -29,6 +29,10 @@ export default function TeacherPanel() {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
+  const [isAssigningCard, setIsAssigningCard] = useState(false);
+  const [isInvalidatingCard, setIsInvalidatingCard] = useState(false);
+  const [isLoadingPermissions, setIsLoadingPermissions] = useState(false);
+
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
     setSnackbarVisible(true);
@@ -100,6 +104,7 @@ export default function TeacherPanel() {
     const startDateTimeISO = startDateTime.toISOString();
     const endDateTimeISO = endDateTime.toISOString();
 
+    setIsAssigningCard(true);
     apiWithTeacherId("POST", "/teacher/assign-card", {
       studentId,
       cardUID,
@@ -122,21 +127,32 @@ export default function TeacherPanel() {
         setRecurrencePattern("");
         setStudentPhotoUrl("");
       })
-      .catch((err) => showSnackbar("Error: " + err));
+      .catch((err) => showSnackbar("Error: " + err))
+      .finally(() => {
+        setIsAssigningCard(false);
+      });
   };
 
   const handleInvalidateCard = () => {
+    setIsInvalidatingCard(true);
     apiWithTeacherId("POST", "/teacher/invalidate-card", {
       cardUID: invalidateCardUID
     })
       .then(() => showSnackbar("Card invalidated"))
-      .catch((err) => showSnackbar("Error: " + err));
+      .catch((err) => showSnackbar("Error: " + err))
+      .finally(() => {
+        setIsInvalidatingCard(false);
+      });
   };
 
   const handleViewPermissions = () => {
+    setIsLoadingPermissions(true);
     apiWithTeacherId("GET", "/teacher/permissions")
       .then((res) => setPermissions(res.data))
-      .catch((err) => showSnackbar("Error: " + err));
+      .catch((err) => showSnackbar("Error: " + err))
+      .finally(() => {
+        setIsLoadingPermissions(false);
+      });
   };
 
   const formatTimeString = (date?: Date) => {
@@ -312,8 +328,10 @@ export default function TeacherPanel() {
                   onPress={handleAssignCard}
                   style={{ marginTop: 10 }}
                   icon="card-account-details"
+                  disabled={isAssigningCard}
+                  loading={isAssigningCard}
                 >
-                  Assign Card
+                  {isAssigningCard ? "Assigning..." : "Assign Card"}
                 </Button>
               </Card.Content>
             </Card>
@@ -328,8 +346,13 @@ export default function TeacherPanel() {
                   mode="outlined"
                   style={{ marginBottom: 10 }}
                 />
-                <Button mode="contained" onPress={handleInvalidateCard}>
-                  Invalidate Card
+                <Button 
+                  mode="contained" 
+                  onPress={handleInvalidateCard}
+                  disabled={isInvalidatingCard}
+                  loading={isInvalidatingCard}
+                >
+                  {isInvalidatingCard ? "Invalidating..." : "Invalidate Card"}
                 </Button>
               </Card.Content>
             </Card>
@@ -337,8 +360,14 @@ export default function TeacherPanel() {
             <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
               <Card.Content>
                 <Title>View Permissions</Title>
-                <Button mode="contained" onPress={handleViewPermissions} style={{ marginBottom: 10 }}>
-                  Load Permissions
+                <Button 
+                  mode="contained" 
+                  onPress={handleViewPermissions} 
+                  style={{ marginBottom: 10 }}
+                  disabled={isLoadingPermissions}
+                  loading={isLoadingPermissions}
+                >
+                  {isLoadingPermissions ? "Loading..." : "Load Permissions"}
                 </Button>
                 {permissions.length > 0 ? (
                   <Card style={{ marginTop: 10 }} elevation={2}>

@@ -21,6 +21,10 @@ export default function GuardPanel() {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
+  // Add loading state variables
+  const [isValidating, setIsValidating] = useState(false);
+  const [isLoadingCards, setIsLoadingCards] = useState(false);
+
   // Helper function to append guardId to requests
   const apiWithGuardId = (method: string, url: string, body?: any) => {
     if (method === "GET" || method === "DELETE") {
@@ -38,9 +42,13 @@ export default function GuardPanel() {
 
   // Fetch all cards (optional, based on your requirements)
   const loadCards = () => {
+    setIsLoadingCards(true);
     apiWithGuardId("GET", "/cards")
       .then((res) => setCards(res.data))
-      .catch((err) => showSnackbar("Error fetching cards: " + err));
+      .catch((err) => showSnackbar("Error fetching cards: " + err))
+      .finally(() => {
+        setIsLoadingCards(false);
+      });
   };
 
   useEffect(() => {
@@ -55,6 +63,7 @@ export default function GuardPanel() {
       return;
     }
 
+    setIsValidating(true);
     setResult("Validating...");
     apiWithGuardId("POST", "/guard/validate", { cardUID: uid })
       .then((res) => {
@@ -83,6 +92,9 @@ export default function GuardPanel() {
         setVisible(true);
         showSnackbar(`Error validating card: ${error.response?.data?.error || error.message}`);
         textInputRef.current?.focus();
+      })
+      .finally(() => {
+        setIsValidating(false);
       });
   };
 
@@ -116,8 +128,13 @@ export default function GuardPanel() {
                   onSubmitEditing={handleValidation}
                   returnKeyType="done"
                 />
-                <Button mode="contained" onPress={handleValidation}>
-                  Validate
+                <Button 
+                  mode="contained" 
+                  onPress={handleValidation}
+                  disabled={isValidating}
+                  loading={isValidating}
+                >
+                  {isValidating ? "Validating..." : "Validate"}
                 </Button>
 
                 {/* New styled result card */}
@@ -224,8 +241,14 @@ export default function GuardPanel() {
             <Card elevation={4} style={{ margin: 10 }}>
               <Card.Content>
                 <Title>All Cards</Title>
-                <Button mode="contained" onPress={loadCards} style={{ marginBottom: 10 }}>
-                  Refresh Cards
+                <Button 
+                  mode="contained" 
+                  onPress={loadCards} 
+                  style={{ marginBottom: 10 }}
+                  disabled={isLoadingCards}
+                  loading={isLoadingCards}
+                >
+                  {isLoadingCards ? "Loading..." : "Refresh Cards"}
                 </Button>
                 {cards.length > 0 ? (
                   cards.map((c: any) => (

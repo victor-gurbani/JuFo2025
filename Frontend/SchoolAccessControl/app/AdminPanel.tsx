@@ -29,6 +29,15 @@ export default function AdminPanel() {
   const [pageSize, setPageSize] = useState(20);
   const [totalLogs, setTotalLogs] = useState(0);
 
+  const [isLoadingTeachers, setIsLoadingTeachers] = useState(false);
+  const [isLoadingCards, setIsLoadingCards] = useState(false);
+  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+  const [isLoadingStudents, setIsLoadingStudents] = useState(false);
+  const [isCreatingTeacher, setIsCreatingTeacher] = useState(false);
+  const [isUpdatingTeacher, setIsUpdatingTeacher] = useState(false);
+  const [isDeletingTeacher, setIsDeletingTeacher] = useState<string | null>(null);
+  const [isDeletingStudent, setIsDeletingStudent] = useState<string | null>(null);
+
   const permissionLevels = ["guard", "teacher", "tutor", "admin"];
 
   // Helper function to append teacherId to requests
@@ -63,18 +72,18 @@ export default function AdminPanel() {
   }, [currentTeacherId, currentPage, pageSize, activeTab]);
 
   const loadTeachers = () => {
-    setTeachersLoading(true);
+    setIsLoadingTeachers(true);
     apiWithTeacherId("GET", "/admin/teachers")
       .then((res) => {
         setTeachers(res.data);
-        setTeachersLoading(false);
-        
         // Now that we have basic data, load the photos separately
         loadTeacherPhotos();
       })
       .catch((err) => {
         showSnackbar("Error: " + err);
-        setTeachersLoading(false);
+      })
+      .finally(() => {
+        setIsLoadingTeachers(false);
       });
   };
 
@@ -96,12 +105,17 @@ export default function AdminPanel() {
   };
 
   const loadCards = () => {
+    setIsLoadingCards(true);
     apiWithTeacherId("GET", "/admin/cards")
       .then((res) => setCards(res.data))
-      .catch((err) => showSnackbar("Error: " + err));
+      .catch((err) => showSnackbar("Error: " + err))
+      .finally(() => {
+        setIsLoadingCards(false);
+      });
   };
 
   const loadAccessLogs = () => {
+    setIsLoadingLogs(true);
     apiWithTeacherId("GET", `/admin/access-logs?page=${currentPage}&limit=${pageSize}`)
       .then((res) => {
         setAccessLogs(res.data);
@@ -110,22 +124,33 @@ export default function AdminPanel() {
           setTotalLogs(parseInt(res.headers['x-total-count']));
         }
       })
-      .catch((err) => showSnackbar("Error loading access logs: " + err));
+      .catch((err) => showSnackbar("Error loading access logs: " + err))
+      .finally(() => {
+        setIsLoadingLogs(false);
+      });
   };
 
   const loadStudents = () => {
+    setIsLoadingStudents(true);
     apiWithTeacherId("GET", "/admin/students")
       .then((res) => setStudents(res.data))
-      .catch((err) => showSnackbar("Error loading students: " + err));
+      .catch((err) => showSnackbar("Error loading students: " + err))
+      .finally(() => {
+        setIsLoadingStudents(false);
+      });
   };
 
   const deleteStudent = (id: string) => {
+    setIsDeletingStudent(id);
     apiWithTeacherId("DELETE", `/admin/students/${id}`)
       .then(() => {
         showSnackbar("Student deleted");
         loadStudents();
       })
-      .catch((err) => showSnackbar("Error: " + err));
+      .catch((err) => showSnackbar("Error: " + err))
+      .finally(() => {
+        setIsDeletingStudent(null);
+      });
   };
 
   const pickImage = async () => {
@@ -160,6 +185,7 @@ export default function AdminPanel() {
       return;
     }
 
+    setIsCreatingTeacher(true);
     apiWithTeacherId("POST", "/admin/teachers", {
       id: teacherId,
       name: teacherName,
@@ -174,7 +200,10 @@ export default function AdminPanel() {
         setPhotoUrl("");
         loadTeachers();
       })
-      .catch((err) => showSnackbar("Error: " + err));
+      .catch((err) => showSnackbar("Error: " + err))
+      .finally(() => {
+        setIsCreatingTeacher(false);
+      });
   };
 
   const updateTeacher = () => {
@@ -183,6 +212,7 @@ export default function AdminPanel() {
       return;
     }
 
+    setIsUpdatingTeacher(true);
     apiWithTeacherId("PUT", `/admin/teachers/${teacherId}`, {
       name: teacherName,
       permissionLevel: teacherPermission,
@@ -196,16 +226,23 @@ export default function AdminPanel() {
         setPhotoUrl("");
         loadTeachers();
       })
-      .catch((err) => showSnackbar("Error: " + err));
+      .catch((err) => showSnackbar("Error: " + err))
+      .finally(() => {
+        setIsUpdatingTeacher(false);
+      });
   };
 
   const deleteTeacher = (id: string) => {
+    setIsDeletingTeacher(id);
     apiWithTeacherId("DELETE", `/admin/teachers/${id}`)
       .then(() => {
         showSnackbar("Teacher deleted");
         loadTeachers();
       })
-      .catch((err) => showSnackbar("Error: " + err));
+      .catch((err) => showSnackbar("Error: " + err))
+      .finally(() => {
+        setIsDeletingTeacher(null);
+      });
   };
 
   const showSnackbar = (message: string) => {
@@ -303,11 +340,23 @@ export default function AdminPanel() {
                 </View>
 
                 <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                  <Button mode="contained" onPress={createTeacher} style={{ margin: 5 }}>
-                    Create Teacher
+                  <Button 
+                    mode="contained" 
+                    onPress={createTeacher} 
+                    style={{ margin: 5 }}
+                    disabled={isCreatingTeacher}
+                    loading={isCreatingTeacher}
+                  >
+                    {isCreatingTeacher ? "Creating..." : "Create Teacher"}
                   </Button>
-                  <Button mode="contained" onPress={updateTeacher} style={{ margin: 5 }}>
-                    Update Teacher
+                  <Button 
+                    mode="contained" 
+                    onPress={updateTeacher} 
+                    style={{ margin: 5 }}
+                    disabled={isUpdatingTeacher}
+                    loading={isUpdatingTeacher}
+                  >
+                    {isUpdatingTeacher ? "Updating..." : "Update Teacher"}
                   </Button>
                 </View>
 
@@ -397,7 +446,13 @@ export default function AdminPanel() {
                           >
                             Edit
                           </Button>
-                          <Button onPress={() => deleteTeacher(t.id)}>Delete</Button>
+                          <Button 
+                            onPress={() => deleteTeacher(t.id)}
+                            disabled={isDeletingTeacher === t.id}
+                            loading={isDeletingTeacher === t.id}
+                          >
+                            {isDeletingTeacher === t.id ? "Deleting..." : "Delete"}
+                          </Button>
                         </Card.Actions>
                       </Card>
                     ))
@@ -412,8 +467,14 @@ export default function AdminPanel() {
             {activeTab === 'students' && (
               <>
                 <Text style={{ marginVertical: 20, fontWeight: "bold" }}>Students</Text>
-                <Button mode="contained" onPress={loadStudents} style={{ marginBottom: 10 }}>
-                  Refresh Students
+                <Button 
+                  mode="contained" 
+                  onPress={loadStudents} 
+                  style={{ marginBottom: 10 }}
+                  disabled={isLoadingStudents}
+                  loading={isLoadingStudents}
+                >
+                  {isLoadingStudents ? "Loading..." : "Refresh Students"}
                 </Button>
                 {students.map((s) => (
                   <Card key={s.id} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
@@ -457,7 +518,13 @@ export default function AdminPanel() {
                       </View>
                     </Card.Content>
                     <Card.Actions>
-                      <Button onPress={() => deleteStudent(s.id)}>Delete</Button>
+                      <Button 
+                        onPress={() => deleteStudent(s.id)}
+                        disabled={isDeletingStudent === s.id}
+                        loading={isDeletingStudent === s.id}
+                      >
+                        {isDeletingStudent === s.id ? "Deleting..." : "Delete"}
+                      </Button>
                     </Card.Actions>
                   </Card>
                 ))}
@@ -467,8 +534,14 @@ export default function AdminPanel() {
             {activeTab === 'cards' && (
               <>
                 <Text style={{ marginVertical: 20, fontWeight: "bold" }}>All Cards</Text>
-                <Button mode="contained" onPress={loadCards} style={{ marginBottom: 10 }}>
-                  Refresh Cards
+                <Button 
+                  mode="contained" 
+                  onPress={loadCards} 
+                  style={{ marginBottom: 10 }}
+                  disabled={isLoadingCards}
+                  loading={isLoadingCards}
+                >
+                  {isLoadingCards ? "Loading..." : "Refresh Cards"}
                 </Button>
                 {cards.map((c: any) => (
                   <Card key={c.uid} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
@@ -482,8 +555,14 @@ export default function AdminPanel() {
                 <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
                   <Card.Content>
                     <Title>Access Logs</Title>
-                    <Button mode="contained" onPress={loadAccessLogs} style={{ marginBottom: 10 }}>
-                      Refresh Logs
+                    <Button 
+                      mode="contained" 
+                      onPress={loadAccessLogs} 
+                      style={{ marginBottom: 10 }}
+                      disabled={isLoadingLogs}
+                      loading={isLoadingLogs}
+                    >
+                      {isLoadingLogs ? "Loading..." : "Refresh Logs"}
                     </Button>
                     <ScrollView horizontal={true}>
                       <DataTable>
