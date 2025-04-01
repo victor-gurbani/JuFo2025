@@ -14,6 +14,7 @@ export default function AdminPanel() {
   const [dashboard, setDashboard] = useState("");
   const [teachers, setTeachers] = useState([]);
   const [teachersLoading, setTeachersLoading] = useState(false);
+  const [teacherPhotos, setTeacherPhotos] = useState<{[key: string]: string}>({});
   const [cards, setCards] = useState([]);
   const [teacherId, setTeacherId] = useState("");
   const [teacherName, setTeacherName] = useState("");
@@ -67,10 +68,30 @@ export default function AdminPanel() {
       .then((res) => {
         setTeachers(res.data);
         setTeachersLoading(false);
+        
+        // Now that we have basic data, load the photos separately
+        loadTeacherPhotos();
       })
       .catch((err) => {
         showSnackbar("Error: " + err);
         setTeachersLoading(false);
+      });
+  };
+
+  const loadTeacherPhotos = () => {
+    apiWithTeacherId("GET", "/admin/teachers/photos")
+      .then((res) => {
+        const photoMap: {[key: string]: string} = {};
+        res.data.forEach((item: {id: string, photoUrl: string}) => {
+          if (item.id && item.photoUrl) {
+            photoMap[item.id] = item.photoUrl;
+          }
+        });
+        setTeacherPhotos(photoMap);
+      })
+      .catch((err) => {
+        console.error("Error loading teacher photos:", err);
+        // Don't show a snackbar for this - it's not critical
       });
   };
 
@@ -329,9 +350,9 @@ export default function AdminPanel() {
                       <Card key={t.id} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
                         <Card.Content>
                           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            {t.photoUrl ? (
+                            {teacherPhotos[t.id] ? (
                               <Image
-                                source={{ uri: t.photoUrl }}
+                                source={{ uri: teacherPhotos[t.id] }}
                                 style={{
                                   width: 60,
                                   height: 60,

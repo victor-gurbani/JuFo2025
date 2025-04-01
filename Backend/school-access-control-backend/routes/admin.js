@@ -16,7 +16,16 @@ module.exports = (db) => {
 
   // List all teachers (allow only admins)
   router.get("/teachers", checkPermission(db, "admin"), (req, res) => {
-    const query = `SELECT * FROM teachers`;
+    const query = `SELECT id, name, permissionLevel FROM teachers`;
+    db.all(query, [], (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    });
+  });
+
+  // Add a new endpoint for teacher photos
+  router.get("/teachers/photos", checkPermission(db, "admin"), (req, res) => {
+    const query = `SELECT id, photoUrl FROM teachers WHERE photoUrl IS NOT NULL`;
     db.all(query, [], (err, rows) => {
       if (err) return res.status(500).json({ error: err.message });
       res.json(rows);
