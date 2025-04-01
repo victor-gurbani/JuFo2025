@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, ScrollView, Image } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, Switch, DataTable } from "react-native-paper";
 import { DatePickerModal, TimePickerModal } from "react-native-paper-dates";
@@ -9,7 +9,10 @@ import { useRouter } from 'expo-router';
 
 export default function TeacherPanel() {
   const router = useRouter();
-  const [currentTeacherId, setCurrentTeacherId] = useState("");
+  const [inputTeacherId, setInputTeacherId] = useState("");
+  const [committedTeacherId, setCommittedTeacherId] = useState("");
+  const idInputTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const [studentId, setStudentId] = useState("");
   const [cardUID, setCardUID] = useState("");
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -38,20 +41,31 @@ export default function TeacherPanel() {
     setSnackbarVisible(true);
   };
 
-  // Helper to pass teacherId
+  const handleTeacherIdChange = (text: string) => {
+    setInputTeacherId(text);
+
+    if (idInputTimeoutRef.current) {
+      clearTimeout(idInputTimeoutRef.current);
+    }
+
+    idInputTimeoutRef.current = setTimeout(() => {
+      setCommittedTeacherId(text);
+    }, 800);
+  };
+
   const apiWithTeacherId = (method: string, url: string, body?: any) => {
     if (method === "GET" || method === "DELETE") {
-      return api[method.toLowerCase()](`${url}?teacherId=${currentTeacherId}`);
+      return api[method.toLowerCase()](`${url}?teacherId=${committedTeacherId}`);
     } else {
-      return api[method.toLowerCase()](url, { ...body, teacherId: currentTeacherId });
+      return api[method.toLowerCase()](url, { ...body, teacherId: committedTeacherId });
     }
   };
 
   useEffect(() => {
-    if (currentTeacherId) {
+    if (committedTeacherId) {
       handleViewPermissions();
     }
-  }, [currentTeacherId]);
+  }, [committedTeacherId]);
 
   const pickStudentImage = async () => {
     try {
@@ -165,12 +179,12 @@ export default function TeacherPanel() {
       <ScrollView style={{ margin: 20 }}>
         <TextInput
           label="Current Teacher ID"
-          value={currentTeacherId}
-          onChangeText={setCurrentTeacherId}
+          value={inputTeacherId}
+          onChangeText={handleTeacherIdChange}
           mode="outlined"
           style={{ marginBottom: 10 }}
         />
-        {currentTeacherId ? (
+        {committedTeacherId ? (
           <>
             <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
               <Card.Content>
@@ -374,7 +388,7 @@ export default function TeacherPanel() {
                     <Card.Content>
                       <Title>Permissions</Title>
                       <ScrollView horizontal={true} style={{ marginHorizontal: -16 }}>
-                        <View style={{ minWidth: 800 }}>  {/* Adjust minWidth based on your content */}
+                        <View style={{ minWidth: 800 }}>
                           <DataTable>
                             <DataTable.Header>
                               <DataTable.Title style={{ width: 100 }}>ID</DataTable.Title>

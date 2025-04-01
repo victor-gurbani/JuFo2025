@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { View, ScrollView, Image } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable, SegmentedButtons } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
@@ -10,7 +10,9 @@ import { useWindowDimensions } from 'react-native';
 export default function AdminPanel() {
   const router = useRouter();
   // State to store the current admin/teacher's ID
-  const [currentTeacherId, setCurrentTeacherId] = useState("");
+  const [inputTeacherId, setInputTeacherId] = useState("");
+  const [committedTeacherId, setCommittedTeacherId] = useState("");
+  const idInputTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [dashboard, setDashboard] = useState("");
   const [teachers, setTeachers] = useState([]);
   const [teachersLoading, setTeachersLoading] = useState(false);
@@ -44,14 +46,28 @@ export default function AdminPanel() {
   const apiWithTeacherId = (method: string, url: string, body?: any) => {
     if (method === "GET" || method === "DELETE") {
       const separator = url.includes('?') ? '&' : '?';
-      return api[method.toLowerCase()](`${url}${separator}teacherId=${currentTeacherId}`);
+      return api[method.toLowerCase()](`${url}${separator}teacherId=${committedTeacherId}`);
     } else {
-      return api[method.toLowerCase()](url, { ...body, teacherId: currentTeacherId });
+      return api[method.toLowerCase()](url, { ...body, teacherId: committedTeacherId });
     }
   };
 
+  const handleTeacherIdChange = (text: string) => {
+    setInputTeacherId(text);
+    
+    // Clear any existing timeout
+    if (idInputTimeoutRef.current) {
+      clearTimeout(idInputTimeoutRef.current);
+    }
+    
+    // Set new timeout to commit the ID after 800ms of inactivity
+    idInputTimeoutRef.current = setTimeout(() => {
+      setCommittedTeacherId(text);
+    }, 800);
+  };
+
   useEffect(() => {
-    if (currentTeacherId) {
+    if (committedTeacherId) {
       // Fetch admin dashboard info
       apiWithTeacherId("GET", "/admin/dashboard")
         .then((response) => {
@@ -63,13 +79,13 @@ export default function AdminPanel() {
       loadCards();
       loadStudents();
     }
-  }, [currentTeacherId]);
+  }, [committedTeacherId]);
 
   useEffect(() => {
-    if (currentTeacherId && activeTab === 'cards') {
+    if (committedTeacherId && activeTab === 'cards') {
       loadAccessLogs();
     }
-  }, [currentTeacherId, currentPage, pageSize, activeTab]);
+  }, [committedTeacherId, currentPage, pageSize, activeTab]);
 
   const loadTeachers = () => {
     setIsLoadingTeachers(true);
@@ -258,13 +274,13 @@ export default function AdminPanel() {
         {/* Input field for Admin/Teacher ID */}
         <TextInput
           label="Current Admin / Teacher ID"
-          value={currentTeacherId}
-          onChangeText={setCurrentTeacherId}
+          value={inputTeacherId}
+          onChangeText={handleTeacherIdChange}
           style={{ marginVertical: 5 }}
           mode="outlined"
         />
 
-        {currentTeacherId ? (
+        {committedTeacherId ? (
           <>
             <SegmentedButtons
               value={activeTab}

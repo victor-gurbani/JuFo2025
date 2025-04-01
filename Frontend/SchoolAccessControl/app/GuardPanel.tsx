@@ -7,7 +7,9 @@ import { useRouter } from 'expo-router';
 export default function GuardPanel() {
   const router = useRouter();
   // State variables
-  const [currentGuardId, setCurrentGuardId] = useState("");
+  const [inputGuardId, setInputGuardId] = useState("");
+  const [committedGuardId, setCommittedGuardId] = useState("");
+  const idInputTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [uid, setUid] = useState("");
   const [result, setResult] = useState("");
   const [visible, setVisible] = useState(false);
@@ -28,9 +30,9 @@ export default function GuardPanel() {
   // Helper function to append guardId to requests
   const apiWithGuardId = (method: string, url: string, body?: any) => {
     if (method === "GET" || method === "DELETE") {
-      return api[method.toLowerCase()](`${url}?guardId=${currentGuardId}`); 
+      return api[method.toLowerCase()](`${url}?guardId=${committedGuardId}`); 
     } else {
-      return api[method.toLowerCase()](url, { ...body, guardId: currentGuardId });
+      return api[method.toLowerCase()](url, { ...body, guardId: committedGuardId });
     }
   };
 
@@ -52,10 +54,24 @@ export default function GuardPanel() {
   };
 
   useEffect(() => {
-    if (currentGuardId) {
+    if (committedGuardId) {
       loadCards();
     }
-  }, [currentGuardId]);
+  }, [committedGuardId]);
+
+  const handleGuardIdChange = (text: string) => {
+    setInputGuardId(text);
+    
+    // Clear any existing timeout
+    if (idInputTimeoutRef.current) {
+      clearTimeout(idInputTimeoutRef.current);
+    }
+    
+    // Set new timeout to commit the ID after 800ms of inactivity
+    idInputTimeoutRef.current = setTimeout(() => {
+      setCommittedGuardId(text);
+    }, 800);
+  };
 
   const handleValidation = () => {
     if (uid.trim() === "") {
@@ -104,13 +120,13 @@ export default function GuardPanel() {
         {/* Input field for Guard ID */}
         <TextInput
           label="Current Guard ID"
-          value={currentGuardId}
-          onChangeText={setCurrentGuardId}
+          value={inputGuardId}
+          onChangeText={handleGuardIdChange}
           style={{ marginVertical: 5 }}
           mode="outlined"
         />
 
-        {currentGuardId ? (
+        {committedGuardId ? (
           <>
             <Text style={{ fontWeight: "bold", marginBottom: 10 }}>Guard Panel</Text>
 
