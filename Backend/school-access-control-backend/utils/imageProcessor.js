@@ -5,6 +5,8 @@ const fs = require('fs');
 const heicConvert = require('heic-convert');
 
 async function processImage(base64Image) {
+  // Console log the frist 100 characters of the base64 image
+  // console.log('Base64 image data:', base64Image.slice(0, 100));
   // For memory tracking - uncomment when debugging
   // const startMemory = process.memoryUsage().heapUsed / 1024 / 1024;
   // console.log(`Memory usage at start: ${startMemory.toFixed(2)} MB`);
@@ -14,8 +16,14 @@ async function processImage(base64Image) {
   let heicBuffer = null;
   
   try {
-    // Remove data:image/xyz;base64, prefix if present
-    const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
+    // Remove data:image/xyz;base64, prefix as many times as needed
+    let base64Data = base64Image;
+    const dataUrlRegex = /^data:image\/\w+;base64,/;
+    
+    // Keep removing the prefix until it no longer exists
+    while (dataUrlRegex.test(base64Data)) {
+      base64Data = base64Data.replace(dataUrlRegex, '');
+    }
     imageBuffer = Buffer.from(base64Data, 'base64');
     
     // Check if the image is HEIC or HEIF

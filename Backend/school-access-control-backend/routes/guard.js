@@ -121,9 +121,12 @@ module.exports = (db) => {
 
   // New endpoint for face verification
   router.post("/verify-face", checkPermission(db, "guard"), async (req, res) => {
+    console.log("Starting face verification request");
     try {
       // Check if models are loaded
+      console.log("Checking if models are loaded:", modelsLoaded);
       if (!modelsLoaded) {
+        console.log("Models not loaded, returning error");
         return res.status(503).json({ 
           error: "Face recognition service not available", 
           message: "Face recognition models not loaded properly" 
@@ -131,8 +134,11 @@ module.exports = (db) => {
       }
 
       const { snapshotImage, cardUID } = req.body;
+      console.log("Received request with cardUID:", cardUID);
+      console.log("Snapshot image received:", snapshotImage ? "Yes" : "No");
       
       if (!snapshotImage || !cardUID) {
+        console.log("Missing required data in request");
         return res.status(400).json({ 
           error: "Missing required data", 
           message: "Both snapshot image and card UID are required" 
@@ -140,6 +146,7 @@ module.exports = (db) => {
       }
 
       // Get the reference student photo for this card
+      console.log("Querying database for reference photo with cardUID:", cardUID);
       const photoQuery = `
         SELECT s.photoUrl
         FROM students s
@@ -150,91 +157,122 @@ module.exports = (db) => {
       `;
 
       db.get(photoQuery, [cardUID], async (err, row) => {
+        console.log("Database query completed");
         if (err) {
+          console.error("Database error:", err);
           return res.status(500).json({ error: err.message });
         }
 
+        console.log("Database result:", row);
         if (!row || !row.photoUrl) {
+          console.log("No reference photo found for this card");
           return res.status(404).json({ 
             error: "Reference photo not found", 
             match: false, 
             similarity: 0 
           });
         }
-        console.log("Snapshot image data:", snapshotImage.slice(0, 20));
+        
+        console.log("Snapshot image data preview:", snapshotImage.slice(0, 20) + "...");
         // Process the snapshot image using utility
-        const snapshotBuffer = Buffer.from(
-          snapshotImage,
-          "base64"
-        );
+        console.log("Processing snapshot image");
+        const snapshotBuffer = processImage(snapshotImage);
+        console.log("Snapshot processing complete, buffer size:", snapshotBuffer.length);
 
-        console.log("Reference photo URL:", row.photoUrl.slice(0, 20));
+        console.log("Reference photo URL preview:", row.photoUrl.slice(0, 20) + "...");
         // Process the reference image using utility
-        const referenceBuffer = Buffer.from(
-          row.photoUrl,
-          "base64"
-        );
+        console.log("Processing reference image");
+        const referenceBuffer = processImage(row.photoUrl);
+        console.log("Reference processing complete, buffer size:", referenceBuffer.length);
 
         // Load images
-        const snapshotImg = await canvas.loadImage(snapshotBuffer);
-        const referenceImg = await canvas.loadImage(referenceBuffer);
+        console.log("Loading images into canvas");
+        try {
+          const snapshotImg = await canvas.loadImage(snapshotBuffer);
+          console.log("Snapshot image loaded, dimensions:", snapshotImg.width, "x", snapshotImg.height);
+          
+          const referenceImg = await canvas.loadImage(referenceBuffer);
+          console.log("Reference image loaded, dimensions:", referenceImg.width, "x", referenceImg.height);
 
-        // Detect faces and get face descriptors
-        const snapshotDetection = await faceapi
-          .detectSingleFace(snapshotImg)
-          .withFaceLandmarks()
-          .withFaceDescriptor();
+          // Detect faces and get face descriptors
+          console.log("Detecting face in snapshot image");
+          const snapshotDetection = await faceapi
+            .detectSingleFace(snapshotImg)
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+          console.log("Snapshot face detection result:", snapshotDetection ? "Face detected" : "No face detected");
 
-        const referenceDetection = await faceapi
-          .detectSingleFace(referenceImg)
-          .withFaceLandmarks()
-          .withFaceDescriptor();
+          console.log("Detecting face in reference image");
+          const referenceDetection = await faceapi
+            .detectSingleFace(referenceImg)
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+          console.log("Reference face detection result:", referenceDetection ? "Face detected" : "No face detected");
 
-        // Check if faces were detected in both images
-        if (!snapshotDetection || !referenceDetection) {
-          return res.json({ 
-            match: false, 
-            similarity: 0, 
-            error: !referenceDetection ? "No face detected in reference photo" : "No face detected in snapshot"
+          // Check if faces were detected in both images
+          if (!snapshotDetection || !referenceDetection) {
+            console.log("Face detection failed in one or both images");
+            return res.json({ 
+              match: false, 
+              similarity: 0, 
+              error: !referenceDetection ? "No face detected in reference photo" : "No face detected in snapshot"
+            });
+          }
+
+          // Calculate similarity using Euclidean distance
+          console.log("Calculating face similarity");
+          const distance = faceapi.euclideanDistance(
+            snapshotDetection.descriptor,
+            referenceDetection.descriptor
+          );
+          console.log("Euclidean distance between faces:", distance);
+
+          // Convert distance to similarity score (0-100%)
+          // Lower distance means higher similarity
+          // Typically, distances < 0.6 indicate same person
+          const threshold = 0.6;
+          const similarity = Math.max(0, Math.min(100, (1 - distance / threshold) * 100));
+          const match = distance < threshold;
+          
+          console.log("Calculated similarity score:", similarity);
+          console.log("Face match result:", match);
+
+          // Log the verification attempt
+          console.log("Logging verification attempt to database");
+          const logQuery = `
+            INSERT INTO accessLogs (direction, student, card, wasApproved, timestamp)
+            VALUES (?, ?, ?, ?, ?)
+          `;
+          
+          db.run(logQuery, ['FACE_VERIFY', row.studentId, cardUID, match ? 1 : 0, Math.floor(Date.now() / 1000)], (logErr) => {
+            if (logErr) console.error("Error logging face verification:", logErr);
+            else console.log("Verification attempt logged successfully");
+          });
+
+          // Return the result
+          console.log("Sending verification response to client");
+          res.json({
+            match,
+            similarity,
+            distance,
+            facesDetected: {
+              snapshot: true,
+              reference: true
+            }
+          });
+        } catch (imageError) {
+          console.error("Error processing images:", imageError);
+          res.status(500).json({
+            error: "Image processing failed",
+            message: imageError.message,
+            match: false,
+            similarity: 0
           });
         }
-
-        // Calculate similarity using Euclidean distance
-        const distance = faceapi.euclideanDistance(
-          snapshotDetection.descriptor,
-          referenceDetection.descriptor
-        );
-
-        // Convert distance to similarity score (0-100%)
-        // Lower distance means higher similarity
-        // Typically, distances < 0.6 indicate same person
-        const threshold = 0.6;
-        const similarity = Math.max(0, Math.min(100, (1 - distance / threshold) * 100));
-        const match = distance < threshold;
-
-        // Log the verification attempt
-        const logQuery = `
-          INSERT INTO accessLogs (direction, student, card, wasApproved, timestamp)
-          VALUES (?, ?, ?, ?, ?)
-        `;
-        
-        db.run(logQuery, ['FACE_VERIFY', row.studentId, cardUID, match ? 1 : 0, Math.floor(Date.now() / 1000)], (logErr) => {
-          if (logErr) console.error("Error logging face verification:", logErr.message);
-        });
-
-        // Return the result
-        res.json({
-          match,
-          similarity,
-          distance,
-          facesDetected: {
-            snapshot: true,
-            reference: true
-          }
-        });
       });
     } catch (error) {
       console.error("Face verification error:", error);
+      console.error("Error stack:", error.stack);
       res.status(500).json({ 
         error: "Face verification failed", 
         message: error.message,
