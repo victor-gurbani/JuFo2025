@@ -230,8 +230,8 @@ module.exports = (db) => {
           // Convert distance to similarity score (0-100%)
           // Lower distance means higher similarity
           // Typically, distances < 0.6 indicate same person
-          const threshold = 0.4;
-          const similarity = 1 - Math.max(0, Math.min(100, (1 - distance / threshold) * 100));
+          const threshold = 0.6;
+          const similarity = 100 - Math.max(0, Math.min(100, (1 - distance / threshold) * 100));
           const match = distance < threshold;
           
           console.log("Calculated similarity score:", similarity);
