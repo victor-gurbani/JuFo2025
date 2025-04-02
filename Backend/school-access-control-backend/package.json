@@ -16,6 +16,7 @@
   "dependencies": {
     "@tensorflow/tfjs-core": "^4.22.0",
     "@tensorflow/tfjs-node": "^4.22.0",
+    "@vladmandic/face-api": "^1.7.15",
     "body-parser": "^1.20.3",
     "buffer": "^6.0.3",
     "bytenode": "^1.5.7",
