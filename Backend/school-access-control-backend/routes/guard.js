@@ -1,9 +1,8 @@
 const tf = require('@tensorflow/tfjs-node')
-// tf.setBackend('cpu');
 
 const express = require("express");
 const checkPermission = require("../middleware/checkPermission");
-const faceapi = require('@vladmandic/face-api');
+const faceapi = require('@vladmandic/face-api'); // much faster and can use modern tf
 const canvas = require("canvas");
 const fs = require("fs");
 const path = require("path");
