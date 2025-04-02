@@ -330,11 +330,11 @@ export default function GuardFacePanel() {
                             color={similarityScore > 0.6 ? '#4CAF50' : '#f44336'} 
                             style={{ height: 10, borderRadius: 5 }} 
                           />
-                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
+                          {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
                             <Text>0%</Text>
                             <Text>50%</Text>
                             <Text>100%</Text>
-                          </View>
+                          </View> */}
                         </View>
                         <Image 
                           source={{ uri: snapshotImage }} 
