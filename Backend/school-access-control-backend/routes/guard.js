@@ -4,7 +4,7 @@ const faceapi = require("face-api.js");
 const canvas = require("canvas");
 const fs = require("fs");
 const path = require("path");
-require("@tensorflow/tfjs-node");
+// require("@tensorflow/tfjs-node");
 // Import the image processor utility
 const { processImage } = require("../utils/imageProcessor");
 
@@ -176,24 +176,24 @@ module.exports = (db) => {
         console.log("Snapshot image data preview:", snapshotImage.slice(0, 20) + "...");
         // Process the snapshot image using utility
         console.log("Processing snapshot image");
-        const snapshotBuffer = processImage(snapshotImage);
+        const snapshotBuffer = await processImage(snapshotImage);
         console.log("Snapshot processing complete, buffer size:", snapshotBuffer.length);
 
         console.log("Reference photo URL preview:", row.photoUrl.slice(0, 20) + "...");
         // Process the reference image using utility
         console.log("Processing reference image");
-        const referenceBuffer = processImage(row.photoUrl);
+        const referenceBuffer = await processImage(row.photoUrl);
         console.log("Reference processing complete, buffer size:", referenceBuffer.length);
 
         // Load images
         console.log("Loading images into canvas");
-        try {
+        try {    
+          const referenceImg = await canvas.loadImage(referenceBuffer);
+          console.log("Reference image loaded, dimensions:", referenceImg.width, "x", referenceImg.height);
+          
           const snapshotImg = await canvas.loadImage(snapshotBuffer);
           console.log("Snapshot image loaded, dimensions:", snapshotImg.width, "x", snapshotImg.height);
           
-          const referenceImg = await canvas.loadImage(referenceBuffer);
-          console.log("Reference image loaded, dimensions:", referenceImg.width, "x", referenceImg.height);
-
           // Detect faces and get face descriptors
           console.log("Detecting face in snapshot image");
           const snapshotDetection = await faceapi
@@ -230,9 +230,9 @@ module.exports = (db) => {
           // Convert distance to similarity score (0-100%)
           // Lower distance means higher similarity
           // Typically, distances < 0.6 indicate same person
-          const threshold = 0.6;
-          const similarity = Math.max(0, Math.min(100, (1 - distance / threshold) * 100));
-          const match = distance < threshold;
+          const threshold = 0.4;
+          const similarity = 100 - Math.max(0, Math.min(100, (1 - distance / threshold) * 100));
+          const match = distance > threshold;
           
           console.log("Calculated similarity score:", similarity);
           console.log("Face match result:", match);
