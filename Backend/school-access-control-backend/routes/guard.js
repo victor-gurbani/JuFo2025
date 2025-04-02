@@ -1,10 +1,17 @@
+const tf = require("@tensorflow/tfjs-node");
+require('@tensorflow/tfjs-node')
 const express = require("express");
 const checkPermission = require("../middleware/checkPermission");
 const faceapi = require("face-api.js");
 const canvas = require("canvas");
 const fs = require("fs");
 const path = require("path");
-// require("@tensorflow/tfjs-node");
+
+tf.setBackend('cpu');
+
+console.log(tf.version.tfjs);
+console.log(tf.tensor([1, 2, 3]).print());
+
 // Import the image processor utility
 const { processImage } = require("../utils/imageProcessor");
 
