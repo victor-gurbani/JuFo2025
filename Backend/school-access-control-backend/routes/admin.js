@@ -183,5 +183,44 @@ module.exports = (db) => {
     });
   });
 
+  // Get logs for a specific card
+  router.get("/card-logs/:uid", checkPermission(db, "admin"), (req, res) => {
+    const { uid } = req.params;
+    
+    const query = `
+      SELECT 
+        al.*,
+        s.name as studentName
+      FROM accessLogs al
+      LEFT JOIN students s ON al.student = s.id
+      WHERE al.card = ?
+      ORDER BY al.timestamp DESC
+      LIMIT 50
+    `;
+    
+    db.all(query, [uid], (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    });
+  });
+
+  // Add a dedicated route for invalidating cards directly from admin panel
+  router.post("/invalidate-card", checkPermission(db, "admin"), (req, res) => {
+    const { cardUID } = req.body;
+    
+    const query = `UPDATE cards SET isValid = 0 WHERE uid = ?`;
+    db.run(query, [cardUID], function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      if (this.changes === 0) return res.status(404).json({ error: "Card not found" });
+
+      // Also invalidate all associated permissions
+      const permQuery = `UPDATE permissions SET isValid = 0 WHERE associatedCard = ?`;
+      db.run(permQuery, [cardUID], (permErr) => {
+        if (permErr) return res.status(500).json({ error: permErr.message });
+        res.json({ success: true });
+      });
+    });
+  });
+
   return router;
 };

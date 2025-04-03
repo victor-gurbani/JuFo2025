@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { View, ScrollView, Image } from "react-native";
-import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable, SegmentedButtons } from "react-native-paper";
+import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable, SegmentedButtons, Portal, Modal, ActivityIndicator } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
 import api from "../services/api";
 import * as ImagePicker from 'expo-image-picker';
@@ -8,9 +8,11 @@ import { useRouter } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { Platform } from 'react-native';
+import { useAppTheme } from '../theme/ThemeContext'; // Add this import
 
 export default function AdminPanel() {
   const router = useRouter();
+  const { theme } = useAppTheme(); // Get the current theme
   // State to store the current admin/teacher's ID
   const [inputTeacherId, setInputTeacherId] = useState("");
   const [committedTeacherId, setCommittedTeacherId] = useState("");
@@ -43,6 +45,13 @@ export default function AdminPanel() {
   const [isDeletingStudent, setIsDeletingStudent] = useState<string | null>(null);
 
   const permissionLevels = ["guard", "teacher", "tutor", "admin"];
+
+  const [selectedCard, setSelectedCard] = useState<any>(null);
+  const [cardPermissions, setCardPermissions] = useState<any[]>([]);
+  const [cardLogs, setCardLogs] = useState<any[]>([]);
+  const [isLoadingCardDetails, setIsLoadingCardDetails] = useState(false);
+  const [isInvalidatingCard, setIsInvalidatingCard] = useState<string | null>(null);
+  const [showCardDetailModal, setShowCardDetailModal] = useState(false);
 
   // Helper function to append teacherId to requests
   const apiWithTeacherId = (method: string, url: string, body?: any) => {
@@ -307,12 +316,83 @@ export default function AdminPanel() {
       });
   };
 
+  const loadCardDetails = (cardUID: string) => {
+    setIsLoadingCardDetails(true);
+    setSelectedCard(cards.find((c: any) => c.uid === cardUID));
+    
+    // Load permissions for this card
+    apiWithTeacherId("GET", `/cards/${cardUID}/permissions`)
+      .then((res) => {
+        setCardPermissions(res.data);
+      })
+      .catch((err) => showSnackbar(`Error loading card permissions: ${err}`))
+      .finally(() => {
+        setIsLoadingCardDetails(false);
+      });
+    
+    // Load access logs for this specific card
+    apiWithTeacherId("GET", `/admin/card-logs/${cardUID}`)
+      .then((res) => {
+        setCardLogs(res.data || []);
+      })
+      .catch((err) => {
+        // If endpoint doesn't exist, don't show error - the feature might not be implemented yet
+        console.log("Card-specific logs not available:", err);
+        setCardLogs([]);
+      });
+    
+    setShowCardDetailModal(true);
+  };
+
+  const invalidateCard = (cardUID: string) => {
+    setIsInvalidatingCard(cardUID);
+    
+    apiWithTeacherId("POST", "/admin/invalidate-card", { cardUID })
+      .then(() => {
+        showSnackbar("Card invalidated successfully");
+        loadCards(); // Refresh the cards list
+      })
+      .catch((err) => {
+        // If admin route fails, try the teacher route as fallback
+        return apiWithTeacherId("POST", "/teacher/invalidate-card", { cardUID })
+          .then(() => {
+            showSnackbar("Card invalidated successfully");
+            loadCards(); // Refresh the cards list
+          })
+          .catch((teacherErr) => {
+            showSnackbar(`Error invalidating card: ${teacherErr}`);
+          });
+      })
+      .finally(() => {
+        setIsInvalidatingCard(null);
+      });
+  };
+
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
     setSnackbarVisible(true);
   };
 
   const { width } = useWindowDimensions();
+
+  // Add this useEffect to handle keyboard events for the modal
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && showCardDetailModal) {
+        setShowCardDetailModal(false);
+      }
+    };
+
+    // Only add the listener when the modal is visible
+    if (showCardDetailModal) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    // Clean up the event listener when the component unmounts or the modal closes
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showCardDetailModal]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -366,21 +446,41 @@ export default function AdminPanel() {
                   <Text>Permission Level</Text>
                   <View style={{ 
                     borderWidth: 1, 
-                    borderColor: '#666',
+                    borderColor: theme.colors.outline,
                     borderRadius: 4,
-                    marginTop: 5
+                    marginTop: 5,
+                    backgroundColor: theme.colors.surface,
                   }}>
                     <Picker
                       selectedValue={teacherPermission}
                       onValueChange={(itemValue) => setTeacherPermission(itemValue.toLowerCase())}
-                      style={{ height: 50 }}
+                      style={{ 
+                        height: 50,
+                        color: theme.colors.onSurface,
+                        backgroundColor: theme.colors.surface, // Explicitly set background color on Picker too
+                      }}
+                      dropdownIconColor={theme.colors.onSurface}
+                      // Force a specific background color mode for each platform
+                      itemStyle={{ 
+                        backgroundColor: theme.colors.surface,
+                        color: theme.colors.onSurface,
+                      }}
                     >
-                      <Picker.Item label="Select a permission level" value="" />
+                      <Picker.Item 
+                        label="Select a permission level" 
+                        value="" 
+                        color={theme.colors.onSurfaceVariant}
+                        // Ensure each item has the correct background
+                        style={{ backgroundColor: theme.colors.surface }}
+                      />
                       {permissionLevels.map((level) => (
                         <Picker.Item 
                           key={level} 
                           label={level.charAt(0).toUpperCase() + level.slice(1)} 
-                          value={level} 
+                          value={level}
+                          color={theme.colors.onSurface}
+                          // Ensure each item has the correct background
+                          style={{ backgroundColor: theme.colors.surface }}
                         />
                       ))}
                     </Picker>
@@ -643,9 +743,43 @@ export default function AdminPanel() {
                 {cards.map((c: any) => (
                   <Card key={c.uid} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
                     <Card.Content>
-                      <Title>Card UID: {c.uid}</Title>
-                      <Paragraph>Is Valid: {c.isValid ? "Yes" : "No"}</Paragraph>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <View>
+                          <Title>Card UID: {c.uid}</Title>
+                          <Paragraph>
+                            <Text style={{ fontWeight: 'bold' }}>Status:</Text> 
+                            <Text style={{ 
+                              color: c.isValid ? theme?.colors.success : theme?.colors.error,
+                              fontWeight: 'bold'
+                            }}>
+                              {c.isValid ? " Valid" : " Invalid"}
+                            </Text>
+                          </Paragraph>
+                          <Paragraph>
+                            <Text style={{ fontWeight: 'bold' }}>Last Assigned To:</Text> {c.lastAssigned || 'None'}
+                          </Paragraph>
+                        </View>
+                      </View>
                     </Card.Content>
+                    <Card.Actions>
+                      <Button 
+                        onPress={() => loadCardDetails(c.uid)}
+                        icon="information"
+                        style={{ marginRight: 8 }}
+                      >
+                        Details
+                      </Button>
+                      <Button 
+                        onPress={() => invalidateCard(c.uid)}
+                        disabled={!c.isValid || isInvalidatingCard === c.uid}
+                        loading={isInvalidatingCard === c.uid}
+                        icon="close-circle"
+                        mode="outlined"
+                        textColor={theme?.colors.error}
+                      >
+                        {isInvalidatingCard === c.uid ? "Invalidating..." : "Invalidate"}
+                      </Button>
+                    </Card.Actions>
                   </Card>
                 ))}
 
@@ -765,6 +899,122 @@ export default function AdminPanel() {
           <Text>Please enter your Admin or Teacher ID to proceed.</Text>
         )}
       </ScrollView>
+      <Portal>
+        <Modal
+          visible={showCardDetailModal}
+          onDismiss={() => setShowCardDetailModal(false)}
+          contentContainerStyle={{
+            backgroundColor: theme.colors.surface,
+            padding: 20,
+            margin: 20,
+            maxHeight: '80%',
+            borderRadius: 10
+          }}
+        >
+          <ScrollView>
+            {selectedCard && (
+              <>
+                <Title>Card Details</Title>
+                <Card style={{ marginBottom: 15 }} elevation={3}>
+                  <Card.Content>
+                    <Paragraph><Text style={{ fontWeight: 'bold' }}>UID:</Text> {selectedCard.uid}</Paragraph>
+                    <Paragraph>
+                      <Text style={{ fontWeight: 'bold' }}>Status:</Text> 
+                      <Text style={{ 
+                        color: selectedCard.isValid ? theme?.colors.success : theme?.colors.error,
+                        fontWeight: 'bold'
+                      }}>
+                        {selectedCard.isValid ? " Valid" : " Invalid"}
+                      </Text>
+                    </Paragraph>
+                    <Paragraph>
+                      <Text style={{ fontWeight: 'bold' }}>Last Assigned To:</Text> {selectedCard.lastAssigned || 'None'}
+                    </Paragraph>
+                  </Card.Content>
+                </Card>
+
+                <Title style={{ marginTop: 15 }}>Permissions</Title>
+                {isLoadingCardDetails ? (
+                  <ActivityIndicator style={{ margin: 20 }} />
+                ) : cardPermissions.length > 0 ? (
+                  <Card style={{ marginBottom: 15 }} elevation={3}>
+                    <Card.Content>
+                      <ScrollView horizontal>
+                        <DataTable>
+                          <DataTable.Header>
+                            <DataTable.Title style={{ width: 70 }}>ID</DataTable.Title>
+                            <DataTable.Title style={{ width: 150 }}>Student</DataTable.Title>
+                            <DataTable.Title style={{ width: 150 }}>Assigned By</DataTable.Title>
+                            <DataTable.Title style={{ width: 180 }}>Start Date</DataTable.Title>
+                            <DataTable.Title style={{ width: 180 }}>End Date</DataTable.Title>
+                            <DataTable.Title style={{ width: 100 }}>Recurring</DataTable.Title>
+                            <DataTable.Title style={{ width: 100 }}>Valid</DataTable.Title>
+                          </DataTable.Header>
+
+                          {cardPermissions.map((perm) => (
+                            <DataTable.Row key={perm.id}>
+                              <DataTable.Cell style={{ width: 70 }}>{perm.id}</DataTable.Cell>
+                              <DataTable.Cell style={{ width: 150 }}>{perm.assignedStudent}</DataTable.Cell>
+                              <DataTable.Cell style={{ width: 150 }}>{perm.assignedBy}</DataTable.Cell>
+                              <DataTable.Cell style={{ width: 180 }}>{new Date(perm.startDate).toLocaleString()}</DataTable.Cell>
+                              <DataTable.Cell style={{ width: 180 }}>{new Date(perm.endDate).toLocaleString()}</DataTable.Cell>
+                              <DataTable.Cell style={{ width: 100 }}>{perm.isRecurring ? 'Yes' : 'No'}</DataTable.Cell>
+                              <DataTable.Cell style={{ width: 100 }}>{perm.isValid ? 'Yes' : 'No'}</DataTable.Cell>
+                            </DataTable.Row>
+                          ))}
+                        </DataTable>
+                      </ScrollView>
+                    </Card.Content>
+                  </Card>
+                ) : (
+                  <Text style={{ margin: 10, fontStyle: 'italic', color: '#666' }}>
+                    No permissions found for this card.
+                  </Text>
+                )}
+
+                {cardLogs.length > 0 && (
+                  <>
+                    <Title style={{ marginTop: 15 }}>Access Logs</Title>
+                    <Card style={{ marginBottom: 15 }} elevation={3}>
+                      <Card.Content>
+                        <ScrollView horizontal>
+                          <DataTable>
+                            <DataTable.Header>
+                              <DataTable.Title style={{ width: 180 }}>Timestamp</DataTable.Title>
+                              <DataTable.Title style={{ width: 150 }}>Student</DataTable.Title>
+                              <DataTable.Title style={{ width: 100 }}>Direction</DataTable.Title>
+                              <DataTable.Title style={{ width: 100 }}>Approved</DataTable.Title>
+                            </DataTable.Header>
+
+                            {cardLogs.map((log) => (
+                              <DataTable.Row key={log.id}>
+                                <DataTable.Cell style={{ width: 180 }}>
+                                  {new Date(log.timestamp * 1000).toLocaleString()}
+                                </DataTable.Cell>
+                                <DataTable.Cell style={{ width: 150 }}>{log.student}</DataTable.Cell>
+                                <DataTable.Cell style={{ width: 100 }}>{log.direction}</DataTable.Cell>
+                                <DataTable.Cell style={{ width: 100 }}>{log.wasApproved ? 'Yes' : 'No'}</DataTable.Cell>
+                              </DataTable.Row>
+                            ))}
+                          </DataTable>
+                        </ScrollView>
+                      </Card.Content>
+                    </Card>
+                  </>
+                )}
+              </>
+            )}
+            
+            <Button 
+              mode="contained" 
+              onPress={() => setShowCardDetailModal(false)}
+              style={{ marginTop: 20 }}
+            >
+              Close
+            </Button>
+          </ScrollView>
+        </Modal>
+      </Portal>
       <Snackbar
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
