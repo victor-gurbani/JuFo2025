@@ -104,14 +104,24 @@ export default function GuardFacePanel() {
     apiWithGuardId("POST", "/guard/validate", { cardUID: uid })
       .then((res) => {
         if (res.data.valid) {
-          setResult("Access Granted (Pending Face)");
           setCardInfo(res.data.card);
           setPermissions(res.data.permissions);
           setPhotoUrl(res.data.photoUrl);
-          showSnackbar("Card validation successful - Please verify face");
           
-          // Show camera for face verification
-          setShowCamera(true);
+          // Check if there's a reference photo available
+          if (res.data.photoUrl) {
+            setResult("Access Granted (Pending Face)");
+            showSnackbar("Card validation successful - Please verify face");
+            // Show camera for face verification
+            setShowCamera(true);
+          } else {
+            // No reference photo available
+            setResult("Access Granted (No Face Reference)");
+            showSnackbar("Card validation successful - No reference photo available for face verification");
+            setFaceVerificationMessage("No reference photo available for this student");
+            // Don't show camera as face verification isn't possible
+            setShowCamera(false);
+          }
         } else {
           setResult("Access Denied");
           setCardInfo(null);
@@ -206,6 +216,8 @@ export default function GuardFacePanel() {
       return faceVerified === null ? "#FFC107" : // Yellow when pending
              faceVerified ? "#4CAF50" : // Green when verified
              "#FFC107"; // Yellow when not verified (but card is valid)
+    } else if (result === "Access Granted (No Face Reference)") {
+      return "#FFC107"; // Yellow when no reference photo
     } else {
       return "#f44336"; // Red for denied
     }
@@ -215,6 +227,10 @@ export default function GuardFacePanel() {
   const getResultText = () => {
     if (result === "Access Denied" || result === "Error" || result === "Validating...") {
       return result;
+    }
+    
+    if (result === "Access Granted (No Face Reference)") {
+      return "Access Granted (No Face Reference)";
     }
     
     if (faceVerified === null) {
@@ -383,6 +399,19 @@ export default function GuardFacePanel() {
                       </Paragraph>
                       <Paragraph>
                         <Text style={{ fontWeight: "bold" }}>Is Valid:</Text> {cardInfo.isValid ? "Yes" : "No"}
+                      </Paragraph>
+                    </Card.Content>
+                  </Card>
+                )}
+
+                {/* Display warning if no reference photo */}
+                {cardInfo && !photoUrl && (
+                  <Card style={{ marginTop: 20, backgroundColor: "#FFC107" }} elevation={2}>
+                    <Card.Content>
+                      <Title style={{ color: "white" }}>Warning: No Reference Photo</Title>
+                      <Paragraph style={{ color: "white" }}>
+                        The student assigned to this card does not have a reference photo. 
+                        Face verification cannot be performed.
                       </Paragraph>
                     </Card.Content>
                   </Card>
