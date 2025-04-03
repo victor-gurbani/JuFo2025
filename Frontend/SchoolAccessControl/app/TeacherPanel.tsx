@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, ScrollView, Image } from "react-native";
+import { View, ScrollView, Image, Platform } from "react-native";  
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, Switch, DataTable } from "react-native-paper";
 import { DatePickerModal, TimePickerModal } from "react-native-paper-dates";
+import * as FileSystem from 'expo-file-system';  
 import api from "../services/api";
-import "react-native-paper-dates"; // For date formatting
+import "react-native-paper-dates"; 
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 
@@ -79,14 +80,58 @@ export default function TeacherPanel() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         quality: 0.5,
-        base64: true
+        base64: true, 
       });
 
-      if (!result.canceled && result.assets[0]) {
-        const base64Image = result.assets[0].uri?.startsWith('data:image/')
-          ? result.assets[0].uri
-          : `data:image/${result.assets[0].uri.split('.').pop()?.toLowerCase() || 'jpg'};base64,${result.assets[0].base64}`;
+      if (!result.canceled && result.assets && result.assets[0]) {
+        // Check if we have base64 data directly from the picker
+        if (result.assets[0].base64) {
+          // We have base64 data, create a data URI
+          const fileType = result.assets[0].uri.split('.').pop()?.toLowerCase() || 'jpeg';
+          const base64Image = result.assets[0].uri?.startsWith('data:image/')
+            ? result.assets[0].uri
+            : `data:image/${fileType};base64,${result.assets[0].base64}`;
+          
           setStudentPhotoUrl(base64Image);
+        } else {
+          // No base64 data, fetch from URI
+          showSnackbar("Processing image...");
+          
+          try {
+            // For web platforms
+            if (Platform.OS === 'web') {
+              const response = await fetch(result.assets[0].uri);
+              const blob = await response.blob();
+              const reader = new FileReader();
+              
+              reader.onload = () => {
+                if (typeof reader.result === 'string') {
+                  setStudentPhotoUrl(reader.result);
+                }
+              };
+              
+              reader.readAsDataURL(blob);
+            } else {
+              // For native platforms - use expo-file-system
+              const fileUri = result.assets[0].uri;
+              const fileInfo = await FileSystem.getInfoAsync(fileUri);
+              
+              if (fileInfo.exists) {
+                const base64 = await FileSystem.readAsStringAsync(fileUri, {
+                  encoding: FileSystem.EncodingType.Base64,
+                });
+                
+                const fileType = fileUri.split('.').pop()?.toLowerCase() || 'jpeg';
+                const base64Image = `data:image/${fileType};base64,${base64}`;
+                setStudentPhotoUrl(base64Image);
+              } else {
+                throw new Error("File does not exist");
+              }
+            }
+          } catch (error) {
+            showSnackbar("Failed to process the image: " + error.message);
+          }
+        }
       }
     } catch (error) {
       showSnackbar("Error picking image: " + error.message);
