@@ -7,9 +7,11 @@ import api from "../services/api";
 import "react-native-paper-dates"; 
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import { useAppTheme } from '../theme/ThemeContext';
 
 export default function TeacherPanel() {
   const router = useRouter();
+  const { theme } = useAppTheme();
   const [inputTeacherId, setInputTeacherId] = useState("");
   const [committedTeacherId, setCommittedTeacherId] = useState("");
   const idInputTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -220,7 +222,7 @@ export default function TeacherPanel() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView style={{ margin: 20 }}>
         <TextInput
           label="Current Teacher ID"
@@ -359,12 +361,12 @@ export default function TeacherPanel() {
                 />
               
                 {/* Recurring Section */}
-                <Card style={{ marginVertical: 15, backgroundColor: '#f5f5f5' }}>
+                <Card style={{ marginVertical: 15, backgroundColor: theme.colors.surface }}>
                   <Card.Content>
                     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
                       <View>
                         <Title style={{ fontSize: 16 }}>Recurring Access</Title>
-                        <Text style={{ color: '#666' }}>Enable for repeating schedules</Text>
+                        <Text style={{ color: theme.colors.onSurfaceVariant }}>Enable for repeating schedules</Text>
                       </View>
                       <Switch value={isRecurring} onValueChange={setIsRecurring} />
                     </View>

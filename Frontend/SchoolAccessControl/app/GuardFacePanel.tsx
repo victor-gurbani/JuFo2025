@@ -4,9 +4,11 @@ import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable, P
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import api from "../services/api";
 import { useRouter } from 'expo-router';
+import { useAppTheme } from '../theme/ThemeContext';
 
 export default function GuardFacePanel() {
   const router = useRouter();
+  const { theme } = useAppTheme();
   // State variables
   const [inputGuardId, setInputGuardId] = useState("");
   const [committedGuardId, setCommittedGuardId] = useState("");
@@ -211,15 +213,15 @@ export default function GuardFacePanel() {
   // Get background color based on result and face verification
   const getResultBackgroundColor = () => {
     if (result === "Access Granted") {
-      return "#4CAF50"; // Green
+      return theme.colors.success;
     } else if (result === "Access Granted (Pending Face)") {
-      return faceVerified === null ? "#FFC107" : // Yellow when pending
-             faceVerified ? "#4CAF50" : // Green when verified
-             "#FFC107"; // Yellow when not verified (but card is valid)
+      return faceVerified === null ? theme.colors.warning : 
+             faceVerified ? theme.colors.success : 
+             theme.colors.warning;
     } else if (result === "Access Granted (No Face Reference)") {
-      return "#FFC107"; // Yellow when no reference photo
+      return theme.colors.warning;
     } else {
-      return "#f44336"; // Red for denied
+      return theme.colors.error;
     }
   };
 
@@ -241,7 +243,7 @@ export default function GuardFacePanel() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView style={{ margin: 20 }}>
         {/* Input field for Guard ID */}
         <TextInput
@@ -343,7 +345,7 @@ export default function GuardFacePanel() {
                           <Text style={{ marginBottom: 5 }}>{faceVerificationMessage}</Text>
                           <ProgressBar 
                             progress={similarityScore} 
-                            color={similarityScore > 0.6 ? '#4CAF50' : '#f44336'} 
+                            color={similarityScore > 0.6 ? theme.colors.success : theme.colors.error} 
                             style={{ height: 10, borderRadius: 5 }} 
                           />
                           {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
@@ -376,7 +378,7 @@ export default function GuardFacePanel() {
                           fontSize: 24,
                           fontWeight: "bold",
                           textAlign: "center",
-                          color: "white",
+                          color: theme.colors.text,
                           padding: 10
                         }}
                       >
@@ -406,10 +408,10 @@ export default function GuardFacePanel() {
 
                 {/* Display warning if no reference photo */}
                 {cardInfo && !photoUrl && (
-                  <Card style={{ marginTop: 20, backgroundColor: "#FFC107" }} elevation={2}>
+                  <Card style={{ marginTop: 20, backgroundColor: theme.colors.warning }} elevation={2}>
                     <Card.Content>
-                      <Title style={{ color: "white" }}>Warning: No Reference Photo</Title>
-                      <Paragraph style={{ color: "white" }}>
+                      <Title style={{ color: theme.colors.text }}>Warning: No Reference Photo</Title>
+                      <Paragraph style={{ color: theme.colors.text }}>
                         The student assigned to this card does not have a reference photo. 
                         Face verification cannot be performed.
                       </Paragraph>
@@ -463,7 +465,7 @@ export default function GuardFacePanel() {
                             width: 200, 
                             height: 200, 
                             borderRadius: 10,
-                            backgroundColor: '#f0f0f0'
+                            backgroundColor: theme.colors.background
                           }}
                           resizeMode="cover"
                         />

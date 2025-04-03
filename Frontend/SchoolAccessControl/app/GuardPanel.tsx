@@ -3,9 +3,11 @@ import { View, ScrollView, Image } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable } from "react-native-paper";
 import api from "../services/api";
 import { useRouter } from 'expo-router';
+import { useAppTheme } from '../theme/ThemeContext';
 
 export default function GuardPanel() {
   const router = useRouter();
+  const { theme } = useAppTheme();
   // State variables
   const [inputGuardId, setInputGuardId] = useState("");
   const [committedGuardId, setCommittedGuardId] = useState("");
@@ -115,7 +117,7 @@ export default function GuardPanel() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView style={{ margin: 20 }}>
         {/* Input field for Guard ID */}
         <TextInput
@@ -158,7 +160,7 @@ export default function GuardPanel() {
                   <Card 
                     style={{ 
                       marginTop: 20,
-                      backgroundColor: result === "Access Granted" ? "#4CAF50" : "#f44336",
+                      backgroundColor: result === "Access Granted" ? theme.colors.success : theme.colors.error,
                       elevation: 4
                     }}
                   >

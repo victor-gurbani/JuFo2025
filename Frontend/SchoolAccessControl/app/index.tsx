@@ -2,6 +2,8 @@ import React, { useState, useRef } from "react";
 import { View } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, SegmentedButtons } from "react-native-paper";
 import { useRouter } from 'expo-router';
+import ThemeToggle from '../components/ThemeToggle';
+import { useAppTheme } from '../theme/ThemeContext';
 
 export default function LoginScreen() {
   const [role, setRole] = useState("");
@@ -10,6 +12,7 @@ export default function LoginScreen() {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const textInputRef = useRef<TextInput>(null);
   const router = useRouter();
+  const { theme } = useAppTheme();
 
   const handleLogin = () => {
     const trimmedRole = role.trim().toLowerCase();
@@ -26,7 +29,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <View style={{ margin: 20 }}>
         <Card elevation={5} style={{ margin: 10 }}>
           <Card.Content>
@@ -58,6 +61,9 @@ export default function LoginScreen() {
                 />
               </Card>
             )}
+            
+            {/* Add theme toggle switch */}
+            <ThemeToggle />
             
             <Button mode="contained" onPress={handleLogin} style={{ marginTop: 10 }}>
               Login
