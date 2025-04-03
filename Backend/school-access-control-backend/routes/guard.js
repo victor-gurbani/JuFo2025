@@ -150,13 +150,15 @@ module.exports = (db) => {
       }
 
       // Get the reference student photo for this card
+      // Updated to get the most recently assigned student's photo
       console.log("Querying database for reference photo with cardUID:", cardUID);
       const photoQuery = `
-        SELECT s.photoUrl
+        SELECT s.photoUrl, s.id as studentId
         FROM students s
         JOIN permissions p ON s.id = p.assignedStudent
         JOIN cards c ON p.associatedCard = c.uid
-        WHERE c.uid = ? AND c.isValid = 1 AND p.isValid = 1
+        WHERE c.uid = ? AND c.isValid = 1 AND p.isValid = 1 
+        AND p.assignedStudent = c.lastAssigned
         LIMIT 1
       `;
 
@@ -167,112 +169,43 @@ module.exports = (db) => {
           return res.status(500).json({ error: err.message });
         }
 
-        console.log("Database result:", row);
+        // If no row found with the lastAssigned match, try getting the most recent permission
         if (!row || !row.photoUrl) {
-          console.log("No reference photo found for this card");
-          return res.status(404).json({ 
-            error: "Reference photo not found", 
-            match: false, 
-            similarity: 0 
-          });
-        }
-        
-        console.log("Snapshot image data preview:", snapshotImage.slice(0, 20) + "...");
-        // Process the snapshot image using utility
-        console.log("Processing snapshot image");
-        const snapshotBuffer = await processImage(snapshotImage);
-        console.log("Snapshot processing complete, buffer size:", snapshotBuffer.length);
-
-        console.log("Reference photo URL preview:", row.photoUrl.slice(0, 20) + "...");
-        // Process the reference image using utility
-        console.log("Processing reference image");
-        const referenceBuffer = await processImage(row.photoUrl);
-        console.log("Reference processing complete, buffer size:", referenceBuffer.length);
-
-        // Load images
-        console.log("Loading images into canvas");
-        try {    
-          const referenceImg = await canvas.loadImage(referenceBuffer);
-          console.log("Reference image loaded, dimensions:", referenceImg.width, "x", referenceImg.height);
+          console.log("No exact match found, trying with most recent permission");
           
-          const snapshotImg = await canvas.loadImage(snapshotBuffer);
-          console.log("Snapshot image loaded, dimensions:", snapshotImg.width, "x", snapshotImg.height);
-          
-          // Detect faces and get face descriptors
-          console.log("Detecting face in snapshot image");
-          const snapshotDetection = await faceapi
-            .detectSingleFace(snapshotImg)
-            .withFaceLandmarks()
-            .withFaceDescriptor();
-          console.log("Snapshot face detection result:", snapshotDetection ? "Face detected" : "No face detected");
-
-          console.log("Detecting face in reference image");
-          const referenceDetection = await faceapi
-            .detectSingleFace(referenceImg)
-            .withFaceLandmarks()
-            .withFaceDescriptor();
-          console.log("Reference face detection result:", referenceDetection ? "Face detected" : "No face detected");
-
-          // Check if faces were detected in both images
-          if (!snapshotDetection || !referenceDetection) {
-            console.log("Face detection failed in one or both images");
-            return res.json({ 
-              match: false, 
-              similarity: 0, 
-              error: !referenceDetection ? "No face detected in reference photo" : "No face detected in snapshot"
-            });
-          }
-
-          // Calculate similarity using Euclidean distance
-          console.log("Calculating face similarity");
-          const distance = faceapi.euclideanDistance(
-            snapshotDetection.descriptor,
-            referenceDetection.descriptor
-          );
-          console.log("Euclidean distance between faces:", distance);
-
-          // Convert distance to similarity score (0-100%)
-          // Lower distance means higher similarity
-          // Typically, distances < 0.6 indicate same person
-          const threshold = 0.6;
-          const similarity = Math.max(0, Math.min(100, (1 - distance) * 100));
-          const match = distance < threshold;
-          
-          console.log("Calculated similarity score:", similarity);
-          console.log("Face match result:", match);
-
-          // Log the verification attempt
-          console.log("Logging verification attempt to database");
-          const logQuery = `
-            INSERT INTO accessLogs (direction, student, card, wasApproved, timestamp)
-            VALUES (?, ?, ?, ?, ?)
+          const fallbackQuery = `
+            SELECT s.photoUrl, s.id as studentId
+            FROM students s
+            JOIN permissions p ON s.id = p.assignedStudent
+            JOIN cards c ON p.associatedCard = c.uid
+            WHERE c.uid = ? AND c.isValid = 1 AND p.isValid = 1
+            ORDER BY p.createdAt DESC
+            LIMIT 1
           `;
           
-          db.run(logQuery, ['FACE_VERIFY', row.studentId, cardUID, match ? 1 : 0, Math.floor(Date.now() / 1000)], (logErr) => {
-            if (logErr) console.error("Error logging face verification:", logErr);
-            else console.log("Verification attempt logged successfully");
-          });
-
-          // Return the result
-          console.log("Sending verification response to client");
-          res.json({
-            match,
-            similarity,
-            distance,
-            facesDetected: {
-              snapshot: true,
-              reference: true
+          db.get(fallbackQuery, [cardUID], async (fallbackErr, fallbackRow) => {
+            if (fallbackErr) {
+              console.error("Fallback database error:", fallbackErr);
+              return res.status(500).json({ error: fallbackErr.message });
             }
+            
+            if (!fallbackRow || !fallbackRow.photoUrl) {
+              console.log("No reference photo found for this card");
+              return res.status(404).json({ 
+                error: "Reference photo not found", 
+                match: false, 
+                similarity: 0 
+              });
+            }
+            
+            // Continue with the face verification using fallbackRow
+            processFaceVerification(fallbackRow, snapshotImage, cardUID, res);
           });
-        } catch (imageError) {
-          console.error("Error processing images:", imageError);
-          res.status(500).json({
-            error: "Image processing failed",
-            message: imageError.message,
-            match: false,
-            similarity: 0
-          });
+          return;
         }
+
+        // Continue with the face verification using row
+        processFaceVerification(row, snapshotImage, cardUID, res);
       });
     } catch (error) {
       console.error("Face verification error:", error);
@@ -285,6 +218,106 @@ module.exports = (db) => {
       });
     }
   });
+
+  // Helper function to process the face verification
+  async function processFaceVerification(row, snapshotImage, cardUID, res) {
+    try {
+      console.log("Snapshot image data preview:", snapshotImage.slice(0, 20) + "...");
+      // Process the snapshot image using utility
+      console.log("Processing snapshot image");
+      const snapshotBuffer = await processImage(snapshotImage);
+      console.log("Snapshot processing complete, buffer size:", snapshotBuffer.length);
+
+      console.log("Reference photo URL preview:", row.photoUrl.slice(0, 20) + "...");
+      // Process the reference image using utility
+      console.log("Processing reference image");
+      const referenceBuffer = await processImage(row.photoUrl);
+      console.log("Reference processing complete, buffer size:", referenceBuffer.length);
+
+      // Load images
+      console.log("Loading images into canvas");
+      const referenceImg = await canvas.loadImage(referenceBuffer);
+      console.log("Reference image loaded, dimensions:", referenceImg.width, "x", referenceImg.height);
+      
+      const snapshotImg = await canvas.loadImage(snapshotBuffer);
+      console.log("Snapshot image loaded, dimensions:", snapshotImg.width, "x", snapshotImg.height);
+      
+      // Detect faces and get face descriptors
+      console.log("Detecting face in snapshot image");
+      const snapshotDetection = await faceapi
+        .detectSingleFace(snapshotImg)
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+      console.log("Snapshot face detection result:", snapshotDetection ? "Face detected" : "No face detected");
+
+      console.log("Detecting face in reference image");
+      const referenceDetection = await faceapi
+        .detectSingleFace(referenceImg)
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+      console.log("Reference face detection result:", referenceDetection ? "Face detected" : "No face detected");
+
+      // Check if faces were detected in both images
+      if (!snapshotDetection || !referenceDetection) {
+        console.log("Face detection failed in one or both images");
+        return res.json({ 
+          match: false, 
+          similarity: 0, 
+          error: !referenceDetection ? "No face detected in reference photo" : "No face detected in snapshot"
+        });
+      }
+
+      // Calculate similarity using Euclidean distance
+      console.log("Calculating face similarity");
+      const distance = faceapi.euclideanDistance(
+        snapshotDetection.descriptor,
+        referenceDetection.descriptor
+      );
+      console.log("Euclidean distance between faces:", distance);
+
+      // Convert distance to similarity score (0-100%)
+      // Lower distance means higher similarity
+      // Typically, distances < 0.6 indicate same person
+      const threshold = 0.6;
+      const similarity = Math.max(0, Math.min(100, (1 - distance) * 100));
+      const match = distance < threshold;
+      
+      console.log("Calculated similarity score:", similarity);
+      console.log("Face match result:", match);
+
+      // Log the verification attempt
+      console.log("Logging verification attempt to database");
+      const logQuery = `
+        INSERT INTO accessLogs (direction, student, card, wasApproved, timestamp)
+        VALUES (?, ?, ?, ?, ?)
+      `;
+      
+      db.run(logQuery, ['FACE_VERIFY', row.studentId, cardUID, match ? 1 : 0, Math.floor(Date.now() / 1000)], (logErr) => {
+        if (logErr) console.error("Error logging face verification:", logErr);
+        else console.log("Verification attempt logged successfully");
+      });
+
+      // Return the result
+      console.log("Sending verification response to client");
+      res.json({
+        match,
+        similarity,
+        distance,
+        facesDetected: {
+          snapshot: true,
+          reference: true
+        }
+      });
+    } catch (imageError) {
+      console.error("Error processing images:", imageError);
+      res.status(500).json({
+        error: "Image processing failed",
+        message: imageError.message,
+        match: false,
+        similarity: 0
+      });
+    }
+  }
 
   return router;
 };
