@@ -162,6 +162,12 @@ export default function TeacherPanel() {
       endTime.getMinutes()
     );
 
+    // Validate that end date/time is after start date/time
+    if (endDateTime <= startDateTime) {
+      showSnackbar("End date/time must be after start date/time.");
+      return;
+    }
+
     const startDateTimeISO = startDateTime.toISOString();
     const endDateTimeISO = endDateTime.toISOString();
 

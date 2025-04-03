@@ -10,6 +10,18 @@ module.exports = (db) => {
     try {
       const { studentId, cardUID, startDate, endDate, isRecurring, recurrencePattern, studentPhotoUrl } = req.body;
       
+      // Validate date ranges
+      const startDateTime = new Date(startDate);
+      const endDateTime = new Date(endDate);
+      
+      if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
+        return res.status(400).json({ error: "Invalid date format" });
+      }
+      
+      if (endDateTime <= startDateTime) {
+        return res.status(400).json({ error: "End date must be after start date" });
+      }
+      
       // Process the image if one was provided
       const processedPhotoUrl = studentPhotoUrl ? await processImage(studentPhotoUrl) : null;
 

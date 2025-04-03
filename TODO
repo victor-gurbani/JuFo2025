@@ -16,13 +16,13 @@
 - [x] Only get face if there is a reference in guardface
 - [x] Add dark mode
 - [x] Add a feature to admin panel to invalidate cards and view info about the card
+- [x] Ensure second date is not greater than first date in teacher panel
 
 - [ ] Add interactive poster
 - [ ] Add login through email and better security measures
 - [ ] Fix image cropping issue in guard.js middleware
-- [ ] Add event listener in frontend guard to eliminate need for focus
-- [ ] Remove redundancy in base64Image conversion code (base64Image = result.assets[0].uri?.startsWith('data:image/') ? result.assets[0].uri : `data:image/${fileType};base64,${result.assets[0].base64}`;)?
-- [ ] Prevent duplicate entries in the same timeframe?
-- [ ] Allow multiple people at the same time per card?
-- [ ] Ensure second date is not greater than first date in teacher panel
+- [ ] Add event listener in frontend guard to eliminate need for focus if no input is already focused
+- [ ] Remove redundancy in base64Image conversion code (base64Image = result.assets[0].uri?.startsWith('data:image/') ? result.assets[0].uri : `data:image/${fileType};base64,${result.assets[0].base64}`;) (?)
+- [ ] Prevent duplicate entries in the same timeframe (?)
+- [ ] Allow multiple people at the same time per card (?)
 - [ ] Fix Admin Web Perm Level Picker Dark Theme Color
