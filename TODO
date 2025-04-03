@@ -1,27 +1,5 @@
-TODO:
-- Change the poorly formatted permissions in the admin panel to match those in the guard panel. DONE
-- Guard panel should autovalidate the date and time of the card swipe. DONE
-- Access Log should be displayed in the admin panel and be recorded in the database. DONE
-- Use List for permissionlevel in teacherpanel DONE
-- move snackbar to the right position DONE
-- clear the input fields after submitting in teacherpanel DONE
-- Add photos for teachers and students and show them respectively in admin and in guard nicely DONE
-- Add a feature to the admin panel to add and remove permissions directly wihtout needing to reenter the ID of the people DONE
-- Allow admins to view Student info and delete it like teachers DONE
+# TODO
 
-- Add a feature to admin panel to invalidate cards and view info about the card
-- Convert images uploaded to consistent format (gives internal server error rn) DONE
-
-- Add interactive poster
-- add domain name DONE
-- add certificates
-- use expo-router DONE
-
-- add login through email and better security measures
-
-
-------
-TODO:
 - [x] Change the poorly formatted permissions in the admin panel to match those in the guard panel.
 - [x] Guard panel should autovalidate the date and time of the card swipe.
 - [x] Access Log should be displayed in the admin panel and be recorded in the database.
@@ -39,7 +17,6 @@ TODO:
 - [ ] Add interactive poster
 - [ ] Add certificates
 - [ ] Add login through email and better security measures
-- [ ] Obfuscate and compile to bytecode
 - [ ] Add dark mode
 - [ ] Fix image cropping issue in guard.js middleware
 - [ ] Add event listener in frontend guard to eliminate need for focus
