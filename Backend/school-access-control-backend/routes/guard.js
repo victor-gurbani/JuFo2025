@@ -169,7 +169,7 @@ module.exports = (db) => {
           return res.status(500).json({ error: err.message });
         }
 
-        // If no row found with the lastAssigned match, try getting the most recent permission
+        /*  If no row found with the lastAssigned match, try getting the most recent permission
         if (!row || !row.photoUrl) {
           console.log("No exact match found, trying with most recent permission");
           
@@ -197,11 +197,26 @@ module.exports = (db) => {
                 similarity: 0 
               });
             }
-            
-            // Continue with the face verification using fallbackRow
-            processFaceVerification(fallbackRow, snapshotImage, cardUID, res);
+            */
+
+        // If no row found at all, it means no student with this card
+        if (!row) {
+          console.log("No student found with this card ID");
+          return res.status(404).json({ 
+            error: "No student assigned to this card", 
+            match: false, 
+            similarity: 0 
           });
-          return;
+        }
+        
+        // If student found but no photo
+        if (!row.photoUrl) {
+          console.log("Student found but has no reference photo");
+          return res.status(404).json({ 
+            error: "The assigned student does not have a reference photo", 
+            match: false, 
+            similarity: 0 
+          });
         }
 
         // Continue with the face verification using row
