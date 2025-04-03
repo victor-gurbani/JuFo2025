@@ -18,4 +18,33 @@ TODO:
 - use expo-router DONE
 
 - add login through email and better security measures
-- obfucate and compile to bytecode
+
+
+------
+TODO:
+- [x] Change the poorly formatted permissions in the admin panel to match those in the guard panel.
+- [x] Guard panel should autovalidate the date and time of the card swipe.
+- [x] Access Log should be displayed in the admin panel and be recorded in the database.
+- [x] Use List for permissionlevel in teacherpanel
+- [x] Move snackbar to the right position
+- [x] Clear the input fields after submitting in teacherpanel
+- [x] Add photos for teachers and students and show them respectively in admin and in guard nicely
+- [x] Add a feature to the admin panel to add and remove permissions directly without needing to reenter the ID of the people
+- [x] Allow admins to view Student info and delete it like teachers
+- [x] Convert images uploaded to consistent format (currently gives internal server error)
+- [x] Add domain name
+- [x] Use expo-router
+
+- [ ] Add a feature to admin panel to invalidate cards and view info about the card
+- [ ] Add interactive poster
+- [ ] Add certificates
+- [ ] Add login through email and better security measures
+- [ ] Obfuscate and compile to bytecode
+- [ ] Add dark mode
+- [ ] Fix image cropping issue in guard.js middleware
+- [ ] Add event listener in frontend guard to eliminate need for focus
+- [ ] Only get face if there is a reference in guardface
+- [ ] Remove redundancy in base64Image conversion code (base64Image = result.assets[0].uri?.startsWith('data:image/') ? result.assets[0].uri : `data:image/${fileType};base64,${result.assets[0].base64}`;)
+- [ ] Prevent duplicate entries in the same timeframe
+- [ ] Allow multiple people at the same time per card
+- [ ] Ensure second date is not greater than first date in teacher panel

@@ -161,6 +161,7 @@ module.exports = (db) => {
         AND p.assignedStudent = c.lastAssigned
         LIMIT 1
       `;
+      // TODO: verify all edge cases AND p.assignedStudent = c.lastAssigned
 
       db.get(photoQuery, [cardUID], async (err, row) => {
         console.log("Database query completed");
