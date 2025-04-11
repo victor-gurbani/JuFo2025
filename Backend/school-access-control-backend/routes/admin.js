@@ -222,5 +222,60 @@ module.exports = (db) => {
     });
   });
 
+  // Get student photos
+  router.get("/students/photos", checkPermission(db, "admin"), (req, res) => {
+    const query = `SELECT id, photoUrl FROM students WHERE photoUrl IS NOT NULL`;
+    db.all(query, [], (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    });
+  });
+
+  // Create a student
+  router.post("/students", checkPermission(db, "admin"), async (req, res) => {
+    try {
+      const { id, name, classGroup, email, tutor, photoUrl } = req.body;
+      
+      // Process the image if one was provided
+      const processedPhotoUrl = photoUrl ? await processImage(photoUrl) : null;
+      
+      const query = `
+        INSERT INTO students (id, name, classGroup, email, tutor, photoUrl) 
+        VALUES (?, ?, ?, ?, ?, ?)
+      `;
+      
+      db.run(query, [id, name, classGroup, email, tutor, processedPhotoUrl], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ id, name, classGroup, email, tutor, photoUrl: processedPhotoUrl });
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Update a student
+  router.put("/students/:id", checkPermission(db, "admin"), async (req, res) => {
+    try {
+      const { name, classGroup, email, tutor, photoUrl } = req.body;
+      
+      // Process the image if one was provided
+      const processedPhotoUrl = photoUrl ? await processImage(photoUrl) : null;
+      
+      const query = `
+        UPDATE students 
+        SET name = ?, classGroup = ?, email = ?, tutor = ?, photoUrl = COALESCE(?, photoUrl)
+        WHERE id = ?
+      `;
+      
+      db.run(query, [name, classGroup, email, tutor, processedPhotoUrl, req.params.id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) return res.status(404).json({ error: "Student not found" });
+        res.json({ id: req.params.id, name, classGroup, email, tutor, photoUrl: processedPhotoUrl });
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   return router;
 };

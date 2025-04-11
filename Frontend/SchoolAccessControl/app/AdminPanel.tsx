@@ -53,6 +53,16 @@ export default function AdminPanel() {
   const [isInvalidatingCard, setIsInvalidatingCard] = useState<string | null>(null);
   const [showCardDetailModal, setShowCardDetailModal] = useState(false);
 
+  const [studentId, setStudentId] = useState("");
+  const [studentName, setStudentName] = useState("");
+  const [studentClassGroup, setStudentClassGroup] = useState("");
+  const [studentEmail, setStudentEmail] = useState("");
+  const [studentTutor, setStudentTutor] = useState("");
+  const [studentPhotoUrl, setStudentPhotoUrl] = useState("");
+  const [isCreatingStudent, setIsCreatingStudent] = useState(false);
+  const [isUpdatingStudent, setIsUpdatingStudent] = useState(false);
+  const [studentPhotos, setStudentPhotos] = useState<{[key: string]: string}>({});
+
   // Helper function to append teacherId to requests
   const apiWithTeacherId = (method: string, url: string, body?: any) => {
     if (method === "GET" || method === "DELETE") {
@@ -160,10 +170,31 @@ export default function AdminPanel() {
   const loadStudents = () => {
     setIsLoadingStudents(true);
     apiWithTeacherId("GET", "/admin/students")
-      .then((res) => setStudents(res.data))
+      .then((res) => {
+        setStudents(res.data);
+        // Now that we have basic data, load the photos separately
+        loadStudentPhotos();
+      })
       .catch((err) => showSnackbar("Error loading students: " + err))
       .finally(() => {
         setIsLoadingStudents(false);
+      });
+  };
+
+  const loadStudentPhotos = () => {
+    apiWithTeacherId("GET", "/admin/students/photos")
+      .then((res) => {
+        const photoMap: {[key: string]: string} = {};
+        res.data.forEach((item: {id: string, photoUrl: string}) => {
+          if (item.id && item.photoUrl) {
+            photoMap[item.id] = item.photoUrl;
+          }
+        });
+        setStudentPhotos(photoMap);
+      })
+      .catch((err) => {
+        console.error("Error loading student photos:", err);
+        // Don't show a snackbar for this - it's not critical
       });
   };
 
@@ -250,6 +281,78 @@ export default function AdminPanel() {
     }
   };
 
+  const pickStudentImage = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        showSnackbar("Permission to access camera roll is required!");
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.5,
+        base64: true
+      });
+
+      if (!result.canceled && result.assets && result.assets[0]) {
+        // Process image data
+        let imageData: string;
+        
+        if (result.assets[0].base64) {
+          // We have base64 data directly
+          const fileType = result.assets[0].uri.split('.').pop()?.toLowerCase() || 'jpeg';
+          imageData = result.assets[0].uri?.startsWith('data:image/')
+            ? result.assets[0].uri
+            : `data:image/${fileType};base64,${result.assets[0].base64}`;
+          
+          setStudentPhotoUrl(imageData);
+        } else {
+          // We need to read the file
+          showSnackbar("Processing image...");
+          
+          try {
+            // For web platforms
+            if (Platform.OS === 'web') {
+              const response = await fetch(result.assets[0].uri);
+              const blob = await response.blob();
+              const reader = new FileReader();
+              
+              reader.onload = () => {
+                if (typeof reader.result === 'string') {
+                  setStudentPhotoUrl(reader.result);
+                }
+              };
+              
+              reader.readAsDataURL(blob);
+            } else {
+              // For native platforms - use expo-file-system
+              const fileUri = result.assets[0].uri;
+              const fileInfo = await FileSystem.getInfoAsync(fileUri);
+              
+              if (fileInfo.exists) {
+                const base64 = await FileSystem.readAsStringAsync(fileUri, {
+                  encoding: FileSystem.EncodingType.Base64,
+                });
+                
+                const fileType = fileUri.split('.').pop()?.toLowerCase() || 'jpeg';
+                imageData = `data:image/${fileType};base64,${base64}`;
+                setStudentPhotoUrl(imageData);
+              } else {
+                throw new Error("File does not exist");
+              }
+            }
+          } catch (error) {
+            showSnackbar("Failed to process the image: " + error.message);
+          }
+        }
+      }
+    } catch (error) {
+      showSnackbar("Error picking image: " + error.message);
+    }
+  };
+
   const createTeacher = () => {
     if (!teacherId || !teacherName || !teacherPermission) {
       showSnackbar("Please fill in all fields.");
@@ -300,6 +403,67 @@ export default function AdminPanel() {
       .catch((err) => showSnackbar("Error: " + err))
       .finally(() => {
         setIsUpdatingTeacher(false);
+      });
+  };
+
+  const createStudent = () => {
+    if (!studentId) {
+      showSnackbar("Student ID is required.");
+      return;
+    }
+
+    setIsCreatingStudent(true);
+    apiWithTeacherId("POST", "/admin/students", {
+      id: studentId,
+      name: studentName,
+      classGroup: studentClassGroup,
+      email: studentEmail,
+      tutor: studentTutor || null,
+      photoUrl: studentPhotoUrl
+    })
+      .then(() => {
+        showSnackbar("Student created");
+        setStudentId("");
+        setStudentName("");
+        setStudentClassGroup("");
+        setStudentEmail("");
+        setStudentTutor("");
+        setStudentPhotoUrl("");
+        loadStudents();
+      })
+      .catch((err) => showSnackbar("Error: " + err))
+      .finally(() => {
+        setIsCreatingStudent(false);
+      });
+  };
+
+  const updateStudent = () => {
+    if (!studentId) {
+      showSnackbar("Student ID is required.");
+      return;
+    }
+
+    setIsUpdatingStudent(true);
+    apiWithTeacherId("PUT", `/admin/students/${studentId}`, {
+      name: studentName,
+      classGroup: studentClassGroup,
+      email: studentEmail,
+      tutor: studentTutor || null,
+      photoUrl: studentPhotoUrl
+    })
+      .then(() => {
+        showSnackbar("Student updated");
+        setStudentId("");
+        setStudentName("");
+        setStudentClassGroup("");
+        setStudentEmail("");
+        setStudentTutor("");
+        setStudentPhotoUrl("");
+        loadStudents();
+      })
+      .catch((err) => showSnackbar("Error: " + err))
+      .finally(() => {
+        setIsUpdatingStudent(false);
       });
   };
 
@@ -629,6 +793,90 @@ export default function AdminPanel() {
             {activeTab === 'students' && (
               <>
                 <Text style={{ marginVertical: 20, fontWeight: "bold" }}>Students</Text>
+                
+                {/* Student creation/editing form */}
+                <Card elevation={4} style={{ margin: 10 }}>
+                  <Card.Content>
+                    <Title>Create or Update Student</Title>
+                    
+                    <TextInput
+                      label="Student ID"
+                      value={studentId}
+                      onChangeText={setStudentId}
+                      style={{ marginVertical: 5 }}
+                      mode="outlined"
+                    />
+                    
+                    <TextInput
+                      label="Student Name"
+                      value={studentName}
+                      onChangeText={setStudentName}
+                      style={{ marginVertical: 5 }}
+                      mode="outlined"
+                    />
+                    
+                    <TextInput
+                      label="Class Group"
+                      value={studentClassGroup}
+                      onChangeText={setStudentClassGroup}
+                      style={{ marginVertical: 5 }}
+                      mode="outlined"
+                    />
+                    
+                    <TextInput
+                      label="Email"
+                      value={studentEmail}
+                      onChangeText={setStudentEmail}
+                      style={{ marginVertical: 5 }}
+                      mode="outlined"
+                      keyboardType="email-address"
+                    />
+                    
+                    <TextInput
+                      label="Tutor ID (optional)"
+                      value={studentTutor}
+                      onChangeText={setStudentTutor}
+                      style={{ marginVertical: 5 }}
+                      mode="outlined"
+                    />
+
+                    <View style={{ marginVertical: 10 }}>
+                      <Button mode="outlined" onPress={pickStudentImage}>
+                        Pick Student Photo
+                      </Button>
+                      {studentPhotoUrl ? (
+                        <View style={{ marginTop: 10, alignItems: 'center' }}>
+                          <Image
+                            source={{ uri: studentPhotoUrl }}
+                            style={{ width: 100, height: 100, borderRadius: 50 }}
+                          />
+                        </View>
+                      ) : null}
+                    </View>
+
+                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                      <Button 
+                        mode="contained" 
+                        onPress={createStudent} 
+                        style={{ margin: 5 }}
+                        disabled={isCreatingStudent}
+                        loading={isCreatingStudent}
+                      >
+                        {isCreatingStudent ? "Creating..." : "Create Student"}
+                      </Button>
+                      <Button 
+                        mode="contained" 
+                        onPress={updateStudent} 
+                        style={{ margin: 5 }}
+                        disabled={isUpdatingStudent}
+                        loading={isUpdatingStudent}
+                      >
+                        {isUpdatingStudent ? "Updating..." : "Update Student"}
+                      </Button>
+                    </View>
+                  </Card.Content>
+                </Card>
+
                 <Button 
                   mode="contained" 
                   onPress={loadStudents} 
@@ -672,9 +920,9 @@ export default function AdminPanel() {
                     <Card key={s.id} style={{ marginBottom: 10, margin: 10 }} elevation={4}>
                       <Card.Content>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                          {s.photoUrl ? (
+                          {studentPhotos[s.id] ? (
                             <Image
-                              source={{ uri: s.photoUrl }}
+                              source={{ uri: studentPhotos[s.id] }}
                               style={{
                                 width: 60,
                                 height: 60,
@@ -694,14 +942,16 @@ export default function AdminPanel() {
                               alignItems: 'center'
                             }}>
                               <Text style={{ fontSize: 24, color: '#666' }}>
-                                {s.id.charAt(0).toUpperCase()}
+                                {s.name ? s.name.charAt(0).toUpperCase() : s.id.charAt(0).toUpperCase()}
                               </Text>
                             </View>
                           )}
                           <View style={{ flex: 1 }}>
                             <Title>ID: {s.id}</Title>
                             {s.name && <Paragraph>Name: {s.name}</Paragraph>}
+                            {s.email && <Paragraph>Email: {s.email}</Paragraph>}
                             {s.classGroup && <Paragraph>Class: {s.classGroup}</Paragraph>}
+                            {s.tutor && <Paragraph>Tutor: {s.tutor}</Paragraph>}
                             {s.assignedCards && <Paragraph>Cards: {s.assignedCards}</Paragraph>}
                             {s.assignedTeachers && (
                               <Paragraph>Teachers: {s.assignedTeachers}</Paragraph>
@@ -710,6 +960,19 @@ export default function AdminPanel() {
                         </View>
                       </Card.Content>
                       <Card.Actions>
+                        <Button 
+                          onPress={() => {
+                            setStudentId(s.id);
+                            setStudentName(s.name || '');
+                            setStudentClassGroup(s.classGroup || '');
+                            setStudentEmail(s.email || '');
+                            setStudentTutor(s.tutor || '');
+                            setStudentPhotoUrl(studentPhotos[s.id] || '');
+                          }}
+                          style={{ marginRight: 8 }}
+                        >
+                          Edit
+                        </Button>
                         <Button 
                           onPress={() => deleteStudent(s.id)}
                           disabled={isDeletingStudent === s.id}
@@ -722,7 +985,7 @@ export default function AdminPanel() {
                   ))
                 ) : (
                   <Text style={{ margin: 10, fontStyle: 'italic', color: '#666' }}>
-                    No students found. Students need to be added via the teacher panel.
+                    No students found. Create a new student using the form above.
                   </Text>
                 )}
               </>
@@ -906,12 +1169,18 @@ export default function AdminPanel() {
           contentContainerStyle={{
             backgroundColor: theme.colors.surface,
             padding: 20,
-            margin: 20,
+            marginHorizontal: 20,
+            marginVertical: Platform.OS === 'android' ? 50 : 20, // Add more margin for Android
             maxHeight: '80%',
-            borderRadius: 10
+            borderRadius: 10,
+            elevation: 5, // Improved shadows for Android
+          }}
+          style={{ 
+            justifyContent: 'center',
+            margin: 0, // Important for Android
           }}
         >
-          <ScrollView>
+          <ScrollView style={{ maxHeight: Platform.OS === 'android' ? '100%' : undefined }}>
             {selectedCard && (
               <>
                 <Title>Card Details</Title>
@@ -939,7 +1208,7 @@ export default function AdminPanel() {
                 ) : cardPermissions.length > 0 ? (
                   <Card style={{ marginBottom: 15 }} elevation={3}>
                     <Card.Content>
-                      <ScrollView horizontal>
+                      <ScrollView horizontal showsHorizontalScrollIndicator={true}>
                         <DataTable>
                           <DataTable.Header>
                             <DataTable.Title style={{ width: 70 }}>ID</DataTable.Title>
@@ -977,7 +1246,7 @@ export default function AdminPanel() {
                     <Title style={{ marginTop: 15 }}>Access Logs</Title>
                     <Card style={{ marginBottom: 15 }} elevation={3}>
                       <Card.Content>
-                        <ScrollView horizontal>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={true}>
                           <DataTable>
                             <DataTable.Header>
                               <DataTable.Title style={{ width: 180 }}>Timestamp</DataTable.Title>
