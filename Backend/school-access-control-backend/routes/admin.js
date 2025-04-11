@@ -97,9 +97,14 @@ module.exports = (db) => {
   router.get("/students", checkPermission(db, "admin"), (req, res) => {
     const query = `
       SELECT 
-        s.*,
-        GROUP_CONCAT(DISTINCT c.uid) as assignedCards,
-        GROUP_CONCAT(DISTINCT t.name) as assignedTeachers
+      s.id,
+      s.name,
+      s.classGroup,
+      s.email,
+      s.tutor,
+      s.lastPhotoUpdate,
+      GROUP_CONCAT(DISTINCT c.uid) as assignedCards,
+      GROUP_CONCAT(DISTINCT t.name) as assignedTeachers
       FROM students s
       LEFT JOIN cards c ON c.lastAssigned = s.id
       LEFT JOIN permissions p ON p.assignedStudent = s.id
