@@ -16,17 +16,20 @@ export default function LoginScreen() {
 
   const handleLogin = () => {
     const trimmedRole = role.trim().toLowerCase();
-    
+  
     if (trimmedRole === "admin" || trimmedRole === "teacher") {
       router.push(`${role.charAt(0).toUpperCase() + role.slice(1)}Panel`);
     } else if (trimmedRole === "guard") {
       // Route to the appropriate guard panel based on selected option
       router.push(guardOption === "face" ? "GuardFacePanel" : "GuardPanel");
+    } else if (trimmedRole === "student") {
+      router.push("StudentPanel");
     } else {
-      setSnackbarMessage("Invalid role. Please enter admin, teacher, or guard.");
+      setSnackbarMessage("Invalid role. Please enter admin, teacher, guard, or student.");
       setSnackbarVisible(true);
     }
   };
+  
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>

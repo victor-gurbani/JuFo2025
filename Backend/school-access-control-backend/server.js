@@ -72,12 +72,29 @@ const db = new sqlite3.Database("./database.db", (err) => {
           photoUrl TEXT,
           classGroup TEXT,
           tutor TEXT,
+          email TEXT,
+          lastPhotoUpdate TEXT,
           FOREIGN KEY (tutor) REFERENCES teachers(id)
         )`,
         (err) => {
           if (err) {
             console.error("Error creating students table:", err.message);
           } else {
+            // Add new columns if they don't exist
+            db.run(`ALTER TABLE students ADD COLUMN email TEXT`, (alterErr) => {
+              // Ignore error if column already exists
+              if (alterErr && !alterErr.message.includes('duplicate column')) {
+                console.error("Error adding email column:", alterErr.message);
+              }
+            });
+            
+            db.run(`ALTER TABLE students ADD COLUMN lastPhotoUpdate TEXT`, (alterErr) => {
+              // Ignore error if column already exists
+              if (alterErr && !alterErr.message.includes('duplicate column')) {
+                console.error("Error adding lastPhotoUpdate column:", alterErr.message);
+              }
+            });
+
             db.run(`
               CREATE INDEX IF NOT EXISTS idx_students_id ON students(id);
               CREATE INDEX IF NOT EXISTS idx_students_tutor ON students(tutor);
@@ -155,12 +172,14 @@ const adminRoutes = require("./routes/admin")(db);
 const teacherRoutes = require("./routes/teacher")(db);
 const guardRoutes = require("./routes/guard")(db);
 const cardRoutes = require("./routes/cards")(db);
+const studentRoutes = require("./routes/student")(db);
 
 // Example routes
 app.use("/admin", adminRoutes);
 app.use("/teacher", teacherRoutes);
 app.use("/guard", guardRoutes);
 app.use("/cards", cardRoutes);
+app.use("/student", studentRoutes);
 
 const PORT = 3000;
 app.listen(PORT, () => {
