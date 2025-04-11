@@ -36,15 +36,20 @@ module.exports = (db) => {
   router.post("/teachers", checkPermission(db, "admin"), async (req, res) => {
     try {
       const { id, name, permissionLevel, photoUrl } = req.body;
-      
+
+      // Prevent using "photos" as an ID
+      if (id.toLowerCase() === "photos") {
+        return res.status(400).json({ error: 'The ID "photos" is not allowed.' });
+      }
+
       // Process the image if one was provided
       const processedPhotoUrl = photoUrl ? await processImage(photoUrl) : null;
-      
+
       const query = `
         INSERT INTO teachers (id, name, permissionLevel, photoUrl) 
         VALUES (?, ?, ?, ?)
       `;
-      
+
       db.run(query, [id, name, permissionLevel, processedPhotoUrl], function (err) {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ id, name, permissionLevel, photoUrl: processedPhotoUrl });
@@ -236,15 +241,20 @@ module.exports = (db) => {
   router.post("/students", checkPermission(db, "admin"), async (req, res) => {
     try {
       const { id, name, classGroup, email, tutor, photoUrl } = req.body;
-      
+
+      // Prevent using "photos" as an ID
+      if (id.toLowerCase() === "photos") {
+        return res.status(400).json({ error: 'The ID "photos" is not allowed.' });
+      }
+
       // Process the image if one was provided
       const processedPhotoUrl = photoUrl ? await processImage(photoUrl) : null;
-      
+
       const query = `
         INSERT INTO students (id, name, classGroup, email, tutor, photoUrl) 
         VALUES (?, ?, ?, ?, ?, ?)
       `;
-      
+
       db.run(query, [id, name, classGroup, email, tutor, processedPhotoUrl], function (err) {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ id, name, classGroup, email, tutor, photoUrl: processedPhotoUrl });
