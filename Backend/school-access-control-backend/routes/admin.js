@@ -107,6 +107,39 @@ module.exports = (db) => {
     });
   });
 
+  // Important: Move the students/photos route before the :id route
+  // This is crucial - specific routes must come before parameterized routes
+  router.get("/students/photos", checkPermission(db, "admin"), (req, res) => {
+    const query = `SELECT id, photoUrl FROM students WHERE photoUrl IS NOT NULL`;
+    db.all(query, [], (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    });
+  });
+  
+  // Get specific student info - this must come after /students/photos
+  router.get("/students/:id", checkPermission(db, "admin"), (req, res) => {
+    const query = `
+      SELECT 
+        s.*,
+        c.uid as cardUID,
+        c.isValid as cardValid,
+        p.startDate,
+        p.endDate,
+        p.isRecurring,
+        t.name as assignedBy
+      FROM students s
+      LEFT JOIN cards c ON c.lastAssigned = s.id
+      LEFT JOIN permissions p ON p.assignedStudent = s.id
+      LEFT JOIN teachers t ON p.assignedBy = t.id
+      WHERE s.id = ?
+    `;
+    db.all(query, [req.params.id], (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    });
+  });
+
   // Delete a student (only admins)
   router.delete("/students/:id", checkPermission(db, "admin"), (req, res) => {
     const query = `DELETE FROM students WHERE id = ?`;
@@ -122,7 +155,7 @@ module.exports = (db) => {
     res.json({ message: "Admin Dashboard" });
   });
 
-  // Add this route in admin.js
+  // Access logs endpoint
   router.get("/access-logs", checkPermission(db, "admin"), (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -157,29 +190,6 @@ module.exports = (db) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
       });
-    });
-  });
-
-  // Get specific student info
-  router.get("/students/:id", checkPermission(db, "admin"), (req, res) => {
-    const query = `
-      SELECT 
-        s.*,
-        c.uid as cardUID,
-        c.isValid as cardValid,
-        p.startDate,
-        p.endDate,
-        p.isRecurring,
-        t.name as assignedBy
-      FROM students s
-      LEFT JOIN cards c ON c.lastAssigned = s.id
-      LEFT JOIN permissions p ON p.assignedStudent = s.id
-      LEFT JOIN teachers t ON p.assignedBy = t.id
-      WHERE s.id = ?
-    `;
-    db.all(query, [req.params.id], (err, rows) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json(rows);
     });
   });
 
@@ -219,15 +229,6 @@ module.exports = (db) => {
         if (permErr) return res.status(500).json({ error: permErr.message });
         res.json({ success: true });
       });
-    });
-  });
-
-  // Get student photos
-  router.get("/students/photos", checkPermission(db, "admin"), (req, res) => {
-    const query = `SELECT id, photoUrl FROM students WHERE photoUrl IS NOT NULL`;
-    db.all(query, [], (err, rows) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json(rows);
     });
   });
 
