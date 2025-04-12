@@ -18,12 +18,12 @@ export default function LoginScreen() {
     const trimmedRole = role.trim().toLowerCase();
   
     if (trimmedRole === "admin" || trimmedRole === "teacher") {
-      router.push(`${role.charAt(0).toUpperCase() + role.slice(1)}Panel`);
+      router.push(`/${role.charAt(0).toUpperCase() + role.slice(1)}Panel`);
     } else if (trimmedRole === "guard") {
       // Route to the appropriate guard panel based on selected option
-      router.push(guardOption === "face" ? "GuardFacePanel" : "GuardPanel");
+      router.push(guardOption === "face" ? "/GuardFacePanel" : "/GuardPanel");
     } else if (trimmedRole === "student") {
-      router.push("StudentPanel");
+      router.push("/StudentPanel");
     } else {
       setSnackbarMessage("Invalid role. Please enter admin, teacher, guard, or student.");
       setSnackbarVisible(true);
@@ -37,7 +37,7 @@ export default function LoginScreen() {
         <Card elevation={5} style={{ margin: 10 }}>
           <Card.Content>
             <Title>Login</Title>
-            <Text>Login as (admin/teacher/guard):</Text>
+            <Text>Login as (admin/teacher/guard/student):</Text>
             <TextInput
               ref={textInputRef}
               label="Enter role"
