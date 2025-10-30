@@ -1,7 +1,11 @@
 # My idea & Q+A
 
 
-I want to build a project for my school's entrance system. Your task is to write the diagrams and doc that i will send to the schools IT department. Ill try to explain my project now, but before continuing with your task, please ask me 5 questions to make sure you've understood it correctly. The idea is that Teachers have in their room a few plastic cards. When a student gives permission to leave school for a day (e.g. illness), instead of having to organise it with the secretary's office, the teacher can directly access their ipad and enter the id of the card, the name of the student they are giving it to, and when it is valid. This helps both students who have to go in and out of school frequently for extracurricular activities and students who leave at a specific time, as they would not normally be able to leave if the parent is not physically present. 
+I want to build a project for my school's entrance system.
+<!---
+[comment]: #  Your task is to write the diagrams and doc that i will send to the schools IT department. Ill try to explain my project now, but before continuing with your task, please ask me 5 questions to make sure you've understood it correctly.
+--->
+The idea is that Teachers have in their room a few plastic cards. When a student gives permission to leave school for a day (e.g. illness), instead of having to organise it with the secretary's office, the teacher can directly access their ipad and enter the id of the card, the name of the student they are giving it to, and when it is valid. This helps both students who have to go in and out of school frequently for extracurricular activities and students who leave at a specific time, as they would not normally be able to leave if the parent is not physically present. 
 To verify that the students are the ones using the cards, the system will include a reader at the entrance of the school, as well as a screen that can be seen by the caretaker. When the card is read, the screen shows a picture of the student who should have the card and can swipe it. That way the card can be verified that it has not been changed hands. I will take care of the software and hardware. The card will be like the metro cards in Madrid, which can't be cloned with any kind of tool. As all the data will be kept inside the school and Phidias already has a photo of each student, this will not cause any inconvenience or data protection problems. 
 
 ## Questions
