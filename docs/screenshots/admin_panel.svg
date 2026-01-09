@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1440" viewBox="0 0 720 1440">
+  <defs>
+    <style>
+      .t { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; fill: #111827; }
+      .muted { fill: #6b7280; }
+      .stroke { stroke: #d1d5db; stroke-width: 6; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#f3f4f6"/>
+
+  <!-- Phone frame -->
+  <rect x="60" y="120" width="600" height="1200" rx="56" fill="#ffffff" class="stroke"/>
+  <rect x="120" y="170" width="480" height="36" rx="18" fill="#e5e7eb"/>
+
+  <!-- Header -->
+  <text x="360" y="285" text-anchor="middle" class="t" font-size="42" font-weight="700">Admin Dashboard</text>
+  <text x="360" y="330" text-anchor="middle" class="t muted" font-size="22">Teachers • Students • Cards • Logs</text>
+
+  <!-- Admin ID input -->
+  <rect x="120" y="380" width="480" height="92" rx="18" fill="#ffffff" class="stroke"/>
+  <text x="145" y="416" class="t muted" font-size="18">Current Admin ID</text>
+  <text x="145" y="452" class="t" font-size="26">admin</text>
+
+  <!-- Tabs -->
+  <rect x="120" y="500" width="480" height="64" rx="18" fill="#f3f4f6"/>
+  <rect x="128" y="508" width="140" height="48" rx="16" fill="#111827"/>
+  <text x="198" y="540" text-anchor="middle" class="t" font-size="18" font-weight="700" fill="#ffffff">Teachers</text>
+  <text x="330" y="540" text-anchor="middle" class="t muted" font-size="18">Students</text>
+  <text x="442" y="540" text-anchor="middle" class="t muted" font-size="18">Cards</text>
+  <text x="548" y="540" text-anchor="middle" class="t muted" font-size="18">Logs</text>
+
+  <!-- Primary table (teachers) -->
+  <rect x="120" y="586" width="480" height="520" rx="18" fill="#ffffff" class="stroke"/>
+  <text x="145" y="628" class="t" font-size="22" font-weight="700">Teachers</text>
+
+  <rect x="145" y="652" width="430" height="36" rx="10" fill="#f3f4f6"/>
+  <text x="160" y="676" class="t muted" font-size="16">ID</text>
+  <text x="300" y="676" class="t muted" font-size="16">Name</text>
+  <text x="465" y="676" class="t muted" font-size="16">Role</text>
+
+  <rect x="145" y="698" width="430" height="44" rx="10" fill="#ffffff" class="stroke"/>
+  <text x="160" y="726" class="t" font-size="16">admin</text>
+  <text x="300" y="726" class="t" font-size="16">Administrator</text>
+  <text x="465" y="726" class="t" font-size="16">admin</text>
+
+  <rect x="145" y="750" width="430" height="44" rx="10" fill="#ffffff" class="stroke"/>
+  <text x="160" y="778" class="t" font-size="16">tutor-01</text>
+  <text x="300" y="778" class="t" font-size="16">Tutor</text>
+  <text x="465" y="778" class="t" font-size="16">tutor</text>
+
+  <rect x="145" y="802" width="430" height="44" rx="10" fill="#ffffff" class="stroke"/>
+  <text x="160" y="830" class="t" font-size="16">teacher-01</text>
+  <text x="300" y="830" class="t" font-size="16">Teacher</text>
+  <text x="465" y="830" class="t" font-size="16">teacher</text>
+
+  <!-- Actions row -->
+  <rect x="145" y="872" width="210" height="64" rx="18" fill="#111827"/>
+  <text x="250" y="914" text-anchor="middle" class="t" font-size="18" font-weight="700" fill="#ffffff">Create</text>
+  <rect x="365" y="872" width="210" height="64" rx="18" fill="#e5e7eb"/>
+  <text x="470" y="914" text-anchor="middle" class="t" font-size="18" font-weight="700">Details</text>
+
+  <!-- Logs preview -->
+  <rect x="120" y="1128" width="480" height="180" rx="18" fill="#ffffff" class="stroke"/>
+  <text x="145" y="1170" class="t" font-size="22" font-weight="700">Recent Activity</text>
+  <text x="145" y="1210" class="t muted" font-size="16">ENTRY • student-213 • approved</text>
+  <text x="145" y="1240" class="t muted" font-size="16">FACE_VERIFY • student-213 • match</text>
+  <text x="145" y="1270" class="t muted" font-size="16">ENTRY • student-108 • denied</text>
+
+  <!-- Modal hint (visual only) -->
+  <rect x="160" y="720" width="400" height="260" rx="22" fill="#111827" opacity="0.10"/>
+  <rect x="190" y="750" width="340" height="200" rx="18" fill="#ffffff" class="stroke"/>
+  <text x="360" y="792" text-anchor="middle" class="t" font-size="18" font-weight="700">Teacher Details</text>
+  <text x="210" y="834" class="t muted" font-size="16">Photo + permission level</text>
+  <rect x="210" y="860" width="300" height="56" rx="16" fill="#e5e7eb"/>
+  <text x="360" y="896" text-anchor="middle" class="t" font-size="16" font-weight="700">Close</text>
+</svg>

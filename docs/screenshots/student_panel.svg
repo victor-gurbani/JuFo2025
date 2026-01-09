@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1440" viewBox="0 0 720 1440">
+  <defs>
+    <style>
+      .t { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; fill: #111827; }
+      .muted { fill: #6b7280; }
+      .stroke { stroke: #d1d5db; stroke-width: 6; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#f3f4f6"/>
+
+  <!-- Phone frame -->
+  <rect x="60" y="120" width="600" height="1200" rx="56" fill="#ffffff" class="stroke"/>
+  <rect x="120" y="170" width="480" height="36" rx="18" fill="#e5e7eb"/>
+
+  <!-- Header -->
+  <text x="360" y="285" text-anchor="middle" class="t" font-size="42" font-weight="700">Student Panel</text>
+  <text x="360" y="330" text-anchor="middle" class="t muted" font-size="22">Profile + photo update (weekly limit)</text>
+
+  <!-- Student ID input -->
+  <rect x="120" y="380" width="480" height="92" rx="18" fill="#ffffff" class="stroke"/>
+  <text x="145" y="416" class="t muted" font-size="18">Your Student ID</text>
+  <text x="145" y="452" class="t" font-size="26">student-213</text>
+
+  <!-- Profile card -->
+  <rect x="120" y="500" width="480" height="300" rx="18" fill="#ffffff" class="stroke"/>
+  <text x="145" y="542" class="t" font-size="22" font-weight="700">Student Information</text>
+
+  <!-- Avatar -->
+  <circle cx="360" cy="620" r="70" fill="#e5e7eb"/>
+  <circle cx="360" cy="600" r="28" fill="#cbd5e1"/>
+  <rect x="320" y="632" width="80" height="58" rx="26" fill="#cbd5e1"/>
+
+  <text x="360" y="724" text-anchor="middle" class="t" font-size="22" font-weight="700">Student Name</text>
+  <text x="360" y="756" text-anchor="middle" class="t muted" font-size="18">Class • Tutor</text>
+
+  <!-- Email input -->
+  <rect x="145" y="820" width="430" height="92" rx="18" fill="#ffffff" class="stroke"/>
+  <text x="168" y="856" class="t muted" font-size="18">Email</text>
+  <text x="168" y="892" class="t" font-size="22">name@example.com</text>
+
+  <!-- Update info button -->
+  <rect x="145" y="930" width="430" height="72" rx="18" fill="#111827"/>
+  <text x="360" y="978" text-anchor="middle" class="t" font-size="24" font-weight="700" fill="#ffffff">Update Info</text>
+
+  <!-- Photo update section -->
+  <rect x="120" y="1030" width="480" height="270" rx="18" fill="#ffffff" class="stroke"/>
+  <text x="145" y="1072" class="t" font-size="22" font-weight="700">Photo Update</text>
+  <text x="145" y="1110" class="t muted" font-size="18">Verify face before saving</text>
+
+  <!-- Toggle (visual) -->
+  <rect x="468" y="1088" width="90" height="40" rx="20" fill="#16a34a"/>
+  <circle cx="535" cy="1108" r="16" fill="#ffffff"/>
+
+  <!-- Upload photo button -->
+  <rect x="145" y="1152" width="430" height="72" rx="18" fill="#111827"/>
+  <text x="360" y="1200" text-anchor="middle" class="t" font-size="24" font-weight="700" fill="#ffffff">Pick Photo</text>
+
+  <!-- Next update note -->
+  <text x="145" y="1260" class="t muted" font-size="18">Next update available: 7 days</text>
+</svg>
