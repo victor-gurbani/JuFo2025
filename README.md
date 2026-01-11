@@ -160,6 +160,13 @@ Default backend is `http://localhost:3000` (the current app config uses localhos
 
 ---
 
+## Repository Structure
+* `Backend/` - Node.js Express API + TensorFlow.js 
+* `Frontend/` - Expo/React Native mobile application
+* `docs/` - Architecture diagrams and screenshots
+
+---
+
 ## Roadmap
 
 * [ ] **Live Video Recognition:** Migrate from static image verification to real-time video stream analysis.
