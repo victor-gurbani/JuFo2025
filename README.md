@@ -174,7 +174,4 @@ Default backend is `http://localhost:3000` (the current app config uses localhos
 
 ---
 
-## Author
-
-**Victor Gurbani**
-[GitHub Profile](https://github.com/victor-gurbani)
+*Authored by [Victor Gurbani](https://github.com/victor-gurbani) | 2025*
