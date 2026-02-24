@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { View, ScrollView, Image } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable, SegmentedButtons, Portal, Modal, ActivityIndicator } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
-import api from "../services/api";
+import api, { getUserId } from "../services/api";
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
@@ -64,12 +64,16 @@ export default function AdminPanel() {
   const [studentPhotos, setStudentPhotos] = useState<{[key: string]: string}>({});
 
   // Helper function to append teacherId to requests
+  // Helper function to append teacherId to requests (now uses JWT-decoded user ID)
   const apiWithTeacherId = (method: string, url: string, body?: any) => {
+    // Get user ID from JWT token (or use manual input as fallback)
+    const userId = getUserId() || committedTeacherId;
+    
     if (method === "GET" || method === "DELETE") {
       const separator = url.includes('?') ? '&' : '?';
-      return api[method.toLowerCase()](`${url}${separator}teacherId=${committedTeacherId}`);
+      return api[method.toLowerCase()](`${url}${separator}teacherId=${userId}`);
     } else {
-      return api[method.toLowerCase()](url, { ...body, teacherId: committedTeacherId });
+      return api[method.toLowerCase()](url, { ...body, teacherId: userId });
     }
   };
 

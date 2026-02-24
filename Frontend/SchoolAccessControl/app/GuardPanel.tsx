@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { View, ScrollView, Image } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable } from "react-native-paper";
-import api from "../services/api";
+import api, { getUserId } from "../services/api";
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '../theme/ThemeContext';
 
@@ -9,9 +9,6 @@ export default function GuardPanel() {
   const router = useRouter();
   const { theme } = useAppTheme();
   // State variables
-  const [inputGuardId, setInputGuardId] = useState("");
-  const [committedGuardId, setCommittedGuardId] = useState("");
-  const idInputTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [uid, setUid] = useState("");
   const [result, setResult] = useState("");
   const [visible, setVisible] = useState(false);
@@ -29,14 +26,7 @@ export default function GuardPanel() {
   const [isValidating, setIsValidating] = useState(false);
   const [isLoadingCards, setIsLoadingCards] = useState(false);
 
-  // Helper function to append guardId to requests
-  const apiWithGuardId = (method: string, url: string, body?: any) => {
-    if (method === "GET" || method === "DELETE") {
-      return api[method.toLowerCase()](`${url}?guardId=${committedGuardId}`); 
-    } else {
-      return api[method.toLowerCase()](url, { ...body, guardId: committedGuardId });
-    }
-  };
+
 
   // Function to show snackbar messages
   const showSnackbar = (message: string) => {
@@ -47,7 +37,7 @@ export default function GuardPanel() {
   // Fetch all cards (optional, based on your requirements)
   const loadCards = () => {
     setIsLoadingCards(true);
-    apiWithGuardId("GET", "/cards")
+    api.get("/cards")
       .then((res) => setCards(res.data))
       .catch((err) => showSnackbar("Error fetching cards: " + err))
       .finally(() => {
@@ -56,24 +46,8 @@ export default function GuardPanel() {
   };
 
   useEffect(() => {
-    if (committedGuardId) {
-      loadCards();
-    }
-  }, [committedGuardId]);
-
-  const handleGuardIdChange = (text: string) => {
-    setInputGuardId(text);
-    
-    // Clear any existing timeout
-    if (idInputTimeoutRef.current) {
-      clearTimeout(idInputTimeoutRef.current);
-    }
-    
-    // Set new timeout to commit the ID after 800ms of inactivity
-    idInputTimeoutRef.current = setTimeout(() => {
-      setCommittedGuardId(text);
-    }, 800);
-  };
+    loadCards();
+  }, []);
 
   const handleValidation = () => {
     if (uid.trim() === "") {
@@ -83,7 +57,7 @@ export default function GuardPanel() {
 
     setIsValidating(true);
     setResult("Validating...");
-    apiWithGuardId("POST", "/guard/validate", { cardUID: uid })
+    api.post("/guard/validate", { cardUID: uid })
       .then((res) => {
         if (res.data.valid) {
           setResult("Access Granted");
@@ -119,17 +93,9 @@ export default function GuardPanel() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView style={{ margin: 20 }}>
-        {/* Input field for Guard ID */}
-        <TextInput
-          label="Current Guard ID"
-          value={inputGuardId}
-          onChangeText={handleGuardIdChange}
-          style={{ marginVertical: 5 }}
-          mode="outlined"
-        />
-
-        {committedGuardId ? (
+      <ScrollView style={{ margin: 20 }}>
           <>
+            <Text style={{ fontWeight: "bold", marginBottom: 10 }}>Guard Panel</Text>
             <Text style={{ fontWeight: "bold", marginBottom: 10 }}>Guard Panel</Text>
 
             {/* Card Validation Section */}
@@ -291,9 +257,6 @@ export default function GuardPanel() {
             </Card>
             
           </>
-        ) : (
-          <Text>Please enter your Guard ID to proceed.</Text>
-        )}
       </ScrollView>
       <Snackbar
         visible={snackbarVisible}

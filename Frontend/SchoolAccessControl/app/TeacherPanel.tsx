@@ -3,7 +3,7 @@ import { View, ScrollView, Image, Platform } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, Switch, DataTable } from "react-native-paper";
 import { DatePickerModal, TimePickerModal } from "react-native-paper-dates";
 import * as FileSystem from 'expo-file-system';  
-import api from "../services/api";
+import api, { getUserId } from "../services/api";
 import "react-native-paper-dates"; 
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
@@ -12,9 +12,6 @@ import { useAppTheme } from '../theme/ThemeContext';
 export default function TeacherPanel() {
   const router = useRouter();
   const { theme } = useAppTheme();
-  const [inputTeacherId, setInputTeacherId] = useState("");
-  const [committedTeacherId, setCommittedTeacherId] = useState("");
-  const idInputTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [studentId, setStudentId] = useState("");
   const [cardUID, setCardUID] = useState("");
@@ -44,31 +41,9 @@ export default function TeacherPanel() {
     setSnackbarVisible(true);
   };
 
-  const handleTeacherIdChange = (text: string) => {
-    setInputTeacherId(text);
-
-    if (idInputTimeoutRef.current) {
-      clearTimeout(idInputTimeoutRef.current);
-    }
-
-    idInputTimeoutRef.current = setTimeout(() => {
-      setCommittedTeacherId(text);
-    }, 800);
-  };
-
-  const apiWithTeacherId = (method: string, url: string, body?: any) => {
-    if (method === "GET" || method === "DELETE") {
-      return api[method.toLowerCase()](`${url}?teacherId=${committedTeacherId}`);
-    } else {
-      return api[method.toLowerCase()](url, { ...body, teacherId: committedTeacherId });
-    }
-  };
-
   useEffect(() => {
-    if (committedTeacherId) {
-      handleViewPermissions();
-    }
-  }, [committedTeacherId]);
+    handleViewPermissions();
+  }, []);
 
   const pickStudentImage = async () => {
     try {
@@ -172,7 +147,7 @@ export default function TeacherPanel() {
     const endDateTimeISO = endDateTime.toISOString();
 
     setIsAssigningCard(true);
-    apiWithTeacherId("POST", "/teacher/assign-card", {
+    api.post("/teacher/assign-card", {
       studentId,
       cardUID,
       startDate: startDateTimeISO,
@@ -181,7 +156,6 @@ export default function TeacherPanel() {
       recurrencePattern,
       studentPhotoUrl
     })
-      .then(() => {
         showSnackbar("Card assigned");
         // Clear the input fields
         setStudentId("");
@@ -202,7 +176,7 @@ export default function TeacherPanel() {
 
   const handleInvalidateCard = () => {
     setIsInvalidatingCard(true);
-    apiWithTeacherId("POST", "/teacher/invalidate-card", {
+    api.post("/teacher/invalidate-card", {
       cardUID: invalidateCardUID
     })
       .then(() => showSnackbar("Card invalidated"))
@@ -214,7 +188,7 @@ export default function TeacherPanel() {
 
   const handleViewPermissions = () => {
     setIsLoadingPermissions(true);
-    apiWithTeacherId("GET", "/teacher/permissions")
+    api.get("/teacher/permissions")
       .then((res) => setPermissions(res.data))
       .catch((err) => showSnackbar("Error: " + err))
       .finally(() => {
@@ -230,15 +204,7 @@ export default function TeacherPanel() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView style={{ margin: 20 }}>
-        <TextInput
-          label="Current Teacher ID"
-          value={inputTeacherId}
-          onChangeText={handleTeacherIdChange}
-          mode="outlined"
-          style={{ marginBottom: 10 }}
-        />
-        {committedTeacherId ? (
-          <>
+        <>
             <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
               <Card.Content>
                 <Title>Assign a Card</Title>
@@ -473,9 +439,6 @@ export default function TeacherPanel() {
               </Card.Content>
             </Card>
           </>
-        ) : (
-          <Text>Please enter your Teacher ID to proceed.</Text>
-        )}
       </ScrollView>
       <Snackbar
         visible={snackbarVisible}

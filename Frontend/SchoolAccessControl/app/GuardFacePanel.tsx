@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { View, ScrollView, Image, StyleSheet } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable, ProgressBar } from "react-native-paper";
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import api from "../services/api";
+import api, { getUserId } from "../services/api";
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '../theme/ThemeContext';
 
@@ -44,11 +44,15 @@ export default function GuardFacePanel() {
   const [isLoadingCards, setIsLoadingCards] = useState(false);
 
   // Helper function to append guardId to requests
+  // Helper function to append guardId to requests (now uses JWT-decoded user ID)
   const apiWithGuardId = (method: string, url: string, body?: any) => {
+    // Get user ID from JWT token (or use manual input as fallback)
+    const userId = getUserId() || committedGuardId;
+    
     if (method === "GET" || method === "DELETE") {
-      return api[method.toLowerCase()](`${url}?guardId=${committedGuardId}`); 
+      return api[method.toLowerCase()](`${url}?guardId=${userId}`);
     } else {
-      return api[method.toLowerCase()](url, { ...body, guardId: committedGuardId });
+      return api[method.toLowerCase()](url, { ...body, guardId: userId });
     }
   };
 
