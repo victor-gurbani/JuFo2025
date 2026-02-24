@@ -66,7 +66,7 @@ Wave 4 (After Wave 3)
 Wave 5 (After Wave 4)
 ├── Task 15: Thesenpapier (4-6 theses with evidence anchors)
 ├── Task 16: Colloquium Presentation Prep
-└── Task 17: Appendices (Reproducibility + Materials)
+└── Task 17: Appendices (Reproducibility + Materials) [x]
 
 Final Verification Wave
 ├── Task 18: Full LaTeX Compilation & Review

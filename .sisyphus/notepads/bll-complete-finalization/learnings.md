@@ -159,3 +159,9 @@ When defending a thesis, the **Position → Evidence → Limitation → Implicat
 - **Demonstration:** Using a "Mock Mode" for the demo ensures stability in environments with poor connectivity or restricted hardware access (like a school auditorium).
 - **Structure:** Balancing technical implementation (Node.js/TF.js) with legal compliance (GDPR) is essential for an interdisciplinary computer science project.
 - **Timing:** 10 minutes is short; focusing on "Why local processing?" (The Edge Computing argument) is the most impactful way to use that time.
+
+### Appendix and Reproducibility
+- The `listings` package requires explicit language definitions for JavaScript if not provided by the distribution.
+- Standardizing image processing (HEIC to PNG) is a key engineering feat for cross-platform biometric systems.
+- Using `longtable` is better for API endpoint lists as they might span multiple pages in future iterations.
+- Hardware requirements should specify RAM for AI inference (4GB+ for Raspberry Pi 4).

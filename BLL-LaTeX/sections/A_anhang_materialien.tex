@@ -1,10 +1,111 @@
 \section{Anhang A: Material, Zusatzdaten und erweiterte Nachweise}
 
 \subsection{Ergaenzende Tabellen und Rohdaten}
-[Hier grosse Tabellen, Rohmesswerte, Vollausgaben von Experimenten einfuegen.]
+
+\subsubsection{Datenbankschema (SQLite)}
+Die folgenden SQL-Anweisungen beschreiben die Struktur der verwendeten Datenbank \texttt{database.db}. Die Tabellen bilden die Grundlage fuer das Berechtigungssystem.
+
+\begin{lstlisting}[language=SQL]
+CREATE TABLE IF NOT EXISTS cards (
+  uid TEXT PRIMARY KEY,
+  lastAssigned TEXT,
+  isValid INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS permissions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  startDate TEXT,
+  endDate TEXT,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  isRecurring INTEGER,
+  recurrencePattern TEXT,
+  isValid INTEGER,
+  assignedStudent TEXT,
+  assignedBy TEXT,
+  associatedCard TEXT,
+  FOREIGN KEY (assignedStudent) REFERENCES students(id),
+  FOREIGN KEY (assignedBy) REFERENCES teachers(id),
+  FOREIGN KEY (associatedCard) REFERENCES cards(uid)
+);
+\end{lstlisting}
+
+\subsubsection{API-Endpunkte}
+In der folgenden Tabelle sind die wichtigsten API-Endpunkte des Backends aufgefuehrt, die von der Guard-App und dem Schueler-Interface genutzt werden.
+
+\begin{longtable}{lll}
+\caption{Uebersicht der API-Endpunkte} \\
+\toprule
+\textbf{Methode} & \textbf{Pfad} & \textbf{Beschreibung} \\ \midrule
+\endhead
+POST & /auth/login & Authentifizierung fuer Personal \\
+POST & /auth/login-student & Login fuer Schueler via ID \\
+POST & /guard/validate & Validierung eines NFC-Scans \\
+POST & /guard/verify-face & Vergleich von Snapshot und Referenz \\
+GET & /student/profile & Abruf des Schuelerprofils \\
+POST & /cards/assign & Verknuepfung Karte mit Schueler \\ \bottomrule
+\end{longtable}
 
 \subsection{Ergaenzende Abbildungen}
-[Hier Diagramme/Skizzen, die den Haupttext entlasten, aber nachvollziehbar machen.]
+Die Benutzeroberflaeche der Guard-App ist fuer die schnelle Verifikation optimiert. Abbildung \ref{fig:screenshot_guard} zeigt die Ansicht nach einem erfolgreichen NFC-Scan.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/systemarchitektur.pdf}
+  \caption{Benutzeroberflaeche der Guard-App bei erfolgreicher Validierung}
+  \label{fig:screenshot_guard}
+\end{figure}
 
 \subsection{Technische Artefakte}
-[Codeauszuege, API-Schemata, Systemdiagramme, Build-Konfigurationen.]
+Hier werden zentrale Code-Ausschnitte dokumentiert, die die technische Logik des Systems repraesentieren.
+
+\subsubsection{Distanzberechnung (Euklidische Distanz)}
+Die Entscheidung ueber eine Gesichtsuereinstimmung basiert auf der euklidischen Distanz der Face-Descriptoren.
+\begin{lstlisting}
+const distance = faceapi.euclideanDistance(
+  snapshotDetection.descriptor,
+  referenceDetection.descriptor
+);
+const threshold = 0.6;
+const match = distance < threshold;
+\end{lstlisting}
+
+\subsubsection{HEIC-Konvertierungspipeline}
+Die Normalisierung von iOS-Fotos erfolgt serverseitig durch eine Pipeline aus \texttt{heic-convert} und \texttt{sharp}.
+\begin{lstlisting}
+if (isHeicFormat || isHeifFormat) {
+  heicBuffer = await heicConvert({
+    buffer: imageBuffer,
+    format: 'PNG',
+    quality: 1
+  });
+  processedImageBuffer = Buffer.from(heicBuffer);
+}
+// Resize mit sharp auf Standardmass
+const sharpOutput = await sharp(processedImageBuffer)
+  .resize(1024, 1024, { fit: 'cover' })
+  .png()
+  .toBuffer();
+\end{lstlisting}
+
+\subsubsection{JWT-Authentifizierungs-Middleware}
+Die Absicherung der Endpunkte erfolgt rollenbasiert mittels JSON Web Tokens.
+\begin{lstlisting}
+const checkAuth = (db, requiredPermissions = []) => {
+  return (req, res, next) => {
+    const token = req.headers.authorization.split(' ')[1];
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded;
+      if (requiredPermissions.length > 0) {
+        const userPermissions = req.user.permissions || [];
+        const hasPermission = requiredPermissions.every(p => userPermissions.includes(p));
+        if (!hasPermission) return res.status(403).json({ error: 'Forbidden' });
+      }
+      next();
+    } catch (err) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+  };
+};
+\end{lstlisting}
+
