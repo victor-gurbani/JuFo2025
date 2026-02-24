@@ -1,0 +1,11 @@
+image1,image2,match_expected,match_actual,detection_time_ms,descriptor_time_ms,distance,total_time_ms
+match1_a.jpg,match1_b.jpg,true,true,199.97,272.46,0.0000,504.26
+match2_a.jpg,match2_b.jpg,true,true,238.50,308.05,0.0000,585.46
+match3_a.jpg,match3_b.jpg,true,true,217.08,274.52,0.0000,526.90
+match4_a.jpg,match4_b.jpg,true,true,205.21,271.10,0.0000,510.94
+match5_a.jpg,match5_b.jpg,true,true,204.89,279.91,0.0000,517.60
+nonmatch1_a.jpg,nonmatch1_b.jpg,false,false,226.51,292.62,0.7069,558.39
+nonmatch2_a.jpg,nonmatch2_b.jpg,false,false,225.46,279.92,0.7764,539.16
+nonmatch3_a.jpg,nonmatch3_b.jpg,false,false,209.40,275.98,0.7266,517.60
+nonmatch4_a.jpg,nonmatch4_b.jpg,false,false,214.35,284.18,1.0748,535.17
+nonmatch5_a.jpg,nonmatch5_b.jpg,false,false,216.54,271.15,0.8151,520.30

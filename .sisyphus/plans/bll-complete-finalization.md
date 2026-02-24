@@ -49,7 +49,7 @@ Wave 1 (Parallel - No Dependencies)
 Wave 2 (After Wave 1)
 ├── Task 5: Frontend Stabilization (auth integration, URL config, web-only fixes) [x]
 ├── Task 5B: Code Polish & Quality Hardening (TS errors, interfaces, dead code, linting) [x]
-├── Task 6: LaTeX Paper — Methodik und Umsetzung (system architecture chapter)
+├── Task 6: LaTeX Paper — Methodik und Umsetzung (system architecture chapter) [x]
 └── Task 7: Create Figures & Diagrams for Paper
 
 Wave 3 (After Wave 2)

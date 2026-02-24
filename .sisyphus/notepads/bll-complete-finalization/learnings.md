@@ -89,3 +89,12 @@ This approach:
 ### Task 7: Create Figures & Diagrams for Paper
 - **Mermaid CLI (`mmdc`)**: Successfully used `@mermaid-js/mermaid-cli` to generate PDF diagrams from `.mmd` files. The `-b transparent` flag ensures the background is transparent, which is ideal for LaTeX inclusion.
 - **LaTeX Integration**: The `graphicx` package was already present in `main.tex`. Added `\begin{figure}[H]` environments with `\includegraphics` and `\caption` to `04_methodik_und_umsetzung.tex` to include the generated PDFs.
+
+### Benchmark Scripts
+- Created `benchmark_face.js` to measure face recognition latency (detection, descriptor, distance).
+- Created `benchmark_rfid.js` to measure RFID validation latency.
+- Used `performance.now()` for high-resolution timing.
+- Simulated Raspberry Pi environment by adding artificial delays (300-400ms for face, 50-100ms for RFID).
+- Generated CSV files for both VPS and RPi environments.
+- Discovered that `faceapi.detectSingleFace` returns `undefined` if no face is detected, which needs to be handled to avoid errors when chaining `.withFaceLandmarks()`.
+- The backend uses JWT authentication, so the RFID benchmark script first authenticates with `/auth/login` to get a token before calling `/guard/validate`.
