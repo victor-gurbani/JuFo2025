@@ -48,6 +48,7 @@ const db = new sqlite3.Database("./database.db", (err) => {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           startDate TEXT,
           endDate TEXT,
+          createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
           isRecurring INTEGER,
           recurrencePattern TEXT,
           isValid INTEGER,
@@ -61,6 +62,13 @@ const db = new sqlite3.Database("./database.db", (err) => {
         (err) => {
           if (err) {
             console.error("Error creating permissions table:", err.message);
+          } else {
+            db.run(`ALTER TABLE permissions ADD COLUMN createdAt DATETIME DEFAULT CURRENT_TIMESTAMP`, (alterErr) => {
+              // Ignore error if column already exists
+              if (alterErr && !alterErr.message.includes('duplicate column')) {
+                console.error("Error adding createdAt column to permissions:", alterErr.message);
+              }
+            });
           }
         }
       );
@@ -137,12 +145,21 @@ const db = new sqlite3.Database("./database.db", (err) => {
           card TEXT,
           wasApproved INTEGER,
           timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+          verified_by TEXT,
           FOREIGN KEY (student) REFERENCES students(id),
-          FOREIGN KEY (card) REFERENCES cards(uid)
+          FOREIGN KEY (card) REFERENCES cards(uid),
+          FOREIGN KEY (verified_by) REFERENCES teachers(id)
         )`,
         (err) => {
           if (err) {
             console.error("Error creating accessLogs table:", err.message);
+          } else {
+            db.run(`ALTER TABLE accessLogs ADD COLUMN verified_by TEXT`, (alterErr) => {
+              // Ignore error if column already exists
+              if (alterErr && !alterErr.message.includes('duplicate column')) {
+                console.error("Error adding verified_by column to accessLogs:", alterErr.message);
+              }
+            });
           }
         }
       );
