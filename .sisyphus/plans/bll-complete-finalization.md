@@ -1013,7 +1013,7 @@ Defense preparation (from BLL_COLLOQUIUM_PREP.md):
 
 **Depends on**: Tasks 12, 15 (paper complete, theses written)
 **Blocks**: Nothing
-
+├── Task 16: Colloquium Presentation Prep [x]
 **QA Scenarios**:
 1. Presentation outline exists with 6 sections and timing
 2. At least 5 anticipated defense questions with prepared answers

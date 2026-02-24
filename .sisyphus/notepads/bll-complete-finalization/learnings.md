@@ -144,3 +144,18 @@ This approach:
 - LaTeX templates for thesenpapier are often concise (1-2 pages) and focus on the "what" and "why" of the work.
 - Methodological defense should highlight choices (Design Science Research) and tools (TypeScript, Node.js, TensorFlow.js).
 - Anticipating critical questions (NFC cloning, acceptance, scalability) helps prepare for the defense.
+
+
+## Colloquium Preparation (Task 15)
+
+### Key Learning: The "Answer Framework" for Academic Defenses
+When defending a thesis, the **Position → Evidence → Limitation → Implication** structure demonstrates:
+1. **Clarity:** A direct answer to the question.
+2. **Grounding:** Usage of benchmark data and implementation details as proof.
+3. **Honesty:** Acknowledging the constraints of the prototype (e.g., lighting dependency).
+4. **Vision:** Understanding how the project fits into a larger technical or social context.
+
+### Presentation Strategy
+- **Demonstration:** Using a "Mock Mode" for the demo ensures stability in environments with poor connectivity or restricted hardware access (like a school auditorium).
+- **Structure:** Balancing technical implementation (Node.js/TF.js) with legal compliance (GDPR) is essential for an interdisciplinary computer science project.
+- **Timing:** 10 minutes is short; focusing on "Why local processing?" (The Edge Computing argument) is the most impactful way to use that time.
