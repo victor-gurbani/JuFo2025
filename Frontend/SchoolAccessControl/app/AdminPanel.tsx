@@ -540,7 +540,13 @@ export default function AdminPanel() {
   const { width } = useWindowDimensions();
 
   // Add this useEffect to handle keyboard events for the modal
+  // Add this useEffect to handle keyboard events for the modal (web only)
   useEffect(() => {
+    // Only run on web platform
+    if (Platform.OS !== 'web') {
+      return;
+    }
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && showCardDetailModal) {
         setShowCardDetailModal(false);
@@ -548,13 +554,15 @@ export default function AdminPanel() {
     };
 
     // Only add the listener when the modal is visible
-    if (showCardDetailModal) {
+    if (showCardDetailModal && Platform.OS === 'web') {
       document.addEventListener('keydown', handleKeyDown);
     }
 
     // Clean up the event listener when the component unmounts or the modal closes
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      if (Platform.OS === 'web') {
+        document.removeEventListener('keydown', handleKeyDown);
+      }
     };
   }, [showCardDetailModal]);
 
