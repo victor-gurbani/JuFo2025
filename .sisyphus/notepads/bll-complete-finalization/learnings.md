@@ -115,3 +115,10 @@ This approach:
 - Reflected on methodological insights, specifically the importance of runtime version pinning and the admission of missing automated tests.
 - Summarized personal development in full-stack engineering, GDPR compliance (Privacy by Design), and project management.
 - Successfully verified that the addition of the reflection chapter does not break the LaTeX compilation.
+
+## Conclusion and Future Work (Task 12)
+- The conclusion successfully synthesizes the benchmark results from Chapter 5.
+- Hypotheses H1 (latency), H2 (accuracy), and H3 (DSGVO) were explicitly addressed and mapped to the results.
+- The Leitfrage was answered affirmatively, emphasizing the "Privacy by Design" approach through local Edge Computing on Raspberry Pi.
+- Future work (Ausblick) focuses on technical scaling (PostgreSQL), security enhancements (Anti-spoofing), and user convenience (Live Video).
+- LaTeX structure for conclusion: \section{Fazit und Ausblick} with subsections for summary, answering the Leitfrage, and outlook.

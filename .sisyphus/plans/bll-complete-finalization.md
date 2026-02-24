@@ -59,7 +59,7 @@ Wave 3 (After Wave 2)
 
 Wave 4 (After Wave 3)
 ├── Task 11: LaTeX Paper — Reflexion Arbeitsprozess [x]
-├── Task 12: LaTeX Paper — Fazit und Ausblick
+├── Task 12: LaTeX Paper — Fazit und Ausblick [x]
 ├── Task 13: Bibliography & Formal Compliance
 └── Task 14: Demo Fallback Mode (mock auth for colloquium)
 

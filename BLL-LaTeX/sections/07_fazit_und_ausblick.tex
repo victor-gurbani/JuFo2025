@@ -1,10 +1,36 @@
-\section{Fazit und Ausblick}
+\section{Fazit und Ausblick} \label{sec:fazit}
 
-\subsection{Beantwortung der Leitfrage}
-[Praezise Synthese der Ergebnisse als belastbare Antwort auf die Leitfrage.]
+\subsection{Zusammenfassung der Ergebnisse} \label{subsec:zusammenfassung}
 
-\subsection{Wissenschaftlicher Mehrwert}
-[Beitrag der Arbeit fuer Fachgebiet, Schule, Praxis oder Forschung.]
+Die vorliegende Arbeit untersuchte die Realisierbarkeit eines hybriden Zugangskontrollsystems für Schulen unter Verwendung von RFID-Technologie und lokaler KI-Inferenz. Im Fokus stand die Beantwortung der Leitfrage: \textit{„Wie lässt sich die physische Zugangskontrolle an Schulen durch die Kombination von passiver RFID-Technologie und lokaler KI-Gesichtserkennung sicher, datenschutzkonform und vollautomatisiert umsetzen?“}
 
-\subsection{Ausblick}
-[Konkrete naechste Schritte, offene Fragen, potentielle Weiterentwicklung.]
+Die Evaluation der Benchmarks auf einem Raspberry Pi 4 zeigte, dass die technische Umsetzung die gesteckten Ziele erreicht und teilweise übertrifft. Die Hypothese \textbf{H1} konnte verifiziert werden: Die RFID-Validierung erfolgte in durchschnittlich 157,3\,ms, während der gesamte Verifikationsprozess (inklusive Gesichtserkennung) mit ca. 700\,ms deutlich unter der geforderten Grenze von 2 Sekunden blieb. Dies belegt die Praxistauglichkeit für Stoßzeiten im Schulalltag. Auch die Hypothese \textbf{H2} zur Zuverlässigkeit wurde bestätigt, da in den Testläufen eine Erkennungsgenauigkeit von 100\,\% erreicht wurde (Zielwert: 90\,\%). Schließlich wurde die Hypothese \textbf{H3} plausibilisiert: Durch den Einsatz von Edge-Computing auf einem lokalen Raspberry Pi verlassen biometrische Daten nie das Schulnetzwerk, wodurch ein hohes Maß an Datenschutz („Privacy by Design“) gewährleistet wird.
+
+\subsection{Beantwortung der Leitfrage} \label{subsec:beantwortung_leitfrage}
+
+Basierend auf den Ergebnissen lässt sich die Leitfrage wie folgt beantworten: Eine sichere, datenschutzkonforme und vollautomatisierte Zugangskontrolle lässt sich durch eine dezentrale Full-Stack-Architektur realisieren, die biometrische Inferenz direkt am „Edge“ (lokaler Server) ausführt.
+,
+\textbf{Sicherheit} wird durch die Kombination zweier Faktoren erreicht: Der physische Besitz einer RFID-Karte wird durch die biometrische Prüfung der Identität ergänzt. Dies verhindert den Missbrauch verlorener oder entliehener Karten effektiv. Die serverseitige Bildnormalisierung (HEIC-zu-PNG-Pipeline) stellt zudem sicher, dass das System robust gegenüber verschiedenen Endgeräten der Nutzer ist.
+,
+Die \textbf{Datenschutzkonformität} wird primär durch die lokale Verarbeitung sichergestellt. Im Gegensatz zu Cloud-basierten Lösungen entfallen riskante Datenübertragungen an Drittanbieter. Die Nutzung von SQLite als portable, lokale Datenbank minimiert zudem die Angriffsfläche für externe Zugriffe.
+,
+Die \textbf{Vollautomatisierung} gelingt durch das entwickelte Backend, das Berechtigungen rollenbasiert (RBAC) verwaltet und wiederkehrende Zugriffsmuster autonom erkennt. Das System entlastet das Schulpersonal, indem es Routinekontrollen automatisiert und Lehrkräften die granulare Verwaltung von Ausnahmegenehmigungen über eine mobile App ermöglicht.
+,
+\subsection{Wissenschaftlicher und praktischer Mehrwert} \label{subsec:mehrwert}
+
+Der wissenschaftliche Mehrwert dieser Arbeit liegt in der Demonstration, dass leistungsfähige KI-Modelle wie SSD MobileNet v1 zur Gesichtserkennung auch auf kostengünstiger Consumer-Hardware (Raspberry Pi) performant für Sicherheitszwecke eingesetzt werden können. Praktisch bietet das System eine skalierbare und kosteneffiziente Lösung für Bildungseinrichtungen, die ihre physische Sicherheit digitalisieren wollen, ohne die Privatsphäre der Schüler zu gefährden.
+,
+\subsection{Ausblick und zukünftige Arbeiten} \label{subsec:ausblick}
+
+Trotz der erfolgreichen Implementierung gibt es mehrere Ansatzpunkte für die zukünftige Weiterentwicklung des Systems:
+,
+\begin{enumerate}
+    \item \textbf{Echtzeit-Videoerkennung:} Der aktuelle Prototyp basiert auf statischen Schnappschüssen. Die Migration zu einer kontinuierlichen Videoanalyse (Live-Stream) könnte den Prozess weiter beschleunigen und komfortabler gestalten.
+    \item \textbf{Anti-Spoofing-Maßnahmen:} Um die Sicherheit weiter zu erhöhen, sollten Mechanismen zur Lebenderkennung (Liveness Detection) integriert werden, die verhindern, dass das System durch das Vorzeigen eines Fotos überlistet wird.
+    \item \textbf{PostgreSQL-Migration:} Für den Einsatz an sehr großen Schulen mit Tausenden von gleichzeitigen Anfragen ist die Migration von SQLite zu einer skalierbareren PostgreSQL-Datenbank sinnvoll, um die Schreibperformanz der Log-Dateien zu optimieren.
+    \item \textbf{Integration in Schulverwaltungssysteme:} Eine Anbindung an bestehende Stundenplansoftware (z.\,B. Untis oder EduPage) würde es ermöglichen, Zugangsberechtigungen automatisch basierend auf dem tagesaktuellen Stundenplan und etwaigen Vertretungsstunden zu vergeben.
+\end{enumerate}
+
+Abschließend lässt sich festhalten, dass das Projekt „Digital School Access Control“ ein solides Fundament für eine moderne Schul-Sicherheitseinrichtung bildet, die Technik und Datenschutz harmonisch vereint.
+
+
