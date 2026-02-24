@@ -47,8 +47,8 @@ Wave 1 (Parallel - No Dependencies)
 └── Task 4: LaTeX Paper — Kurzfassung + Einleitung + Theoretischer Hintergrund
 
 Wave 2 (After Wave 1)
-├── Task 5: Frontend Stabilization (auth integration, URL config, web-only fixes)
-├── Task 5B: Code Polish & Quality Hardening (TS errors, interfaces, dead code, linting)
+├── Task 5: Frontend Stabilization (auth integration, URL config, web-only fixes) [x]
+├── Task 5B: Code Polish & Quality Hardening (TS errors, interfaces, dead code, linting) [x]
 ├── Task 6: LaTeX Paper — Methodik und Umsetzung (system architecture chapter)
 └── Task 7: Create Figures & Diagrams for Paper
 
