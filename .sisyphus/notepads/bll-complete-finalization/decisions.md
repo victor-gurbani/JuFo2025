@@ -54,3 +54,28 @@ if (debug) console.log('message');
 - Created `.nvmrc` with content `22` (Node version pinning)
 - `dotenv` dependency added to support environment-based configuration
 - `.gitignore` verified to already contain `.env` and `database.db`
+## Frontend Stabilization & Auth Integration (Task 5)
+
+### Decision: Standardize JWT Interceptors and Remove Manual ID Passing
+- Replaced manual `uid` and `studentId` passing with a centralized Axios interceptor in `services/api.ts` that automatically attaches the JWT token from `expo-secure-store`.
+- Removed all legacy wrapper components (e.g., `CustomCard.tsx`) and `committed*Id` states from all panels (`AdminPanel`, `GuardFacePanel`, `GuardPanel`, `StudentPanel`, `TeacherPanel`).
+
+### Rationale
+- Manual ID passing is insecure and prone to state synchronization issues.
+- A centralized JWT interceptor ensures all API requests are authenticated consistently.
+- Removing redundant wrapper components simplifies the React component tree and reduces maintenance overhead.
+
+### Implementation
+- Installed `expo-secure-store` for secure token storage.
+- Updated `services/api.ts` to use `SecureStore.getItemAsync('userToken')`.
+- Cleaned up JSX structures in all panels, fixing mismatched tags caused by the removal of wrapper components.
+- Resolved TypeScript strict-mode errors by explicitly typing catch blocks (`catch (error: any)`) and refs (`useRef<any>(null)`).
+- Removed conflicting `@types/axios` dependency to fix Promise chain typings.
+
+### Verification
+- Ran `npx tsc --noEmit` to ensure zero TypeScript compilation errors.
+- Ran `npx expo export` to verify the application bundles successfully without runtime crashes.
+- Decided to use "Berliner Gymnasium" as a placeholder school name.
+- Split the Introduction into three subsections: Problemstellung, Projektbeschreibung, and Forschungsfrage.
+- Focused the Theoretical Background on RFID, Face Recognition (SSD Mobilenet v1), and GDPR.
+- Added 10 relevant literature sources to references.bib.

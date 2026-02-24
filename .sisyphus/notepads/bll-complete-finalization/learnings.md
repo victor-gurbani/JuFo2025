@@ -68,3 +68,14 @@ This approach:
 - PORT configuration updated to `process.env.PORT || 3000`
 - Enables production flexibility without code changes
 - .env file not versioned (correctly in .gitignore)
+## Frontend Stabilization & Auth Integration (Task 5)
+
+### Key Learning: Managing Legacy React Native Codebases
+- When removing wrapper components, it is crucial to carefully realign the JSX tree to avoid mismatched tags and structural errors.
+- Outdated type definitions (e.g., `@types/axios`) can conflict with newer library versions that include native types, causing obscure TypeScript errors like `finally does not exist on type IPromise`. Always check for native types before installing `@types/*` packages.
+- In strict TypeScript environments, `catch (error)` defaults to `unknown`. When migrating legacy code, explicitly typing it as `any` (`catch (error: any)`) can quickly unblock compilation without requiring extensive refactoring of error handling logic.
+- React Native Paper components like `TextInput` cannot be used directly as generic types for `useRef` without `typeof` or `InstanceType`. Using `useRef<any>(null)` is a pragmatic workaround when strict typing is not strictly necessary.
+- Used biblatex with biber for bibliography management in BLL-LaTeX.
+- Structure of the BLL paper follows the provided template in BLL-LaTeX/sections.
+- Integrated research from DokuDeutsch.md and README.md into the LaTeX document.
+- Local processing of biometic data is a key selling point for GDPR compliance in schools.
