@@ -104,3 +104,7 @@ This approach:
 - **Gesichtserkennung:** Die lokale Verarbeitung auf dem RPi dauert ca. 532 ms (Detection + Descriptor). Die Genauigkeit lag in den Tests bei 100% (H2).
 - **Technik:** Die Integration von `pgfplots` ermöglicht professionelle Diagramme direkt in LaTeX.
 - **DSGVO:** Die lokale Verarbeitung wurde als Hauptargument für die DSGVO-Konformität (H3) herausgestellt, da biometrische Daten das lokale Netzwerk nicht verlassen.
+
+- Interdisciplinary expansion: Integrated GDPR (Art. 9, Art. 6), ethical considerations (proportionality, Opt-In), and organizational impacts (training, costs).
+- References: Added Bayerisches Datenschutzgesetz (BayDSG), Bayerisches Erziehungs- und Unterrichtsgesetz (BayEUG), and EU Ethics Guidelines for AI.
+- Privacy by Design: Emphasized local processing (On-Premise) as a key differentiator for compliance in school environments.

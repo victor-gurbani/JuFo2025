@@ -55,8 +55,18 @@ Um die Sicherheit über das einfache Vorzeigen einer RFID-Karte hinaus zu erhöh
 
 Die Datenhaltung erfolgt in einer SQLite-Instanz, die sich durch ihre Dateibasiertheit und den Verzicht auf einen separaten Serverprozess ideal für lokale Schulumgebungen eignet \cite{sqlite2023}. Das Schema umfasst fünf zentrale Tabellen: \textit{students}, \textit{teachers}, \textit{cards}, \textit{permissions} und \textit{accessLogs}. Die Beziehungen sind über Fremdschlüssel (\textit{Foreign Keys}) definiert, um referenzielle Integrität zu gewährleisten. Beispielsweise verknüpft die Tabelle \textit{permissions} eine \textit{studentId} mit einer \textit{cardUID} und einer \textit{teacherId}, wodurch jederzeit nachvollziehbar ist, wer wem wann welchen Zugang gewährt hat.
 
-\subsection{Datenschutzkonzept und Datensicherheit}
-Der Schutz biometrischer Daten unterliegt strengen Anforderungen der DSGVO \cite{dsgvo2016}. Das System wurde daher nach dem Prinzip \textit{Privacy by Design} entwickelt. Ein entscheidender Faktor ist der lokale Betrieb (\textit{On-Premise}): Biometrische Daten und Zugriffsprotokolle verlassen das Schulnetzwerk zu keinem Zeitpunkt. Die Übertragung zwischen Frontend und Backend erfolgt verschlüsselt über HTTPS mit TLS 1.3. Auf den RFID-Karten selbst werden keine personenbezogenen Daten gespeichert, sondern lediglich die anonyme UID, was die Risiken bei Kartenverlust minimiert. Sämtliche Zugriffe werden revisionssicher protokolliert, wobei das System rollenbasierte Zugriffsbeschränkungen auf diese Logs erzwingt.
+\subsection{Datenschutzkonzept und Datensicherheit} \label{subsec:konzept_datenschutz}
+Das technische Datenschutzkonzept des Systems setzt die in Kapitel \ref{subsec:datenschutz} dargelegten theoretischen Anforderungen praktisch um. Die Sicherheit der Daten wird durch eine Kombination aus architektonischen Entscheidungen und kryptografischen Verfahren gewährleistet.
+
+\begin{itemize}
+    \item \textbf{Dezentralisierung und lokale Persistenz:} Im Gegensatz zu kommerziellen Cloud-Lösungen erfolgt die Speicherung der biometrischen Templates ausschließlich in einer lokalen SQLite-Datenbank auf dem schuleigenen Server. Dies verhindert den unbefugten Zugriff durch Drittanbieter und minimiert die Angriffsfläche für großflächige Datenlecks.
+    \item \textbf{Datenminimierung:} Es werden keine Rohbilder der Gesichter dauerhaft gespeichert. Nach der initialen Registrierung generiert das System aus dem Foto einen 128-dimensionalen Merkmalsvektor (Face Embedding). Das ursprüngliche Bild kann anschließend gelöscht werden, da für den Abgleich lediglich der mathematische Vektor benötigt wird, aus dem das Originalbild nicht rekonstruiert werden kann (Einweg-Funktion).
+    \item \textbf{Verschlüsselung und Transport-Security:} Die Kommunikation zwischen den Guard-Tablets und dem Backend findet über eine mit TLS 1.3 verschlüsselte Verbindung statt. Sensible Datenfelder in der Datenbank, wie etwa die Verknüpfung zwischen RFID-UID und Klarnamen, können zusätzlich mittels AES-256 verschlüsselt werden.
+    \item \textbf{Rollenbasierte Zugriffskontrolle (RBAC):} Der Zugriff auf das Administrations-Interface und die \textit{accessLogs} ist streng reglementiert. Lehrkräfte haben lediglich Zugriff auf die Berechtigungen ihrer eigenen Kurse, während das Sicherheitspersonal nur die für die aktuelle Verifikation notwendigen Daten (Name, Kurs, Status) sieht.
+\end{itemize}
+
+Durch diese Maßnahmen wird ein Schutzniveau erreicht, das den Anforderungen für Schulen gemäß BayEUG und BayDSG entspricht \cite{bayeug, baydsg}. Das System demonstriert, dass moderne Sicherheitstechnologien und strenger Datenschutz kein Widerspruch sein müssen, wenn sie konsequent lokal implementiert werden.
+
 
 \subsection{Untersuchungsdesign}
 [Design begruenden: experimentell, vergleichend, prototypisch, empirisch etc.]
