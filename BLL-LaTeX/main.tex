@@ -1,0 +1,112 @@
+\documentclass[12pt,a4paper]{article}
+
+% Encoding and language
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{csquotes}
+
+% Typography and layout
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[left=3cm,right=4cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{setspace}
+\setstretch{1.5}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+
+% Math, figures, tables
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{enumitem}
+
+% Headers and links
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+% Bibliography
+\usepackage[backend=biber,style=authoryear,sorting=nyt]{biblatex}
+\addbibresource{references.bib}
+
+% Metadata (fill these first)
+\newcommand{\blltitle}{Titel der Besonderen Lernleistung}
+\newcommand{\bllsubtitle}{Praeziser Untertitel mit Leitfrage}
+\newcommand{\studentname}{Vorname Nachname}
+\newcommand{\schoolname}{Name der Schule}
+\newcommand{\courseyear}{Abiturjahrgang 2026}
+\newcommand{\erstkorrektor}{Name Erstkorrektor}
+\newcommand{\zweitkorrektor}{Name Zweitkorrektor}
+\newcommand{\abgabedatum}{13. Maerz 2026}
+
+% Header/footer
+\setlength{\headheight}{14.5pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\studentname}
+\fancyhead[R]{BLL}
+\fancyfoot[C]{\thepage}
+
+\begin{document}
+
+% Title page (no page number)
+\hypersetup{pageanchor=false}
+\input{sections/00_titelblatt}
+\clearpage
+
+% Front matter in Roman numerals
+\pagenumbering{Roman}
+\setcounter{page}{1}
+
+\input{sections/01_kurzfassung}
+\clearpage
+
+\tableofcontents
+\clearpage
+
+\listoffigures
+\addcontentsline{toc}{section}{Abbildungsverzeichnis}
+\clearpage
+
+\listoftables
+\addcontentsline{toc}{section}{Tabellenverzeichnis}
+\clearpage
+
+% Main text in Arabic numerals
+\hypersetup{pageanchor=true}
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\input{sections/02_einleitung}
+\input{sections/03_theoretischer_hintergrund}
+\input{sections/04_methodik_und_umsetzung}
+\input{sections/05_ergebnisse_und_evaluation}
+\input{sections/06_reflexion_arbeitsprozess}
+\input{sections/07_fazit_und_ausblick}
+\input{sections/08_rubrik_check}
+
+% Back matter in Roman numerals (as often required in BLL formats)
+\clearpage
+\hypersetup{pageanchor=false}
+\pagenumbering{Roman}
+\setcounter{page}{1}
+
+\printbibliography[heading=bibintoc,title={Literatur- und Quellenverzeichnis}]
+\clearpage
+
+\input{sections/09_unterstuetzungsleistungen}
+\clearpage
+
+\input{sections/10_selbststaendigkeitserklaerung}
+\clearpage
+
+\appendix
+\input{sections/A_anhang_materialien}
+\input{sections/B_anhang_reproduzierbarkeit}
+
+\end{document}

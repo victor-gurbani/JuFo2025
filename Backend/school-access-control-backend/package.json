@@ -22,6 +22,7 @@
     "bytenode": "^1.5.7",
     "canvas": "^2.11.2",
     "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
     "express": "^4.21.2",
     "face-api.js": "^0.22.2",
     "heic-convert": "^2.1.0",

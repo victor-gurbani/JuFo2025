@@ -1,8 +1,9 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const sqlite3 = require("sqlite3").verbose(); // SQLite library
-const checkPermission = require("./middleware/checkPermission");
+require('dotenv').config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const sqlite3 = require('sqlite3').verbose();
+const checkPermission = require('./middleware/checkPermission');
 
 // Initialize Express app
 const app = express();
@@ -12,14 +13,17 @@ app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(cors());
 
-// Memory usage logging
+// Memory usage logging (only in development)
+const debug = process.env.NODE_ENV === 'development';
 const logMemoryUsage = () => {
   const used = process.memoryUsage();
   console.log(`Memory usage - rss: ${Math.round(used.rss / 1024 / 1024)}MB, heapTotal: ${Math.round(used.heapTotal / 1024 / 1024)}MB, heapUsed: ${Math.round(used.heapUsed / 1024 / 1024)}MB`);
 };
 
-// Log every 5 minutes
-setInterval(logMemoryUsage, 5 * 60 * 1000);
+// Log every 5 minutes (only in development)
+if (debug) {
+  setInterval(logMemoryUsage, 5 * 60 * 1000);
+}
 
 // Initialize SQLite database
 const db = new sqlite3.Database("./database.db", (err) => {
@@ -200,7 +204,17 @@ app.use("/guard", guardRoutes);
 app.use("/cards", cardRoutes);
 app.use("/student", studentRoutes);
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
+// Centralized error handler middleware
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(err.status || 500).json({
+    error: err.message || 'Internal Server Error',
+    ...(debug && { stack: err.stack })
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

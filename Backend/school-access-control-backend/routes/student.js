@@ -1,10 +1,13 @@
-const express = require("express");
-const checkAuth = require("../middleware/checkAuth");
+const express = require('express');
+const checkAuth = require('../middleware/checkAuth');
 const { processImage } = require('../utils/imageProcessor');
 const faceapi = require('@vladmandic/face-api');
-const canvas = require("canvas");
-const fs = require("fs");
-const path = require("path");
+const canvas = require('canvas');
+const fs = require('fs');
+const path = require('path');
+
+// Debug logging - only in development
+const debug = process.env.NODE_ENV === 'development';
 
 // Patch nodejs environment for face-api.js
 const { Canvas, Image, ImageData } = canvas;
@@ -22,14 +25,14 @@ module.exports = (db) => {
       // Make sure the models directory exists
       if (!fs.existsSync(modelsPath)) {
         fs.mkdirSync(modelsPath, { recursive: true });
-        console.log("Models directory created. Please download face-api models to this location.");
+        if (debug) console.log('Models directory created. Please download face-api models to this location.');
         return false;
       }
       
       // Only load the detection model, we don't need landmark and recognition for basic face detection
       await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelsPath);
       
-      console.log("Face detection model loaded successfully");
+      if (debug) console.log('Face detection model loaded successfully');
       return true;
     } catch (error) {
       console.error("Error loading face detection model:", error);
@@ -143,7 +146,7 @@ module.exports = (db) => {
             // Continue with update if a face was detected
             updateStudentPhoto(processedBuffer);
           } catch (error) {
-            console.error("Face detection error:", error);
+            console.error('Face detection error:', error);
             return res.status(500).json({ error: "Failed to process face detection" });
           }
         } else {
@@ -152,7 +155,7 @@ module.exports = (db) => {
             const processedPhotoUrl = await processImage(photoUrl);
             updateStudentPhoto(processedPhotoUrl);
           } catch (error) {
-            console.error("Photo processing error:", error);
+            console.error('Photo processing error:', error);
             return res.status(500).json({ error: "Failed to process photo" });
           }
         }

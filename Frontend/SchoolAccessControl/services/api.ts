@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://accesscontrol.jufo.varfield.com"
+  baseURL: "https://localhost:3000"
 });
 
 export default api;

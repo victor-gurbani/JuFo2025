@@ -1,0 +1,49 @@
+classDiagram
+    class Tarjeta {
+        +String uid [PK]
+        +String ultimoAsignado
+        +Integer esValida
+    }
+    
+    class Permiso {
+        +Integer id [PK]
+        +String fechaInicio
+        +String fechaFin
+        +Integer esRecurrente
+        +String patronDeRecurrencia
+        +Integer esValido
+        +String estudianteAsignado [FK]
+        +String asignadoPor [FK]
+        +String tarjetaAsociada [FK]
+    }
+    
+    class Estudiante {
+        +String id [PK]
+        +String nombre
+        +String urlFoto
+        +String grupoClase
+        +String tutor [FK]
+    }
+    
+    class Profesor {
+        +String id [PK]
+        +String nombre
+        +String nivelDePermiso
+        +String urlFoto
+    }
+    
+    class RegistroAcceso {
+        +Integer id [PK]
+        +String direccion
+        +String estudiante [FK]
+        +String tarjeta [FK]
+        +Integer fueAprobado
+        +DateTime fechaHora
+    }
+
+    Profesor "1" --> "*" Permiso : asigna
+    Estudiante "1" --> "*" Permiso : es asignado
+    Tarjeta "1" --> "*" Permiso : se usa para
+    Profesor "1" --> "*" Estudiante : tutorea
+    Estudiante "1" --> "*" RegistroAcceso : genera
+    Tarjeta "1" --> "*" RegistroAcceso : se usa en
