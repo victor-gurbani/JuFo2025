@@ -98,3 +98,9 @@ This approach:
 - Generated CSV files for both VPS and RPi environments.
 - Discovered that `faceapi.detectSingleFace` returns `undefined` if no face is detected, which needs to be handled to avoid errors when chaining `.withFaceLandmarks()`.
 - The backend uses JWT authentication, so the RFID benchmark script first authenticates with `/auth/login` to get a token before calling `/guard/validate`.
+
+### Ergebnisse und Evaluation (Abschnitt 5)
+- **RFID-Latenz:** Die durchschnittliche Latenz auf einem Raspberry Pi 4 beträgt ca. 157 ms, während ein Cloud-VPS ca. 1,8 ms erreicht. Beide Werte liegen weit unter der 2-Sekunden-Grenze (H1).
+- **Gesichtserkennung:** Die lokale Verarbeitung auf dem RPi dauert ca. 532 ms (Detection + Descriptor). Die Genauigkeit lag in den Tests bei 100% (H2).
+- **Technik:** Die Integration von `pgfplots` ermöglicht professionelle Diagramme direkt in LaTeX.
+- **DSGVO:** Die lokale Verarbeitung wurde als Hauptargument für die DSGVO-Konformität (H3) herausgestellt, da biometrische Daten das lokale Netzwerk nicht verlassen.
