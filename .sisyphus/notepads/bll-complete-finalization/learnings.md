@@ -108,3 +108,10 @@ This approach:
 - Interdisciplinary expansion: Integrated GDPR (Art. 9, Art. 6), ethical considerations (proportionality, Opt-In), and organizational impacts (training, costs).
 - References: Added Bayerisches Datenschutzgesetz (BayDSG), Bayerisches Erziehungs- und Unterrichtsgesetz (BayEUG), and EU Ethics Guidelines for AI.
 - Privacy by Design: Emphasized local processing (On-Premise) as a key differentiator for compliance in school environments.
+
+### Task 11: Reflection Chapter (2026-02-24)
+- Documented the project genesis, starting from the "doctor's appointment" scenario and school-level consultations.
+- Detailed technical challenges: HEIC image normalization, TensorFlow.js memory management in Node.js, and the rationale behind the 0.6 face recognition threshold.
+- Reflected on methodological insights, specifically the importance of runtime version pinning and the admission of missing automated tests.
+- Summarized personal development in full-stack engineering, GDPR compliance (Privacy by Design), and project management.
+- Successfully verified that the addition of the reflection chapter does not break the LaTeX compilation.

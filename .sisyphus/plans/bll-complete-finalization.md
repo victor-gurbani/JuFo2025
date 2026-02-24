@@ -58,7 +58,7 @@ Wave 3 (After Wave 2)
 ├── Task 10: LaTeX Paper — Interdisciplinary Chapter (Law/GDPR/Ethics) [x]
 
 Wave 4 (After Wave 3)
-├── Task 11: LaTeX Paper — Reflexion Arbeitsprozess
+├── Task 11: LaTeX Paper — Reflexion Arbeitsprozess [x]
 ├── Task 12: LaTeX Paper — Fazit und Ausblick
 ├── Task 13: Bibliography & Formal Compliance
 └── Task 14: Demo Fallback Mode (mock auth for colloquium)
