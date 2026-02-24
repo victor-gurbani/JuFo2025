@@ -1,0 +1,22 @@
+sequenceDiagram
+    participant C as Card UID (NFC)
+    participant App as Guard App
+    participant API as Node.js Backend
+    participant DB as SQLite
+    participant AI as TensorFlow Engine
+
+    C->>App: Reads NFC UID
+    App->>API: POST /guard/validate { cardUID }
+    API->>DB: Check Permissions (Date/Time/Role)
+    
+    alt Permission Valid
+        DB-->>API: Return Student Photo (if available)
+        App->>API: (Optional) POST /guard/verify-face { snapshotImage, cardUID }
+        API->>AI: Face verification (euclidean distance)
+        AI-->>API: Similarity + Match
+        API-->>App: Access GRANTED (Green)
+    else Permission Invalid
+        API-->>App: Access DENIED (Red)
+    end
+    
+    API->>DB: Log Access Event (Timestamp)

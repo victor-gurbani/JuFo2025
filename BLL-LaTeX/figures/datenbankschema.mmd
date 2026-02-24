@@ -1,0 +1,45 @@
+erDiagram
+    STUDENTS ||--o{ CARDS : owns
+    STUDENTS ||--o{ PERMISSIONS : has
+    TEACHERS ||--o{ PERMISSIONS : grants
+    CARDS ||--o{ ACCESS_LOGS : generates
+    STUDENTS ||--o{ ACCESS_LOGS : generates
+    TEACHERS ||--o{ ACCESS_LOGS : verified_by
+
+    STUDENTS {
+        int id PK
+        string name
+        string photo
+        string faceDescriptor
+    }
+    TEACHERS {
+        int id PK
+        string name
+        string email
+        string passwordHash
+    }
+    CARDS {
+        int id PK
+        string uid
+        int studentId FK
+        boolean isActive
+    }
+    PERMISSIONS {
+        int id PK
+        int studentId FK
+        int grantedBy FK
+        datetime validFrom
+        datetime validUntil
+        boolean isRecurring
+        string recurrencePattern
+        datetime createdAt
+    }
+    ACCESS_LOGS {
+        int id PK
+        int cardId FK
+        int studentId FK
+        datetime timestamp
+        boolean granted
+        string reason
+        int verified_by FK
+    }

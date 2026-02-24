@@ -82,3 +82,12 @@ if (debug) console.log('message');
 ### Decision: Methodology Structure (2026-02-24)
 - Structured the methodology chapter to mirror the actual implementation (Systemarchitektur, RFID-Management, Gesichtserkennungs-Pipeline, Datenbankdesign, Datenschutz).
 - Used specific technical details found in the source code (e.g., 1024x1024 resolution, 0.6 threshold, specific SQLite tables) to increase scientific depth.
+
+### Task 7: Create Figures & Diagrams for Paper
+- **Diagram Types**:
+  - `systemarchitektur.mmd`: Used a `graph TD` to show the 3-tier architecture (Frontend, Backend, Data & AI).
+  - `gesichtserkennung_pipeline.mmd`: Used a `graph TD` flowchart to illustrate the image processing and face recognition steps.
+  - `datenbankschema.mmd`: Used an `erDiagram` to represent the SQLite database schema with relationships.
+  - `rfid_workflow.mmd`: Used a `sequenceDiagram` based on the README to show the card validation process.
+  - `benchmark_placeholder.mmd`: Used an `xychart-beta` to create a placeholder bar/line chart for benchmark results.
+- **Placement in LaTeX**: Placed the figures in the corresponding subsections of `04_methodik_und_umsetzung.tex` using the `[H]` float specifier to ensure they appear exactly where they are referenced.

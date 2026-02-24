@@ -85,3 +85,7 @@ This approach:
 - Described the server-side face recognition pipeline, including HEIC-to-PNG normalization and Euclidean distance matching.
 - Explained the local-only data storage approach for GDPR compliance.
 - Successfully verified LaTeX compilation using biblatex/biber for references.
+
+### Task 7: Create Figures & Diagrams for Paper
+- **Mermaid CLI (`mmdc`)**: Successfully used `@mermaid-js/mermaid-cli` to generate PDF diagrams from `.mmd` files. The `-b transparent` flag ensures the background is transparent, which is ideal for LaTeX inclusion.
+- **LaTeX Integration**: The `graphicx` package was already present in `main.tex`. Added `\begin{figure}[H]` environments with `\includegraphics` and `\caption` to `04_methodik_und_umsetzung.tex` to include the generated PDFs.

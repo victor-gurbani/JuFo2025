@@ -3,6 +3,13 @@
 In diesem Kapitel werden die technische Architektur, die Implementierungsdetails sowie das methodische Vorgehen bei der Entwicklung des digitalen Schul-Zugangskontrollsystems dargelegt. Der Fokus liegt dabei auf der Verbindung von Hardware-Komponenten mit einer skalierbaren Software-Infrastruktur und der Integration moderner KI-Algorithmen zur Identitätsprüfung.
 
 \subsection{Systemarchitektur}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/systemarchitektur.pdf}
+    \caption{Systemarchitektur des digitalen Schul-Zugangskontrollsystems}
+    \label{fig:architecture}
+\end{figure}
+
 Die Architektur des Systems folgt einem streng entkoppelten Client-Server-Modell, um eine hohe Wartbarkeit und Flexibilität zu gewährleisten. Wie in Abbildung \ref{fig:architecture} dargestellt, besteht das Ökosystem aus drei Hauptkomponenten: einem Node.js-Backend, einer plattformübergreifenden Mobilanwendung (Frontend) und einer lokalen SQLite-Datenbank.
 
 Das Backend basiert auf dem Express.js-Framework \cite{expressjs2023} und fungiert als zentrale Instanz für die Geschäftslogik, Berechtigungsprüfung und KI-gestützte Gesichtserkennung. Durch die Wahl von Node.js konnte eine hohe Performance bei asynchronen Operationen, wie etwa dem Einlesen großer Bilddaten, erzielt werden. Die Kommunikation erfolgt über eine RESTful API, die strikt zustandslos arbeitet und mittels JSON Web Tokens (JWT) abgesichert ist.
@@ -10,11 +17,25 @@ Das Backend basiert auf dem Express.js-Framework \cite{expressjs2023} und fungie
 Das Frontend wurde mit dem React Native Framework und dem Expo SDK \cite{reactnative2023, expo2023} entwickelt. Dieser Ansatz ermöglicht die Bereitstellung einer nativen Anwendung für iOS und Android aus einer gemeinsamen Codebasis. Die Benutzeroberfläche nutzt die Material-Design-Vorgaben durch die Integration der Bibliothek \textit{react-native-paper}, was eine intuitive Bedienung für Lehrer, Schüler und Sicherheitspersonal sicherstellt. Rechenintensive Aufgaben, insbesondere die Bildverarbeitung und die Ausführung neuronaler Netze, werden konsequent auf den Server ausgelagert, um die Anforderungen an die Hardware der Endgeräte (Smartphones oder Tablets) minimal zu halten.
 
 \subsection{RFID-Kartenmanagement und Berechtigungsmodell}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/rfid_workflow.pdf}
+    \caption{Sequenzdiagramm des RFID-Kartenmanagements und Berechtigungsmodells}
+    \label{fig:rfid_workflow}
+\end{figure}
+
 Das Herzstück der Zugangskontrolle ist die Identifikation der Nutzer über RFID/NFC-Medien. Jede Karte wird durch ihre weltweit eindeutige \textit{Unique Identifier} (UID) im System registriert. Das Berechtigungsmodell ist rollenbasiert (\textit{Role-Based Access Control}, RBAC) und differenziert zwischen Schülern, Lehrkräften, Sicherheitspersonal (Guards) und Administratoren.
 
 Ein wesentliches Merkmal der Umsetzung ist die Verwaltung zeitlich begrenzter und wiederkehrender Berechtigungen. Lehrkräfte können über ihr Dashboard Zugriffsberechtigungen für bestimmte Zeitfenster definieren. Dabei wird in der Datenbank zwischen einmaligen Freigaben und rekursiven Mustern (z.\,B. wöchentliche Labortermine) unterschieden. Bei jedem Scan-Vorgang validiert das Backend die UID gegen die hinterlegten Zeitfenster und den aktuellen Status der Karte \cite{finkenzeller2015rfid}. Dieser automatisierte Prozess entlastet das Schulpersonal von manuellen Listen und erhöht gleichzeitig die Sicherheit durch Echtzeit-Protokollierung in den \textit{accessLogs}.
 
 \subsection{Gesichtserkennungs-Pipeline}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/gesichtserkennung_pipeline.pdf}
+    \caption{Ablauf der Gesichtserkennungs-Pipeline}
+    \label{fig:face_pipeline}
+\end{figure}
+
 Um die Sicherheit über das einfache Vorzeigen einer RFID-Karte hinaus zu erhöhen, wurde eine biometrische Verifikationsschicht implementiert. Diese Pipeline ist in vier Phasen unterteilt: Normalisierung, Detektion, Merkmalsextraktion und Vergleich.
 
 \begin{enumerate}
@@ -25,6 +46,13 @@ Um die Sicherheit über das einfache Vorzeigen einer RFID-Karte hinaus zu erhöh
 \end{enumerate}
 
 \subsection{Datenbankdesign und technische Persistenz}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/datenbankschema.pdf}
+    \caption{Entity-Relationship-Modell der SQLite-Datenbank}
+    \label{fig:database_schema}
+\end{figure}
+
 Die Datenhaltung erfolgt in einer SQLite-Instanz, die sich durch ihre Dateibasiertheit und den Verzicht auf einen separaten Serverprozess ideal für lokale Schulumgebungen eignet \cite{sqlite2023}. Das Schema umfasst fünf zentrale Tabellen: \textit{students}, \textit{teachers}, \textit{cards}, \textit{permissions} und \textit{accessLogs}. Die Beziehungen sind über Fremdschlüssel (\textit{Foreign Keys}) definiert, um referenzielle Integrität zu gewährleisten. Beispielsweise verknüpft die Tabelle \textit{permissions} eine \textit{studentId} mit einer \textit{cardUID} und einer \textit{teacherId}, wodurch jederzeit nachvollziehbar ist, wer wem wann welchen Zugang gewährt hat.
 
 \subsection{Datenschutzkonzept und Datensicherheit}
@@ -41,3 +69,10 @@ Der Schutz biometrischer Daten unterliegt strengen Anforderungen der DSGVO \cite
 
 \subsection{Guetekriterien und Limitationen}
 [Validitaet, Reliabilitaet, Bias, Grenzen des Designs offenlegen.]
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/benchmark_placeholder.pdf}
+    \caption{Platzhalter für Benchmark-Ergebnisse der Gesichtserkennung}
+    \label{fig:benchmark}
+\end{figure}
