@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import ThemeToggle from '../components/ThemeToggle';
 import { useAppTheme } from '../theme/ThemeContext';
 import api from '../services/api';
-import * as SecureStore from 'expo-secure-store';
+import { setToken } from '../services/storage';
 
 export default function LoginScreen() {
   const [id, setId] = useState("");
@@ -20,14 +20,20 @@ export default function LoginScreen() {
   const { theme } = useAppTheme();
 
   const handleLogin = async () => {
-    if (!id || !password) {
-      setSnackbarMessage("Please enter both ID and password");
+    if (!role) {
+      setSnackbarMessage("Please select a role");
       setSnackbarVisible(true);
       return;
     }
 
-    if (!role) {
-      setSnackbarMessage("Please select a role");
+    if (!id) {
+      setSnackbarMessage("Please enter an ID");
+      setSnackbarVisible(true);
+      return;
+    }
+
+    if (role !== "student" && !password) {
+      setSnackbarMessage("Please enter a password");
       setSnackbarVisible(true);
       return;
     }
@@ -52,7 +58,7 @@ export default function LoginScreen() {
 
       if (response.data?.token) {
         // Store token in secure store
-        await SecureStore.setItemAsync('authToken', response.data.token);
+        await setToken(response.data.token);
 
         // Navigate based on role
         if (role === "admin") {

@@ -1,6 +1,6 @@
 import axios from "axios";
 import Constants from "expo-constants";
-import * as SecureStore from 'expo-secure-store';
+import { setToken, getToken, deleteToken } from './storage';
 
 const getBaseURL = () => {
   // Try to get from app config, fallback to localhost:3000 for development
@@ -42,7 +42,7 @@ const api = axios.create({
 // Add JWT token interceptor
 api.interceptors.request.use(async (config) => {
   try {
-    const token = await SecureStore.getItemAsync('authToken');
+    const token = await getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
       
@@ -67,7 +67,7 @@ api.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       // Clear token and redirect to login
-      await SecureStore.deleteItemAsync('authToken');
+      await deleteToken();
       authState.token = null;
       authState.user = null;
       // Navigation will be handled by the app's login flow
@@ -78,7 +78,7 @@ api.interceptors.response.use(
 
 // Helper to get current user ID from token
 const getUserId = async () => {
-  const token = await SecureStore.getItemAsync('authToken');
+  const token = await getToken();
   if (token && !authState.user) {
     const decoded = decodeToken(token);
     if (decoded) {
