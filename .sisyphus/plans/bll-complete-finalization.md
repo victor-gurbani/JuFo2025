@@ -69,9 +69,9 @@ Wave 5 (After Wave 4)
 └── Task 17: Appendices (Reproducibility + Materials) [x]
 
 Final Verification Wave
-├── Task 18: Full LaTeX Compilation & Review
-├── Task 19: Code Packaging & Final Git Tag
-└── Task 20: Submission Package Assembly
+├── Task 18: Full LaTeX Compilation & Review [x]
+├── Task 19: Code Packaging & Final Git Tag [x]
+└── Task 20: Submission Package Assembly [x]
 ```
 
 ## Tasks
@@ -1072,7 +1072,7 @@ Defense preparation (from BLL_COLLOQUIUM_PREP.md):
 
 ---
 
-#### Task 18: Full LaTeX Compilation & Review
+#### Task 18: Full LaTeX Compilation & Review [x]
 
 **What**: Final compilation of the complete BLL paper. Fix any LaTeX warnings, verify page count, check cross-references, ensure no placeholder brackets remain.
 
@@ -1104,7 +1104,7 @@ Defense preparation (from BLL_COLLOQUIUM_PREP.md):
 
 ---
 
-#### Task 19: Code Packaging & Final Git Tag
+#### Task 19: Code Packaging & Final Git Tag [x]
 
 **What**: Clean up the repository, ensure all files are committed, create a final git tag for the BLL submission.
 
@@ -1135,7 +1135,7 @@ Defense preparation (from BLL_COLLOQUIUM_PREP.md):
 
 ---
 
-#### Task 20: Submission Package Assembly
+#### Task 20: Submission Package Assembly [x]
 
 **What**: Assemble the final submission package: printed PDF, digital copy, USB/ZIP with code, thesenpapier.
 
