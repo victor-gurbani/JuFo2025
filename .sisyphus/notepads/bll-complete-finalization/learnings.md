@@ -79,3 +79,9 @@ This approach:
 - Structure of the BLL paper follows the provided template in BLL-LaTeX/sections.
 - Integrated research from DokuDeutsch.md and README.md into the LaTeX document.
 - Local processing of biometic data is a key selling point for GDPR compliance in schools.
+### Learning: LaTeX Methodology Section Implementation (2026-02-24)
+- Documented the system architecture (Node.js, React Native, SQLite).
+- Detailed the RFID card management and role-based access control.
+- Described the server-side face recognition pipeline, including HEIC-to-PNG normalization and Euclidean distance matching.
+- Explained the local-only data storage approach for GDPR compliance.
+- Successfully verified LaTeX compilation using biblatex/biber for references.

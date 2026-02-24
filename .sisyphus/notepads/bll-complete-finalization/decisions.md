@@ -79,3 +79,6 @@ if (debug) console.log('message');
 - Split the Introduction into three subsections: Problemstellung, Projektbeschreibung, and Forschungsfrage.
 - Focused the Theoretical Background on RFID, Face Recognition (SSD Mobilenet v1), and GDPR.
 - Added 10 relevant literature sources to references.bib.
+### Decision: Methodology Structure (2026-02-24)
+- Structured the methodology chapter to mirror the actual implementation (Systemarchitektur, RFID-Management, Gesichtserkennungs-Pipeline, Datenbankdesign, Datenschutz).
+- Used specific technical details found in the source code (e.g., 1024x1024 resolution, 0.6 threshold, specific SQLite tables) to increase scientific depth.
