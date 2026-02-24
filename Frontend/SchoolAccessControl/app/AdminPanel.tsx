@@ -16,10 +16,10 @@ export default function AdminPanel() {
   // State to store the current admin/teacher's ID
 
   const [dashboard, setDashboard] = useState("");
-  const [teachers, setTeachers] = useState([]);
+  const [teachers, setTeachers] = useState<any[]>([]);
   const [teachersLoading, setTeachersLoading] = useState(false);
   const [teacherPhotos, setTeacherPhotos] = useState<{[key: string]: string}>({});
-  const [cards, setCards] = useState([]);
+  const [cards, setCards] = useState<any[]>([]);
   const [teacherId, setTeacherId] = useState("");
   const [teacherName, setTeacherName] = useState("");
   const [teacherPermission, setTeacherPermission] = useState("");
@@ -63,23 +63,9 @@ export default function AdminPanel() {
 
 
 
-  const handleTeacherIdChange = (text: string) => {
-    setInputTeacherId(text);
-    
-    // Clear any existing timeout
-    if (idInputTimeoutRef.current) {
-      clearTimeout(idInputTimeoutRef.current);
-    }
-    
-    // Set new timeout to commit the ID after 800ms of inactivity
-    idInputTimeoutRef.current = setTimeout(() => {
-      setCommittedTeacherId(text);
-    }, 800);
-  };
 
   useEffect(() => {
-    if (committedTeacherId) {
-      // Fetch admin dashboard info
+    // Fetch admin dashboard info
     api.get("/admin/dashboard")
       .then((response) => {
         setDashboard(response.data.message);
@@ -260,12 +246,12 @@ export default function AdminPanel() {
                 throw new Error("File does not exist");
               }
             }
-          } catch (error) {
+          } catch (error: any) {
             showSnackbar("Failed to process the image: " + error.message);
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       showSnackbar("Error picking image: " + error.message);
     }
   };
@@ -332,12 +318,12 @@ export default function AdminPanel() {
                 throw new Error("File does not exist");
               }
             }
-          } catch (error) {
+          } catch (error: any) {
             showSnackbar("Failed to process the image: " + error.message);
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       showSnackbar("Error picking image: " + error.message);
     }
   };
@@ -1145,9 +1131,6 @@ export default function AdminPanel() {
               </>
             )}
           </>
-        ) : (
-          <Text>Please enter your Admin or Teacher ID to proceed.</Text>
-        )}
       </ScrollView>
       <Portal>
         <Modal

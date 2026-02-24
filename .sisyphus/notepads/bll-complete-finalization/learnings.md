@@ -122,3 +122,18 @@ This approach:
 - The Leitfrage was answered affirmatively, emphasizing the "Privacy by Design" approach through local Edge Computing on Raspberry Pi.
 - Future work (Ausblick) focuses on technical scaling (PostgreSQL), security enhancements (Anti-spoofing), and user convenience (Live Video).
 - LaTeX structure for conclusion: \section{Fazit und Ausblick} with subsections for summary, answering the Leitfrage, and outlook.
+## Bibliography & Formal Compliance (Task 13) - Tue Feb 24 21:39:53 CET 2026
+- Bibliography updated to 20 entries (legal, tech docs, textbooks, security papers).
+- All 18 cited entries resolve correctly in the document.
+- Formal documents (Selbstständigkeitserklärung, Unterstützungsleistungen) filled with Name: Victor Gurbani, Date: March 2026.
+- AI tools (Claude, ChatGPT, GitHub Copilot) declared in compliance with transparency requirements.
+- Figure and Table indices verified as non-empty.
+- Compilation successful with pdflatex and biber.
+
+
+## Mock Mode Implementation & JSX Fixes
+- Implemented a hidden developer toggle (5 taps on title) in `GuardPanel` and `GuardFacePanel` to enable a "Mock Mode" for offline colloquium presentations.
+- Created `utils/mockData.ts` to serve static valid/invalid responses.
+- Discovered and fixed pre-existing unmatched `<ScrollView>` JSX tags across all panel components (`GuardPanel`, `GuardFacePanel`, `StudentPanel`, `TeacherPanel`, `AdminPanel`) that were preventing successful TypeScript compilation.
+- Fixed several other pre-existing TypeScript errors across the panel components (e.g., missing `theme` imports, incorrect `TextInput` type usage, missing `router` import, and `unknown` error types in catch blocks).
+- Verified that the project compiles successfully with `npx tsc --noEmit`.

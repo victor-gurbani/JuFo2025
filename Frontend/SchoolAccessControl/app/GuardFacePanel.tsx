@@ -5,11 +5,14 @@ import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import api, { getUserId } from "../services/api";
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '../theme/ThemeContext';
+import { 
+  mockValidationResponse, 
+  mockInvalidValidationResponse, 
+  mockFaceVerificationResponse, 
+  mockInvalidFaceVerificationResponse 
+} from '../utils/mockData';
 
 export default function GuardFacePanel() {
-  const router = useRouter();
-  const { theme } = useAppTheme();
-  // State variables
   const [uid, setUid] = useState("");
   const [result, setResult] = useState("");
   const [visible, setVisible] = useState(false);
@@ -17,8 +20,8 @@ export default function GuardFacePanel() {
   const [permissions, setPermissions] = useState<any[]>([]);
   const [cards, setCards] = useState<any[]>([]);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
-  const textInputRef = useRef<TextInput>(null);
-  
+  const textInputRef = useRef<any>(null);
+  const { theme } = useAppTheme();
   // Camera related state
   const [permission, requestPermission] = useCameraPermissions();
   const [cameraFacing, setCameraFacing] = useState<CameraType>('front');
@@ -40,8 +43,33 @@ export default function GuardFacePanel() {
   const [isValidating, setIsValidating] = useState(false);
   const [isLoadingCards, setIsLoadingCards] = useState(false);
 
+  // Mock mode state
+  const [isMockMode, setIsMockMode] = useState(false);
+  const [mockPressCount, setMockPressCount] = useState(0);
+  const mockTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-
+  const handleTitlePress = () => {
+    setMockPressCount((prev) => {
+      const newCount = prev + 1;
+      if (newCount >= 5) {
+        setIsMockMode((prevMode) => {
+          const newMode = !prevMode;
+          showSnackbar(newMode ? "Mock Mode Enabled" : "Mock Mode Disabled");
+          return newMode;
+        });
+        return 0;
+      }
+      
+      if (mockTimeoutRef.current) {
+        clearTimeout(mockTimeoutRef.current);
+      }
+      mockTimeoutRef.current = setTimeout(() => {
+        setMockPressCount(0);
+      }, 2000);
+      
+      return newCount;
+    });
+  };
   // Function to show snackbar messages
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
@@ -77,6 +105,41 @@ export default function GuardFacePanel() {
 
     setIsValidating(true);
     setResult("Validating...");
+
+    if (isMockMode) {
+      setTimeout(() => {
+        const res = uid.toLowerCase() === "invalid" ? mockInvalidValidationResponse : mockValidationResponse;
+        if (res.data.valid) {
+          setCardInfo(res.data.card);
+          setPermissions(res.data.permissions);
+          setPhotoUrl(res.data.photoUrl);
+          
+          if (res.data.photoUrl) {
+            setResult("Access Granted (Pending Face)");
+            showSnackbar("Card validation successful - Please verify face (MOCK)");
+            setShowCamera(true);
+          } else {
+            setResult("Access Granted (No Face Reference)");
+            showSnackbar("Card validation successful - No reference photo available (MOCK)");
+            setFaceVerificationMessage("No reference photo available for this student");
+            setShowCamera(false);
+          }
+        } else {
+          setResult("Access Denied");
+          setCardInfo(null);
+          setPermissions([]);
+          setPhotoUrl(null);
+          setShowCamera(false);
+          showSnackbar("Invalid card or expired permissions (MOCK)");
+        }
+        setVisible(true);
+        setUid("");
+        textInputRef.current?.focus();
+        setIsValidating(false);
+      }, 500);
+      return;
+    }
+
     api.post("/guard/validate", { cardUID: uid })
       .then((res) => {
         if (res.data.valid) {
@@ -153,6 +216,29 @@ export default function GuardFacePanel() {
     setIsFaceVerifying(true);
     setFaceVerificationMessage("Verifying face...");
     
+    if (isMockMode) {
+      setTimeout(() => {
+        const res = cardUID.toLowerCase() === "invalid" ? mockInvalidFaceVerificationResponse : mockFaceVerificationResponse;
+        const { match, similarity, error } = res.data;
+        
+        setSimilarityScore(similarity / 100);
+        setFaceVerified(match);
+        
+        if (error) {
+          setFaceVerificationMessage(`Face verification error: ${error}`);
+        } else if (match) {
+          setResult("Access Granted");
+          setFaceVerificationMessage(`Face verified (${similarity.toFixed(1)}% match) (MOCK)`);
+        } else {
+          setFaceVerificationMessage(`Face does not match (${similarity.toFixed(1)}% similarity) (MOCK)`);
+        }
+        
+        setIsFaceVerifying(false);
+        setShowCamera(false);
+      }, 1000);
+      return;
+    }
+
     api.post("/guard/verify-face", {
       snapshotImage: imageUri,
       cardUID: cardUID
@@ -219,11 +305,20 @@ export default function GuardFacePanel() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView style={{ margin: 20 }}>
-      <ScrollView style={{ margin: 20 }}>
-          <>
-            <Text style={{ fontWeight: "bold", marginBottom: 10 }}>Face Recognition Guard Panel</Text>
-            <Text style={{ fontWeight: "bold", marginBottom: 10 }}>Face Recognition Guard Panel</Text>
-
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <Text 
+                style={{ fontWeight: "bold", fontSize: 20 }}
+                onPress={handleTitlePress}
+                suppressHighlighting={true}
+              >
+                Face Recognition Guard Panel
+              </Text>
+              {isMockMode && (
+                <View style={{ backgroundColor: theme.colors.error, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
+                  <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12 }}>DEMO</Text>
+                </View>
+              )}
+            </View>
             {/* Card Validation Section */}
             <Card elevation={4} style={{ margin: 10 }}>
               <Card.Content>
@@ -344,8 +439,7 @@ export default function GuardFacePanel() {
                           fontSize: 24,
                           fontWeight: "bold",
                           textAlign: "center",
-                          color: theme.colors.text,
-                          padding: 10
+                          color: theme.colors.onSurface,
                         }}
                       >
                         {getResultText()}
@@ -376,9 +470,8 @@ export default function GuardFacePanel() {
                 {cardInfo && !photoUrl && (
                   <Card style={{ marginTop: 20, backgroundColor: theme.colors.warning }} elevation={2}>
                     <Card.Content>
-                      <Title style={{ color: theme.colors.text }}>Warning: No Reference Photo</Title>
-                      <Paragraph style={{ color: theme.colors.text }}>
-                        The student assigned to this card does not have a reference photo. 
+                      <Title style={{ color: theme.colors.onSurface }}>Warning: No Reference Photo</Title>
+                      <Paragraph style={{ color: theme.colors.onSurface }}>
                         Face verification cannot be performed.
                       </Paragraph>
                     </Card.Content>
@@ -476,7 +569,6 @@ export default function GuardFacePanel() {
                 )}
               </Card.Content>
             </Card>
-            
       </ScrollView>
       <Snackbar
         visible={snackbarVisible}

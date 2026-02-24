@@ -4,11 +4,9 @@ import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable } 
 import api, { getUserId } from "../services/api";
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '../theme/ThemeContext';
+import { mockValidationResponse, mockInvalidValidationResponse } from '../utils/mockData';
 
 export default function GuardPanel() {
-  const router = useRouter();
-  const { theme } = useAppTheme();
-  // State variables
   const [uid, setUid] = useState("");
   const [result, setResult] = useState("");
   const [visible, setVisible] = useState(false);
@@ -16,8 +14,8 @@ export default function GuardPanel() {
   const [permissions, setPermissions] = useState<any[]>([]); // State to store permissions related to the card
   const [cards, setCards] = useState<any[]>([]); // State to store all cards (if needed)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null); // Add photo URL state
-  const textInputRef = useRef<TextInput>(null);
-
+  const textInputRef = useRef<any>(null);
+  const { theme } = useAppTheme();
   // Snackbar message state
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -26,8 +24,33 @@ export default function GuardPanel() {
   const [isValidating, setIsValidating] = useState(false);
   const [isLoadingCards, setIsLoadingCards] = useState(false);
 
+  // Mock mode state
+  const [isMockMode, setIsMockMode] = useState(false);
+  const [mockPressCount, setMockPressCount] = useState(0);
+  const mockTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-
+  const handleTitlePress = () => {
+    setMockPressCount((prev) => {
+      const newCount = prev + 1;
+      if (newCount >= 5) {
+        setIsMockMode((prevMode) => {
+          const newMode = !prevMode;
+          showSnackbar(newMode ? "Mock Mode Enabled" : "Mock Mode Disabled");
+          return newMode;
+        });
+        return 0;
+      }
+      
+      if (mockTimeoutRef.current) {
+        clearTimeout(mockTimeoutRef.current);
+      }
+      mockTimeoutRef.current = setTimeout(() => {
+        setMockPressCount(0);
+      }, 2000);
+      
+      return newCount;
+    });
+  };
   // Function to show snackbar messages
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
@@ -57,6 +80,31 @@ export default function GuardPanel() {
 
     setIsValidating(true);
     setResult("Validating...");
+
+    if (isMockMode) {
+      setTimeout(() => {
+        const res = uid.toLowerCase() === "invalid" ? mockInvalidValidationResponse : mockValidationResponse;
+        if (res.data.valid) {
+          setResult("Access Granted");
+          setCardInfo(res.data.card);
+          setPermissions(res.data.permissions);
+          setPhotoUrl(res.data.photoUrl);
+          showSnackbar("Card validation successful (MOCK)");
+        } else {
+          setResult("Access Denied");
+          setCardInfo(null);
+          setPermissions([]);
+          setPhotoUrl(null);
+          showSnackbar("Invalid card or expired permissions (MOCK)");
+        }
+        setVisible(true);
+        setUid("");
+        textInputRef.current?.focus();
+        setIsValidating(false);
+      }, 500);
+      return;
+    }
+
     api.post("/guard/validate", { cardUID: uid })
       .then((res) => {
         if (res.data.valid) {
@@ -93,11 +141,20 @@ export default function GuardPanel() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView style={{ margin: 20 }}>
-      <ScrollView style={{ margin: 20 }}>
-          <>
-            <Text style={{ fontWeight: "bold", marginBottom: 10 }}>Guard Panel</Text>
-            <Text style={{ fontWeight: "bold", marginBottom: 10 }}>Guard Panel</Text>
-
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <Text 
+                style={{ fontWeight: "bold", fontSize: 20 }}
+                onPress={handleTitlePress}
+                suppressHighlighting={true}
+              >
+                Guard Panel
+              </Text>
+              {isMockMode && (
+                <View style={{ backgroundColor: theme.colors.error, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
+                  <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12 }}>DEMO</Text>
+                </View>
+              )}
+            </View>
             {/* Card Validation Section */}
             <Card elevation={4} style={{ margin: 10 }}>
               <Card.Content>
@@ -255,7 +312,6 @@ export default function GuardPanel() {
                 )}
               </Card.Content>
             </Card>
-            
       </ScrollView>
       <Snackbar
         visible={snackbarVisible}

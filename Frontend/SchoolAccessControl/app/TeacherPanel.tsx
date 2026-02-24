@@ -105,12 +105,12 @@ export default function TeacherPanel() {
                 throw new Error("File does not exist");
               }
             }
-          } catch (error) {
+          } catch (error: any) {
             showSnackbar("Failed to process the image: " + error.message);
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       showSnackbar("Error picking image: " + error.message);
     }
   };
@@ -205,7 +205,6 @@ export default function TeacherPanel() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView style={{ margin: 20 }}>
-        <>
             <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
               <Card.Content>
                 <Title>Assign a Card</Title>
@@ -300,7 +299,7 @@ export default function TeacherPanel() {
                   visible={isStartDatePickerVisible}
                   onDismiss={() => setStartDatePickerVisible(false)}
                   date={startDate}
-                  onConfirm={(params: { date: Date }) => {
+                  onConfirm={(params: any) => {
                     setStartDate(params.date);
                     setStartDatePickerVisible(false);
                   }}
@@ -319,7 +318,7 @@ export default function TeacherPanel() {
                   visible={isEndDatePickerVisible}
                   onDismiss={() => setEndDatePickerVisible(false)}
                   date={endDate}
-                  onConfirm={(params: { date: Date }) => {
+                  onConfirm={(params: any) => {
                     setEndDate(params.date);
                     setEndDatePickerVisible(false);
                   }}

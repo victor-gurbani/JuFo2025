@@ -61,7 +61,7 @@ Wave 4 (After Wave 3)
 ├── Task 11: LaTeX Paper — Reflexion Arbeitsprozess [x]
 ├── Task 12: LaTeX Paper — Fazit und Ausblick [x]
 ├── Task 13: Bibliography & Formal Compliance [x]
-└── Task 14: Demo Fallback Mode (mock auth for colloquium)
+├── Task 14: Demo Fallback Mode (mock auth for colloquium) [x]
 
 Wave 5 (After Wave 4)
 ├── Task 15: Thesenpapier (4-6 theses with evidence anchors)

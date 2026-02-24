@@ -148,7 +148,7 @@ export default function StudentPanel() {
                 throw new Error("File does not exist");
               }
             }
-          } catch (error) {
+          } catch (error: any) {
             showSnackbar("Failed to process the image: " + error.message);
             return;
           }
@@ -158,7 +158,7 @@ export default function StudentPanel() {
         setPhotoUrl(imageData);
         uploadPhotoToServer(imageData);
       }
-    } catch (error) {
+    } catch (error: any) {
       showSnackbar("Error picking image: " + error.message);
     }
   };
@@ -201,7 +201,6 @@ export default function StudentPanel() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <ScrollView style={{ margin: 20 }}>
       <ScrollView style={{ margin: 20 }}>
         {isLoadingInfo ? (
           <ActivityIndicator style={{ marginTop: 20 }} />
@@ -296,9 +295,10 @@ export default function StudentPanel() {
                   </View>
                 </Card.Content>
               </Card>
-
+            </>
+          ) : (
             <Text style={{ margin: 20 }}>Student not found. Please check your ID.</Text>
-          )
+          )}
       </ScrollView>
       
       <Snackbar

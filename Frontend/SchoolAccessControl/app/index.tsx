@@ -15,7 +15,7 @@ export default function LoginScreen() {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState<"admin" | "teacher" | "guard" | "student" | "">(""); // Track selected role
-  const textInputRef = useRef<TextInput>(null);
+  const textInputRef = useRef<any>(null);
   const router = useRouter();
   const { theme } = useAppTheme();
 
