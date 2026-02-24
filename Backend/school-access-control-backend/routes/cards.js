@@ -1,10 +1,12 @@
+const express = require("express");
+// Replace checkPermission with checkAuth
+const checkAuth = require("../middleware/checkAuth");
+
 module.exports = (db) => {
-  const express = require("express");
-  const checkPermission = require("../middleware/checkPermission");
   const router = express.Router();
 
   // Create a new card (allow admins and tutors)
-  router.post("/", checkPermission(db, "tutor"), (req, res) => {
+  router.post("/", checkAuth(db, ['MANAGE_CARDS']), (req, res) => {
     const { uid, lastAssigned, isValid } = req.body;
 
     const query = `INSERT INTO cards (uid, lastAssigned, isValid) VALUES (?, ?, ?)`;
@@ -17,7 +19,7 @@ module.exports = (db) => {
   });
 
   // Read all cards (allow guards, teachers, tutors, admins)
-  router.get("/", checkPermission(db, "guard"), (req, res) => {
+  router.get("/", checkAuth(db, ['VIEW_CARDS']), (req, res) => {
     const query = `SELECT * FROM cards`;
     db.all(query, [], (err, rows) => {
       if (err) {
@@ -28,7 +30,7 @@ module.exports = (db) => {
   });
 
   // Read a specific card by UID (allow guards, admins)
-  router.get("/:uid", checkPermission(db, "guard"), (req, res) => {
+  router.get("/:uid", checkAuth(db, ['VIEW_CARDS']), (req, res) => {
     const { uid } = req.params;
     const query = `SELECT * FROM cards WHERE uid = ? LIMIT 1`;
     db.get(query, [uid], (err, row) => {
@@ -43,7 +45,7 @@ module.exports = (db) => {
   });
 
   // Update a card (allow admins and tutors)
-  router.put("/:uid", checkPermission(db, "tutor"), (req, res) => {
+  router.put("/:uid", checkAuth(db, ['MANAGE_CARDS']), (req, res) => {
     const { lastAssigned, isValid } = req.body;
     const query = `UPDATE cards SET lastAssigned = ?, isValid = ? WHERE uid = ?`;
     db.run(query, [lastAssigned, isValid ? 1 : 0, req.params.uid], function (err) {
@@ -58,7 +60,7 @@ module.exports = (db) => {
   });
 
   // Delete a card (allow admins and tutors)
-  router.delete("/:uid", checkPermission(db, "tutor"), (req, res) => {
+  router.delete("/:uid", checkAuth(db, ['MANAGE_CARDS']), (req, res) => {
     const query = `DELETE FROM cards WHERE uid = ?`;
     db.run(query, [req.params.uid], function (err) {
       if (err) {
@@ -72,7 +74,7 @@ module.exports = (db) => {
   });
 
   // Get permissions for a specific card (allow guards, admins)
-  router.get("/:uid/permissions", checkPermission(db, "guard"), (req, res) => {
+  router.get("/:uid/permissions", checkAuth(db, ['VIEW_PERMISSIONS', 'VIEW_CARDS']), (req, res) => {
     const { uid } = req.params;
     const permissionsQuery = `
       SELECT p.id, p.startDate, p.endDate, p.isRecurring, p.recurrencePattern, p.assignedStudent, t.name AS assignedBy

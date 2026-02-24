@@ -1,4 +1,5 @@
 const express = require("express");
+const checkAuth = require("../middleware/checkAuth");
 const { processImage } = require('../utils/imageProcessor');
 const faceapi = require('@vladmandic/face-api');
 const canvas = require("canvas");
@@ -42,11 +43,13 @@ module.exports = (db) => {
   });
 
   // Get student information (requires student authentication)
-  router.get("/info", (req, res) => {
-    const { studentId } = req.query;
+  router.get("/info", checkAuth(db, ['VIEW_OWN_INFO']), (req, res) => {
+    // Get student ID from authenticated user
+    const studentId = req.query.studentId || req.user.id;
 
-    if (!studentId) {
-      return res.status(400).json({ error: "Student ID is required" });
+    // Check if the user is requesting their own info or has elevated permissions
+    if (studentId !== req.user.id && !req.user.permissions.includes('VIEW_STUDENTS')) {
+      return res.status(403).json({ error: "You can only view your own student information" });
     }
 
     const query = `
@@ -72,12 +75,20 @@ module.exports = (db) => {
   });
 
   // Update student photo (with once per week limitation)
-  router.post("/update-photo", async (req, res) => {
+  router.post("/update-photo", checkAuth(db, ['UPDATE_OWN_PHOTO']), async (req, res) => {
     try {
-      const { studentId, photoUrl, verifyFace } = req.body;
+      // Get student ID from authenticated user or parameter for elevated users
+      const studentId = req.body.studentId || req.user.id;
+      const photoUrl = req.body.photoUrl;
+      const verifyFace = req.body.verifyFace;
       
-      if (!studentId || !photoUrl) {
-        return res.status(400).json({ error: "Student ID and photo are required" });
+      // Check if the user is updating their own photo or has elevated permissions
+      if (studentId !== req.user.id && !req.user.permissions.includes('MANAGE_STUDENTS')) {
+        return res.status(403).json({ error: "You can only update your own photo" });
+      }
+
+      if (!photoUrl) {
+        return res.status(400).json({ error: "Photo is required" });
       }
 
       // Check when photo was last updated
@@ -92,10 +103,13 @@ module.exports = (db) => {
         }
 
         // Check if a week has passed since the last update
+        // Skip this check for admins/managers
         const now = new Date();
         const lastUpdate = row.lastPhotoUpdate ? new Date(row.lastPhotoUpdate) : null;
         
-        if (lastUpdate && now.getTime() - lastUpdate.getTime() < 7 * 24 * 60 * 60 * 1000) {
+        if (lastUpdate && 
+            now.getTime() - lastUpdate.getTime() < 7 * 24 * 60 * 60 * 1000 && 
+            !req.user.permissions.includes('MANAGE_STUDENTS')) {
           return res.status(403).json({ 
             error: "Photo can only be updated once per week", 
             nextUpdateAvailable: new Date(lastUpdate.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString() 
@@ -169,11 +183,14 @@ module.exports = (db) => {
   });
 
   // Update student information (email only for now)
-  router.post("/update-info", (req, res) => {
-    const { studentId, email } = req.body;
+  router.post("/update-info", checkAuth(db, ['UPDATE_OWN_INFO']), (req, res) => {
+    // Get student ID from authenticated user or parameter for elevated users
+    const studentId = req.body.studentId || req.user.id;
+    const { email } = req.body;
     
-    if (!studentId) {
-      return res.status(400).json({ error: "Student ID is required" });
+    // Check if the user is updating their own info or has elevated permissions
+    if (studentId !== req.user.id && !req.user.permissions.includes('MANAGE_STUDENTS')) {
+      return res.status(403).json({ error: "You can only update your own information" });
     }
 
     // Only allow updating email for now

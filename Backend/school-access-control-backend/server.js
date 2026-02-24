@@ -168,6 +168,7 @@ const db = new sqlite3.Database("./database.db", (err) => {
 });
 
 // Pass database instance to routes
+const authRoutes = require("./routes/auth")(db);
 const adminRoutes = require("./routes/admin")(db);
 const teacherRoutes = require("./routes/teacher")(db);
 const guardRoutes = require("./routes/guard")(db);
@@ -175,6 +176,7 @@ const cardRoutes = require("./routes/cards")(db);
 const studentRoutes = require("./routes/student")(db);
 
 // Example routes
+app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/teacher", teacherRoutes);
 app.use("/guard", guardRoutes);

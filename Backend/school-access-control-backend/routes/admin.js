@@ -1,10 +1,11 @@
 const express = require("express");
 const checkPermission = require("../middleware/checkPermission");
+const checkAuth = require("../middleware/checkAuth");
 const { processImage } = require('../utils/imageProcessor');
 
 module.exports = (db) => {
   const router = express.Router();
-
+  router.use(checkAuth(db));
   // Get all cards (allow only admins)
   router.get("/cards", checkPermission(db, "admin"), (req, res) => {
     const query = `SELECT * FROM cards`;

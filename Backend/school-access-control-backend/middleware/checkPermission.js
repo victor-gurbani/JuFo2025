@@ -17,14 +17,13 @@ const roleHierarchy = {
 
 module.exports = (db, requiredLevel) => {
   return (req, res, next) => {
-    const teacherId = (req.body.teacherId || req.query.teacherId || req.body.guardId || req.query.guardId || "").toLowerCase(); // Must be passed by the client
-    // if (!teacherId) {
-    //   return res.status(400).json({ error: "Teacher ID is required." });
-    // }
-
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    }
+    const userId = req.user.id.toLowerCase();
     const query = `SELECT permissionLevel FROM teachers WHERE id = ?`;
 
-    db.get(query, [teacherId], (err, row) => {
+    db.get(query, [userId], (err, row) => {
       if (err) return res.status(500).json({ error: err.message });
       if (!row) return res.status(404).json({ error: "Teacher not found" });
 

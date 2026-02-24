@@ -1,7 +1,8 @@
 const tf = require('@tensorflow/tfjs-node')
 
 const express = require("express");
-const checkPermission = require("../middleware/checkPermission");
+// Replace checkPermission with checkAuth
+const checkAuth = require("../middleware/checkAuth");
 const faceapi = require('@vladmandic/face-api'); // much faster and can use modern tf
 const canvas = require("canvas");
 const fs = require("fs");
@@ -51,8 +52,10 @@ module.exports = (db) => {
   });
 
   // Validate a card swipe (allow guards, teachers, tutors, admins)
-  router.post("/validate", checkPermission(db, "guard"), (req, res) => {
+  router.post("/validate", checkAuth(db, ['VALIDATE_SWIPE']), (req, res) => {
     const { cardUID } = req.body;
+    const verifiedBy = req.user.id; // Use authenticated user ID
+    
     const cardQuery = `
       SELECT c.uid, c.lastAssigned, c.isValid
       FROM cards c
@@ -66,12 +69,12 @@ module.exports = (db) => {
       LEFT JOIN students s ON p.assignedStudent = s.id
       WHERE p.associatedCard = ? AND p.isValid = 1
     `;
+    
     db.get(cardQuery, [cardUID], (err, cardRow) => {
       if (err) return res.status(500).json({ error: err.message });
       if (!cardRow) return res.json({ valid: false });
       if (cardRow.isValid !== 1) return res.json({ valid: false });
       
-
       // Fetch permissions related to the card
       db.all(permissionsQuery, [cardUID], (permErr, permRows) => {
         if (permErr) return res.status(500).json({ error: permErr.message });
@@ -84,13 +87,13 @@ module.exports = (db) => {
           return now >= startDate && now <= endDate;
         });
 
-        // After validation, log the access attempt
+        // After validation, log the access attempt with verified_by
         const logAccess = (isValid, studentId) => {
           const logQuery = `
-            INSERT INTO accessLogs (direction, student, card, wasApproved, timestamp)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO accessLogs (direction, student, card, wasApproved, timestamp, verified_by)
+            VALUES (?, ?, ?, ?, ?, ?)
           `;
-          db.run(logQuery, ['ENTRY', studentId, cardUID, isValid ? 1 : 0, Math.floor(Date.now() / 1000)], (logErr) => {
+          db.run(logQuery, ['ENTRY', studentId, cardUID, isValid ? 1 : 0, Math.floor(Date.now() / 1000), verifiedBy], (logErr) => {
             if (logErr) console.error("Error logging access:", logErr.message);
           });
         };
@@ -124,7 +127,7 @@ module.exports = (db) => {
   });
 
   // New endpoint for face verification
-  router.post("/verify-face", checkPermission(db, "guard"), async (req, res) => {
+  router.post("/verify-face", checkAuth(db, ['VERIFY_FACE']), async (req, res) => {
     console.log("Starting face verification request");
     try {
       // Check if models are loaded
@@ -138,6 +141,8 @@ module.exports = (db) => {
       }
 
       const { snapshotImage, cardUID } = req.body;
+      const verifiedBy = req.user.id; // Use authenticated user ID
+      
       console.log("Received request with cardUID:", cardUID);
       console.log("Snapshot image received:", snapshotImage ? "Yes" : "No");
       
@@ -221,7 +226,7 @@ module.exports = (db) => {
         }
 
         // Continue with the face verification using row
-        processFaceVerification(row, snapshotImage, cardUID, res);
+        processFaceVerification(row, snapshotImage, cardUID, res, verifiedBy);
       });
     } catch (error) {
       console.error("Face verification error:", error);
@@ -236,7 +241,7 @@ module.exports = (db) => {
   });
 
   // Helper function to process the face verification
-  async function processFaceVerification(row, snapshotImage, cardUID, res) {
+  async function processFaceVerification(row, snapshotImage, cardUID, res, verifiedBy) {
     try {
       console.log("Snapshot image data preview:", snapshotImage.slice(0, 20) + "...");
       // Process the snapshot image using utility
@@ -301,14 +306,14 @@ module.exports = (db) => {
       console.log("Calculated similarity score:", similarity);
       console.log("Face match result:", match);
 
-      // Log the verification attempt
+      // Log the verification attempt with verified_by
       console.log("Logging verification attempt to database");
       const logQuery = `
-        INSERT INTO accessLogs (direction, student, card, wasApproved, timestamp)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO accessLogs (direction, student, card, wasApproved, timestamp, verified_by)
+        VALUES (?, ?, ?, ?, ?, ?)
       `;
       
-      db.run(logQuery, ['FACE_VERIFY', row.studentId, cardUID, match ? 1 : 0, Math.floor(Date.now() / 1000)], (logErr) => {
+      db.run(logQuery, ['FACE_VERIFY', row.studentId, cardUID, match ? 1 : 0, Math.floor(Date.now() / 1000), verifiedBy], (logErr) => {
         if (logErr) console.error("Error logging face verification:", logErr);
         else console.log("Verification attempt logged successfully");
       });
