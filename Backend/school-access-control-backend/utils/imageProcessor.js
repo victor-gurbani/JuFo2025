@@ -7,6 +7,15 @@ const heicConvert = require('heic-convert');
 // Debug logging - only in development
   const debug = process.env.NODE_ENV === 'development';
 
+
+  /**
+   * Process and normalize image data for face recognition
+   * Handles multiple image formats (JPEG, PNG, HEIC/HEIF) and converts to standardized PNG
+   * Resizes images to 1024x1024 to optimize for face-api processing
+   * @param {string} base64Image - Base64 encoded image string (may include data:image/...;base64, prefix)
+   * @returns {Promise<string>} Base64 encoded PNG image as data URI
+   * @throws {Error} If image processing fails
+   */
   async function processImage(base64Image) {
   let imageBuffer = null;
   let processedImageBuffer = null;

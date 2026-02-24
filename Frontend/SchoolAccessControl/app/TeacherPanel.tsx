@@ -156,6 +156,7 @@ export default function TeacherPanel() {
       recurrencePattern,
       studentPhotoUrl
     })
+      .then(() => {
         showSnackbar("Card assigned");
         // Clear the input fields
         setStudentId("");
@@ -438,7 +439,6 @@ export default function TeacherPanel() {
                 )}
               </Card.Content>
             </Card>
-          </>
       </ScrollView>
       <Snackbar
         visible={snackbarVisible}

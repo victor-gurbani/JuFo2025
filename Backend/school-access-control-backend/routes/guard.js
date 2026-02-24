@@ -51,6 +51,13 @@ module.exports = (db) => {
   });
 
   // Validate a card swipe (allow guards, teachers, tutors, admins)
+
+  /**
+   * POST /guard/validate - Validate a card swipe
+   * Checks if a card is valid and assigned to a student with valid permissions
+   * @param {string} req.body.cardUID - The NFC card UID to validate
+   * @returns {Object} {valid, studentId, studentName, photoUrl} if valid card, or {valid: false, message} otherwise
+   */
   router.post("/validate", checkAuth(db, ['VALIDATE_SWIPE']), (req, res) => {
     const { cardUID } = req.body;
     const verifiedBy = req.user.id; // Use authenticated user ID
@@ -126,6 +133,14 @@ module.exports = (db) => {
   });
 
   // New endpoint for face verification
+
+  /**
+   * POST /guard/verify-face - Verify face against reference photo
+   * Uses TensorFlow.js face-api for face detection and comparison
+   * @param {string} req.body.snapshotImage - Base64 encoded snapshot image from camera
+   * @param {string} req.body.cardUID - The NFC card UID to match against
+   * @returns {Object} {match, similarity, distance} with euclidean distance and similarity threshold (0.6)
+   */
   router.post("/verify-face", checkAuth(db, ['VERIFY_FACE']), async (req, res) => {
     if (debug) console.log('Starting face verification request');
     try {

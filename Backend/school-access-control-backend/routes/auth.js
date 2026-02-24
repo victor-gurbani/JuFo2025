@@ -5,6 +5,17 @@ module.exports = (db) => {
   const router = express.Router();
 
   // Login for teachers, guards, and admins
+
+  /**
+   * POST /auth/login - Authenticate teacher, guard, or admin
+   * Verifies credentials and returns JWT token with permissions
+   * @param {Object} req.body - Request body
+   * @param {string} req.body.id - User ID (teacher/guard/admin)
+   * @param {string} req.body.password - Password (prototype accepts 'prototype_secret' or 'admin123')
+   * @returns {Object} {token, user} - JWT token and user info with role and permissions
+   * @throws {401} If credentials are invalid
+   * @throws {400} If ID or password is missing
+   */
   router.post('/login', (req, res) => {
     const { id, password } = req.body;
 
@@ -56,6 +67,16 @@ module.exports = (db) => {
   });
 
   // Login for students
+
+  /**
+   * POST /auth/login-student - Authenticate a student
+   * Validates student ID and returns JWT token with student permissions
+   * @param {Object} req.body - Request body
+   * @param {string} req.body.studentId - Student ID
+   * @returns {Object} {token, user} - JWT token and student info with role and permissions
+   * @throws {401} If student is not found
+   * @throws {400} If studentId is missing
+   */
   router.post('/login-student', (req, res) => {
     const { studentId } = req.body;
 

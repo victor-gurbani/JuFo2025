@@ -256,7 +256,6 @@ export default function GuardPanel() {
               </Card.Content>
             </Card>
             
-          </>
       </ScrollView>
       <Snackbar
         visible={snackbarVisible}

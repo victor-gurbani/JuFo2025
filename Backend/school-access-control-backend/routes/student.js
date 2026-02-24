@@ -46,6 +46,15 @@ module.exports = (db) => {
   });
 
   // Get student information (requires student authentication)
+  /**
+   * GET /student/info - Retrieve student profile information
+   * Returns student details including name, email, photo, class group, and tutor info
+   * @param {string} req.query.studentId - Optional student ID (if not provided, uses authenticated user ID)
+   * @requires Authentication with VIEW_OWN_INFO permission
+   * @returns {Object} Student object with id, name, email, photoUrl, classGroup, lastPhotoUpdate, tutorName
+   * @throws {403} If user tries to view another student's info without elevated permissions
+   * @throws {404} If student not found
+   */
   router.get("/info", checkAuth(db, ['VIEW_OWN_INFO']), (req, res) => {
     // Get student ID from authenticated user
     const studentId = req.query.studentId || req.user.id;
@@ -78,6 +87,20 @@ module.exports = (db) => {
   });
 
   // Update student photo (with once per week limitation)
+  /**
+   * POST /student/update-photo - Update student profile photo with optional face verification
+   * Handles photo upload, resizing, and optional face detection verification
+   * Enforces once-per-week update limit for non-admin users
+   * @param {Object} req.body - Request body
+   * @param {string} req.body.photoUrl - Photo data-URI
+   * @param {boolean} req.body.verifyFace - Optional face detection (default: false)
+   * @param {string} req.body.studentId - Optional student ID (if not provided, uses authenticated user ID)
+   * @requires Authentication with UPDATE_OWN_PHOTO permission
+   * @returns {Object} {success, message, nextUpdateAvailable} - Confirmation with next update timestamp
+   * @throws {403} If update limit exceeded or insufficient permissions
+   * @throws {400} If no face detected (when verifyFace=true) or photo quality too low
+   * @throws {503} If face detection service not available
+   */
   router.post("/update-photo", checkAuth(db, ['UPDATE_OWN_PHOTO']), async (req, res) => {
     try {
       // Get student ID from authenticated user or parameter for elevated users
@@ -186,6 +209,18 @@ module.exports = (db) => {
   });
 
   // Update student information (email only for now)
+  /**
+   * POST /student/update-info - Update student information
+   * Currently allows updating email address only
+   * @param {Object} req.body - Request body
+   * @param {string} req.body.email - New email address
+   * @param {string} req.body.studentId - Optional student ID (if not provided, uses authenticated user ID)
+   * @requires Authentication with UPDATE_OWN_INFO permission
+   * @returns {Object} {success, message} - Confirmation message
+   * @throws {403} If user tries to update another student's info without elevated permissions
+   * @throws {400} If email is missing or invalid
+   * @throws {404} If student not found
+   */
   router.post("/update-info", checkAuth(db, ['UPDATE_OWN_INFO']), (req, res) => {
     // Get student ID from authenticated user or parameter for elevated users
     const studentId = req.body.studentId || req.user.id;
