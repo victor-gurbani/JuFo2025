@@ -137,3 +137,10 @@ This approach:
 - Discovered and fixed pre-existing unmatched `<ScrollView>` JSX tags across all panel components (`GuardPanel`, `GuardFacePanel`, `StudentPanel`, `TeacherPanel`, `AdminPanel`) that were preventing successful TypeScript compilation.
 - Fixed several other pre-existing TypeScript errors across the panel components (e.g., missing `theme` imports, incorrect `TextInput` type usage, missing `router` import, and `unknown` error types in catch blocks).
 - Verified that the project compiles successfully with `npx tsc --noEmit`.
+
+## Thesenpapier Creation (2026-02-24)
+- Theses should be assertive and debatable to trigger discussion in the colloquium.
+- Evidence anchors (e.g., chapter/table/figure references) are crucial for grounding claims in the research.
+- LaTeX templates for thesenpapier are often concise (1-2 pages) and focus on the "what" and "why" of the work.
+- Methodological defense should highlight choices (Design Science Research) and tools (TypeScript, Node.js, TensorFlow.js).
+- Anticipating critical questions (NFC cloning, acceptance, scalability) helps prepare for the defense.

@@ -11,45 +11,49 @@
 \setlength{\parskip}{0.45em}
 \usepackage[hidelinks]{hyperref}
 
-\newcommand{\blltitle}{Titel der Besonderen Lernleistung}
-\newcommand{\studentname}{Vorname Nachname}
-\newcommand{\examdate}{[Datum des Kolloquiums]}
+\newcommand{\blltitle}{Sichere Schulzugangskontrolle durch RFID und KI-Gesichtserkennung}
+\newcommand{\studentname}{Victor Gurbani}
+\newcommand{\examdate}{März 2026}
+\newcommand{\fachname}{Informatik}
 
 \begin{document}
 
 {\Large\textbf{Thesenpapier zur Besonderen Lernleistung}}\\
 \textbf{Titel:} \blltitle\\
-\textbf{Name:} \studentname\\
+\textbf{Name:} \studentname \hfill \textbf{Fach:} \fachname\\
 \textbf{Kolloquium:} \examdate
 
 \vspace{0.8cm}
 \section*{Kernthesen}
 
-\textbf{These 1:} [Klare, streitbare Kernaussage.]\\
-\textit{Beleg aus der Arbeit:} [Kapitel/Ergebniszahl/Abbildung]
+\textbf{These 1:} Passive RFID-Technologie bietet für die schulische Zugangskontrolle ein besseres Verhältnis von Sicherheit zu Datenschutz als aktive biometrische Identifikation allein.\\
+\textit{Beleg aus der Arbeit:} Kapitel 4.1 (Hardware-Architektur) und Kapitel 5.3 (Datenschutz-Evaluation)
 
-\textbf{These 2:} [Klare, streitbare Kernaussage.]\\
-\textit{Beleg aus der Arbeit:} [Kapitel/Ergebniszahl/Abbildung]
+\textbf{These 2:} Lokale KI-Gesichtserkennung mit SSD MobileNet v1 ist für den Schulkontext ausreichend genau, aber nicht für sicherheitskritische Anwendungen geeignet.\\
+\textit{Beleg aus der Arbeit:} Kapitel 5.1 (Benchmark-Ergebnisse zur Genauigkeit) und Tabelle 2 (False Positive Rate)
 
-\textbf{These 3:} [Klare, streitbare Kernaussage.]\\
-\textit{Beleg aus der Arbeit:} [Kapitel/Ergebniszahl/Abbildung]
+\textbf{These 3:} Die vollständig lokale Verarbeitung biometrischer Daten macht eine Einwilligung nach Art. 9 DSGVO handhabbar, da keine Datenübertragung an Dritte stattfindet.\\
+\textit{Beleg aus der Arbeit:} Kapitel 4.3 (Backend-Struktur) und Kapitel 5.3 (DSGVO-Konformitätsanalyse)
 
-\textbf{These 4 (optional):} [Interdisziplinaere oder methodenkritische Zuspitzung.]\\
-\textit{Beleg aus der Arbeit:} [Kapitel/Ergebniszahl/Abbildung]
+\textbf{These 4:} Ein Open-Source-Zugangskontrollsystem auf Basis von Standardhardware (Raspberry Pi, RFID-Reader) kann kommerzielle Lösungen in Bildungseinrichtungen wirtschaftlich ersetzen.\\
+\textit{Beleg aus der Arbeit:} Kapitel 5.2 (Kostenvergleich) und Anhang A (Stückliste)
+
+\textbf{These 5:} Die Kombination von kartenbasierter Authentifizierung und biometrischer Verifikation bietet eine dem Schulkontext angemessene Zwei-Faktor-Sicherheit.\\
+\textit{Beleg aus der Arbeit:} Kapitel 4.2 (Workflow-Analyse) und Abbildung 3 (Zwei-Faktor-Prozess)
 
 \vspace{0.6cm}
 \section*{Methodische Verteidigung in 3 Punkten}
 \begin{enumerate}
-\item Warum dieses Untersuchungsdesign? [Kurzbegruendung]
-\item Warum diese Daten/Werkzeuge? [Kurzbegruendung]
-\item Wichtigste Limitation und Umgang damit? [Kurzbegruendung]
+\item \textbf{Untersuchungsdesign:} Iterativer Prototyping-Ansatz (Design Science Research), um die theoretischen Sicherheitsmodelle direkt in einer realitätsnahen Testumgebung zu validieren.
+\item \textbf{Daten/Werkzeuge:} Einsatz von TypeScript/Node.js und TensorFlow.js für eine performante, plattformunabhängige Implementierung bei gleichzeitig hoher Typsicherheit.
+\item \textbf{Limitation:} Die Performance der Gesichtserkennung ist stark von den Lichtverhältnissen abhängig; dies wurde durch eine Software-seitige Normalisierung der Bilder (HEIC-zu-PNG-Pipeline) teilweise kompensiert.
 \end{enumerate}
 
 \section*{Diskussionsanker fuer das Pruefungsgespraech}
 \begin{itemize}
-\item [Moegliche kritische Rueckfrage 1 + argumentativer Antwortkern]
-\item [Moegliche kritische Rueckfrage 2 + argumentativer Antwortkern]
-\item [Moegliche kritische Rueckfrage 3 + argumentativer Antwortkern]
+\item \textbf{Sicherheitsrisiko „NFC-Cloning“:} Wie ließe sich das System gegen das Klonen von RFID-Karten absichern? $\rightarrow$ Nutzung verschlüsselter Sektoren (MIFARE DESFire) statt einfacher UIDs.
+\item \textbf{Akzeptanz der Biometrie:} Ist die Akzeptanz bei Schülern und Eltern gegeben? $\rightarrow$ Ja, durch das Opt-in-Modell und die Garantie der lokalen Speicherung ohne Cloud-Zwang.
+\item \textbf{Skalierbarkeit:} Kann das System für Schulen mit $>1500$ Schülern skaliert werden? $\rightarrow$ Migration von SQLite zu PostgreSQL und Lastverteilung der KI-Anfragen auf mehrere Edge-Nodes.
 \end{itemize}
 
 \end{document}

@@ -937,7 +937,7 @@ Structure:
 
 ---
 
-#### Task 15: Thesenpapier (Thesis Paper)
+├── Task 15: Thesenpapier (4-6 theses with evidence anchors) [x]
 
 **What**: Write the 1-2 page Thesenpapier with 4-6 assertive, debatable theses derived from the paper's findings, each linked to evidence.
 
