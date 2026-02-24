@@ -53,8 +53,8 @@ Wave 2 (After Wave 1)
 └── Task 7: Create Figures & Diagrams for Paper
 
 Wave 3 (After Wave 2)
-├── Task 8: Benchmark Script + Data Collection (RPi vs VPS)
-├── Task 9: LaTeX Paper — Ergebnisse und Evaluation (needs benchmark data)
+├── Task 8: Benchmark Script + Data Collection (RPi vs VPS) [x]
+├── Task 9: LaTeX Paper — Ergebnisse und Evaluation (needs benchmark data) [x]
 └── Task 10: LaTeX Paper — Interdisciplinary Chapter (Law/GDPR/Ethics)
 
 Wave 4 (After Wave 3)
