@@ -44,7 +44,7 @@ Wave 1 (Parallel - No Dependencies)
 ├── Task 1: Implement JWT Authentication (checkAuth.js) [x]
 ├── Task 2: Fix Database Schema (accessLogs + permissions) [x]
 ├── Task 3: Backend Cleanup (console.logs, .env, error handling) [x]
-└── Task 4: LaTeX Paper — Kurzfassung + Einleitung + Theoretischer Hintergrund
+└── Task 4: LaTeX Paper — Kurzfassung + Einleitung + Theoretischer Hintergrund [x]
 
 Wave 2 (After Wave 1)
 ├── Task 5: Frontend Stabilization (auth integration, URL config, web-only fixes) [x]
