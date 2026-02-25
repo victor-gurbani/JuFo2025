@@ -27,6 +27,37 @@ CREATE TABLE IF NOT EXISTS permissions (
   FOREIGN KEY (assignedBy) REFERENCES teachers(id),
   FOREIGN KEY (associatedCard) REFERENCES cards(uid)
 );
+
+CREATE TABLE IF NOT EXISTS students (
+  id TEXT PRIMARY KEY,
+  firstName TEXT,
+  lastName TEXT,
+  className TEXT,
+  photoUrl TEXT,
+  faceDescriptor TEXT,
+  associatedCard TEXT,
+  FOREIGN KEY (associatedCard) REFERENCES cards(uid)
+);
+
+CREATE TABLE IF NOT EXISTS teachers (
+  id TEXT PRIMARY KEY,
+  name TEXT,
+  email TEXT,
+  passwordHash TEXT,
+  role TEXT DEFAULT 'teacher',
+  permissions TEXT
+);
+
+CREATE TABLE IF NOT EXISTS accessLogs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  cardUID TEXT,
+  studentId TEXT,
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+  accessGranted INTEGER,
+  verificationMethod TEXT,
+  FOREIGN KEY (cardUID) REFERENCES cards(uid),
+  FOREIGN KEY (studentId) REFERENCES students(id)
+);
 \end{lstlisting}
 
 \subsubsection{API-Endpunkte}
@@ -39,18 +70,18 @@ In der folgenden Tabelle sind die wichtigsten API-Endpunkte des Backends aufgefu
 \endhead
 POST & /auth/login & Authentifizierung fuer Personal \\
 POST & /auth/login-student & Login fuer Schueler via ID \\
-POST & /guard/validate & Validierung eines NFC-Scans \\
+POST & /guard/validate & Validierung eines RFID-Scans \\
 POST & /guard/verify-face & Vergleich von Snapshot und Referenz \\
 GET & /student/profile & Abruf des Schuelerprofils \\
 POST & /cards/assign & Verknuepfung Karte mit Schueler \\ \bottomrule
 \end{longtable}
 
 \subsection{Ergaenzende Abbildungen}
-Die Benutzeroberflaeche der Guard-App ist fuer die schnelle Verifikation optimiert. Abbildung \ref{fig:screenshot_guard} zeigt die Ansicht nach einem erfolgreichen NFC-Scan.
+Die Benutzeroberflaeche der Guard-App ist fuer die schnelle Verifikation optimiert. Abbildung \ref{fig:screenshot_guard} zeigt die Ansicht nach einem erfolgreichen RFID-Scan.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.8\textwidth]{figures/systemarchitektur.pdf}
+  \includegraphics[width=0.8\textwidth,height=0.4\textheight,keepaspectratio]{figures/systemarchitektur.pdf}
   \caption{Benutzeroberflaeche der Guard-App bei erfolgreicher Validierung}
   \label{fig:screenshot_guard}
 \end{figure}
@@ -108,4 +139,3 @@ const checkAuth = (db, requiredPermissions = []) => {
   };
 };
 \end{lstlisting}
-

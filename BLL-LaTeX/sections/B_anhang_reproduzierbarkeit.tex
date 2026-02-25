@@ -21,7 +21,7 @@ Um das System in einer Testumgebung zu reproduzieren, sind die folgenden Schritt
 \subsubsection{Hardware-Voraussetzungen}
 \begin{itemize}
   \item Raspberry Pi 4 (mind. 4GB RAM empfohlen fuer KI-Inferenz)
-  \item USB-NFC/RFID-Lesegeraet (kompatibel mit libnfc)
+  \item USB-RFID-Lesegeraet (125\,kHz, EM4100-kompatibel)
   \item Kamera-Modul oder USB-Webcam zur Gesichtserfassung
 \end{itemize}
 
@@ -51,6 +51,5 @@ Das Skript gibt die Inferenzzeit fuer 20 Testbilder aus und speichert die Ergebn
 \begin{itemize}
   \item \textbf{Modell-Ladefehler:} Falls die Gewichte in \texttt{/weights} fehlen, startet der Gesichtserkennungs-Service nicht. Pruefen Sie das \texttt{server.log} auf entsprechende Fehlermeldungen.
   \item \textbf{Speichermangel:} Bei der Verarbeitung vieler HEIC-Bilder auf einem Raspberry Pi kann es zu \enquote{Out of Memory} Fehlern kommen. Das System ist so konfiguriert, dass es nach jeder Bildkonvertierung \texttt{global.gc()} aufruft (erfordert Start mit \texttt{--expose-gc}).
-  \item \textbf{Erwartete Ausgabe:} Ein erfolgreicher NFC-Scan liefert ein JSON-Objekt mit \texttt{"valid": true} und der \texttt{photoUrl} des Schuelers zurueck.
+  \item \textbf{Erwartete Ausgabe:} Ein erfolgreicher RFID-Scan liefert ein JSON-Objekt mit \texttt{"valid": true} und der \texttt{photoUrl} des Schuelers zurueck.
 \end{itemize}
-

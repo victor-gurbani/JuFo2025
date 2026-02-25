@@ -3,9 +3,9 @@
 In diesem Kapitel werden die technische Architektur, die Implementierungsdetails sowie das methodische Vorgehen bei der Entwicklung des digitalen Schul-Zugangskontrollsystems dargelegt. Der Fokus liegt dabei auf der Verbindung von Hardware-Komponenten mit einer skalierbaren Software-Infrastruktur und der Integration moderner KI-Algorithmen zur Identitätsprüfung.
 
 \subsection{Systemarchitektur}
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.8\textwidth]{figures/systemarchitektur.pdf}
+    \includegraphics[width=0.8\textwidth,height=0.4\textheight,keepaspectratio]{figures/systemarchitektur.pdf}
     \caption{Systemarchitektur des digitalen Schul-Zugangskontrollsystems}
     \label{fig:architecture}
 \end{figure}
@@ -17,21 +17,21 @@ Das Backend basiert auf dem Express.js-Framework \cite{expressjs2023} und fungie
 Das Frontend wurde mit dem React Native Framework und dem Expo SDK \cite{reactnative2023, expo2023} entwickelt. Dieser Ansatz ermöglicht die Bereitstellung einer nativen Anwendung für iOS und Android aus einer gemeinsamen Codebasis. Die Benutzeroberfläche nutzt die Material-Design-Vorgaben durch die Integration der Bibliothek \textit{react-native-paper}, was eine intuitive Bedienung für Lehrer, Schüler und Sicherheitspersonal sicherstellt. Rechenintensive Aufgaben, insbesondere die Bildverarbeitung und die Ausführung neuronaler Netze, werden konsequent auf den Server ausgelagert, um die Anforderungen an die Hardware der Endgeräte (Smartphones oder Tablets) minimal zu halten.
 
 \subsection{RFID-Kartenmanagement und Berechtigungsmodell}
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.8\textwidth]{figures/rfid_workflow.pdf}
+    \includegraphics[width=0.8\textwidth,height=0.4\textheight,keepaspectratio]{figures/rfid_workflow.pdf}
     \caption{Sequenzdiagramm des RFID-Kartenmanagements und Berechtigungsmodells}
     \label{fig:rfid_workflow}
 \end{figure}
 
-Das Herzstück der Zugangskontrolle ist die Identifikation der Nutzer über RFID/NFC-Medien. Jede Karte wird durch ihre weltweit eindeutige \textit{Unique Identifier} (UID) im System registriert. Das Berechtigungsmodell ist rollenbasiert (\textit{Role-Based Access Control}, RBAC) und differenziert zwischen Schülern, Lehrkräften, Sicherheitspersonal (Guards) und Administratoren.
+Das Herzstück der Zugangskontrolle ist die Identifikation der Nutzer über RFID-Medien. Jede Karte wird durch ihre weltweit eindeutige \textit{Unique Identifier} (UID) im System registriert. Das Berechtigungsmodell ist rollenbasiert (\textit{Role-Based Access Control}, RBAC) und differenziert zwischen Schülern, Lehrkräften, Sicherheitspersonal (Guards) und Administratoren.
 
 Ein wesentliches Merkmal der Umsetzung ist die Verwaltung zeitlich begrenzter und wiederkehrender Berechtigungen. Lehrkräfte können über ihr Dashboard Zugriffsberechtigungen für bestimmte Zeitfenster definieren. Dabei wird in der Datenbank zwischen einmaligen Freigaben und rekursiven Mustern (z.\,B. wöchentliche Labortermine) unterschieden. Bei jedem Scan-Vorgang validiert das Backend die UID gegen die hinterlegten Zeitfenster und den aktuellen Status der Karte \cite{finkenzeller2015rfid}. Dieser automatisierte Prozess entlastet das Schulpersonal von manuellen Listen und erhöht gleichzeitig die Sicherheit durch Echtzeit-Protokollierung in den \textit{accessLogs}.
 
 \subsection{Gesichtserkennungs-Pipeline}
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.8\textwidth]{figures/gesichtserkennung_pipeline.pdf}
+    \includegraphics[width=0.8\textwidth,height=0.4\textheight,keepaspectratio]{figures/gesichtserkennung_pipeline.pdf}
     \caption{Ablauf der Gesichtserkennungs-Pipeline}
     \label{fig:face_pipeline}
 \end{figure}
@@ -46,9 +46,9 @@ Um die Sicherheit über das einfache Vorzeigen einer RFID-Karte hinaus zu erhöh
 \end{enumerate}
 
 \subsection{Datenbankdesign und technische Persistenz}
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.8\textwidth]{figures/datenbankschema.pdf}
+    \includegraphics[width=0.8\textwidth,height=0.4\textheight,keepaspectratio]{figures/datenbankschema.pdf}
     \caption{Entity-Relationship-Modell der SQLite-Datenbank}
     \label{fig:database_schema}
 \end{figure}
@@ -66,6 +66,5 @@ Das technische Datenschutzkonzept des Systems setzt die in Kapitel \ref{subsec:d
 \end{itemize}
 
 Durch diese Maßnahmen wird ein Schutzniveau erreicht, das den Anforderungen für Schulen gemäß BayEUG und BayDSG entspricht \cite{bayeug, baydsg}. Das System demonstriert, dass moderne Sicherheitstechnologien und strenger Datenschutz kein Widerspruch sein müssen, wenn sie konsequent lokal implementiert werden.
-
 
 

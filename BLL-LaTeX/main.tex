@@ -9,11 +9,16 @@
 % Typography and layout
 \usepackage{lmodern}
 \usepackage{microtype}
-\usepackage[left=3cm,right=4cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage[left=3cm,right=3cm,top=2.5cm,bottom=2.5cm]{geometry}
 \usepackage{setspace}
 \setstretch{1.5}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{0.6em}
+\setlength{\parskip}{0.5em}
+
+% Tighten float spacing
+\setlength{\floatsep}{6pt}
+\setlength{\textfloatsep}{8pt}
+\setlength{\intextsep}{6pt}
 
 % Math, figures, tables
 \usepackage{amsmath,amssymb}
@@ -56,6 +61,17 @@
 % Bibliography
 \usepackage[backend=biber,style=authoryear,sorting=nyt]{biblatex}
 \addbibresource{references.bib}
+
+% --- Draft Watermark Flag ---
+\newif\ifdraftversion
+\draftversiontrue % Set to \draftversionfalse to disable
+
+\ifdraftversion
+  \usepackage{draftwatermark}
+  \SetWatermarkText{ENTWURF}
+  \SetWatermarkScale{1.5}
+\fi
+% ----------------------------
 
 % Metadata (fill these first)
 \newcommand{\blltitle}{Digital School Access Control}
