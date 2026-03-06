@@ -1,24 +1,24 @@
 \section{Ergebnisse und Evaluation}
 \label{sec:ergebnisse}
 
-Dieses Kapitel präsentiert und evaluiert die Benchmark-Daten im Hinblick auf die Forschungsfragen und Hypothesen. Schwerpunkte sind die Performanz der RFID-Validierung, die Gesichtserkennung sowie der Vergleich zwischen lokaler Edge-Verarbeitung und Cloud-Infrastruktur.
+In diesem Kapitel werden die im Rahmen der Benchmark-Tests erhobenen Daten präsentiert und im Hinblick auf die Forschungsfragen sowie die eingangs aufgestellten Hypothesen evaluiert. Der Fokus liegt dabei auf der Performanz der RFID-Validierung, der Genauigkeit und Geschwindigkeit der Gesichtserkennung sowie einem Vergleich zwischen lokaler Verarbeitung und Cloud-Infrastruktur.
 
 \subsection{Versuchsaufbau und Methodik}
 \label{subsec:versuchsaufbau}
 
-Drei Hardware-Szenarien wurden verglichen:
+Um eine fundierte Aussage über die Praxistauglichkeit des Systems treffen zu können, wurden zwei unterschiedliche Hardware-Szenarien verglichen:
 
 \begin{enumerate}
-    \item \textbf{Lokale Edge-Umgebung (RPi):} Raspberry Pi 4 B (4\,GB RAM) als dedizierter Server für datenschutzkonforme Schulnutzung.
-    \item \textbf{Cloud-Umgebung (VPS):} Oracle Cloud ARM (3 vCPUs, 17\,GB RAM) als Referenz für Skalierbarkeit.
-    \item \textbf{Lokale Workstation (MacBook):} MacBook Pro (M4 Max, 64\,GB RAM) als obere Performance-Referenz.
+    \item \textbf{Lokale Edge-Umgebung (RPi):} Ein Raspberry Pi 4 Model B mit 4\,GB RAM, der als dedizierter Server für die Zugangs- und Auslasskontrolle fungiert. Dies entspricht dem Ziel-Szenario für eine datenschutzkonforme Schule.
+    \item \textbf{Cloud-Umgebung (VPS):} Ein Oracle Cloud ARM-Server (Ampere Neoverse-N1) mit 3 vCPUs und 17\,GB RAM. Dies dient als Referenzwert für die Skalierbarkeit und zeigt das Potenzial bei leistungsstärkerer Hardware.
+    \item \textbf{Lokale Workstation (MacBook):} Ein Apple MacBook Pro mit M4 Max Chip (16 Kerne: 12 Performance + 4 Efficiency), 64\,GB RAM. Dies dient als obere Referenz für die maximal erreichbare Performance.
 \end{enumerate}
-Ein automatisiertes Skript erhob die Daten über 50 sequentielle RFID-Abfragen und 10 Gesichtserkennungszyklen (je 5 positive/negative Übereinstimmungen).
+Die Datenerhebung erfolgte automatisiert über ein Benchmark-Skript, welches 50 sequentielle RFID-Validierungsanfragen sowie 10 Gesichtserkennungszyklen (jeweils 5 positive und 5 negative Übereinstimmungen) durchführte.
 
 \subsection{Ergebnisse der RFID-Validierung}
 \label{subsec:ergebnisse_rfid}
 
-Die RFID-Messung umfasst die Zeitspanne von der UID-Übermittlung bis zur Berechtigungsentscheidung inklusive Datenbankabfrage.
+Die RFID-Validierung bildet das Rückgrat der schnellen Zugangs- und Auslasskontrolle. Die Messwerte umfassen die Zeit von der Übermittlung der UID an den Backend-Server bis zur Rückgabe der Berechtigungsentscheidung inklusive Datenbankabfrage.
 
 \begin{table}[H]
 \centering
@@ -35,7 +35,7 @@ MacBook M4 Max & 0,61   & 0,29   & 1,48   & 0,28 \\
 \end{tabular}
 \end{table}
 
-Wie Tabelle \ref{tab:rfid_results} zeigt, variieren die Zeiten hardwarebedingt. Auf dem Raspberry Pi liegt der Schnitt bei 8,33\,ms, auf dem VPS bei 2,94\,ms und auf dem MacBook bei 0,61\,ms. Alle Latenzen bleiben weit unter der kritischen Marke von einer Sekunde und sind für Nutzer kaum wahrnehmbar.
+Wie in Tabelle \ref{tab:rfid_results} ersichtlich, variiert die Verarbeitungszeit erheblich je nach Hardware: Auf dem Raspberry Pi beträgt sie durchschnittlich 8,33\,ms, auf dem Cloud-Server 2,94\,ms und auf dem MacBook M4 Max nur 0,61\,ms. In jedem Fall bleibt die Latenz weit unter der kritischen Marke von einer Sekunde, was für den Nutzer kaum wahrnehmbar ist.
 
 \begin{figure}[htbp]
 \centering
@@ -65,7 +65,7 @@ Wie Tabelle \ref{tab:rfid_results} zeigt, variieren die Zeiten hardwarebedingt. 
 \subsection{Ergebnisse der Gesichtserkennung}
 \label{subsec:ergebnisse_gesicht}
 
-Die biometrische Verifikation nutzt \textit{face-api.js} auf TensorFlow.js-Basis. Gesichtserkennung (\textit{Detection}) und Merkmalsextraktion (\textit{Descriptor}) wurden getrennt gemessen.
+Die biometrische Verifikation wurde mittels \textit{face-api.js} auf Basis von TensorFlow.js durchgeführt. Dabei wurden die Schritte Gesichtserkennung (\textit{Detection}) und Merkmalsextraktion (\textit{Descriptor}) getrennt gemessen.
 
 \begin{table}[H]
 \centering
@@ -82,27 +82,29 @@ MacBook M4 Max & 66,91   & 98,81   & 165,74  & 100\,\% \\
 \end{tabular}
 \end{table}
 
-Die Gesamtzeit reicht von 3530\,ms (Raspberry Pi) über 938\,ms (VPS) bis zu 166\,ms (MacBook). Die Genauigkeit betrug auf allen Plattformen 100\,\%, wobei dies unter kontrollierten Bedingungen mit einer Stichprobe von $n = 10$ erfolgte.
+Die Gesamtzeit für eine vollständige biometrische Verifikation variiert stark je nach Hardware: Auf dem Raspberry Pi liegt sie bei durchschnittlich 3530\,ms (ca. 3,5 Sekunden), auf dem Cloud-Server bei 938\,ms und auf dem MacBook M4 Max bei nur 166\,ms. Besonders bemerkenswert ist die Genauigkeit von 100\,\% auf allen drei Plattformen, wobei anzumerken ist, dass dies unter kontrollierten Lichtverhältnissen mit einer begrenzten Stichprobe ($n = 10$) erfolgte.
 
 \subsection{Leistungsvergleich und Analyse}
 \label{subsec:leistungsvergleich}
 
-Die Performance skaliert direkt mit der Rechenleistung. Bei der Gesichtserkennung übertrifft der VPS den Raspberry Pi um den Faktor 3,8, das MacBook um den Faktor 21,3. Bei der RFID-Validierung sind die Unterschiede geringer (Faktor 2,8 bzw. 13,7), da die Datenbankabfrage limitiert. Lokale Verarbeitung auf dem Raspberry Pi bietet dennoch Vorteile:
+Der Vergleich zwischen den drei Testumgebungen zeigt eine klare Skalierung der Performance mit der CPU-Leistung. Bei der Gesichtserkennung ist der Cloud-Server 3,8-mal schneller als der Raspberry Pi, während der MacBook M4 Max 21,3-mal schneller ist (3530\,ms vs. 166\,ms). Bei der RFID-Validierung ist der Unterschied mit dem Faktor 2,8 (RPi zu VPS) bzw. 13,7 (RPi zu MacBook) weniger ausgeprägt, da hier primär die Datenbankabfrage limitiert. Dennoch bietet die lokale Verarbeitung auf dem Raspberry Pi entscheidende Vorteile:
 
 \begin{enumerate}
-    \item \textbf{Autonomie:} Zuverlässigkeit bei Internetausfall.
-    \item \textbf{Datenschutz:} Biometrische Daten verbleiben im Schulnetzwerk.
-    \item \textbf{Latenz:} Fehlende Upload-Zeiten für Bilder kompensieren die geringere Cloud-Rechenleistung im Realbetrieb.
+    \item \textbf{Autonomie:} Das System funktioniert auch bei Internetausfall zuverlässig.
+    \item \textbf{Datenschutz:} Biometrische Merkmale verlassen nie das Schulnetzwerk.
+    \item \textbf{Latenz-Vorteil:} Während die reine Rechenzeit in der Cloud geringer ist, würde in einem realen Szenario die Netzwerklatenz (Upload des Bildes) hinzukommen, was den Vorteil des VPS teilweise zunichtemachen könnte.
 \end{enumerate}
 
 \subsection{Evaluation der Hypothesen}
 \label{subsec:evaluation_hypothesen}
 
+Abschließend werden die eingangs formulierten Hypothesen anhand der Ergebnisse bewertet:
+
 \textbf{H1: „Ein kombiniertes RFID-basiertes System zur Zugangs- und Auslasskontrolle kann Berechtigungsentscheidungen in unter 2 Sekunden treffen.“}
-\\ \textbf{Verifiziert (mit Nuancierung).} Die Gesamtzeit auf dem Raspberry Pi (~3,5\,s) überschreitet das Ziel wegen der Gesichtsverifizierung leicht. Da der RFID-Check (~8\,ms) jedoch sofortige Signale ermöglicht und die Gesichtserkennung asynchron folgen kann, ist das System für schnellen Durchlauf praxistauglich.
+\\ \textbf{Verifiziert (mit Nuancierung).} Mit einer durchschnittlichen Antwortzeit von 8,33\,ms (RFID) bzw. ca. 3,5\,s für den kombinierten RFID- und Gesichtsscan auf dem Raspberry Pi wird die 2-Sekunden-Zielmarke bei der Gesamtverifikation leicht überschritten, was primär durch die optionale Gesichtsverifizierung bedingt ist. Auf dem Cloud-Server liegt die Gesamtzeit bei unter 1\,s, auf dem MacBook M4 Max sogar bei nur 166\,ms. Da die Gesichtserkennung jedoch asynchron im Hintergrund erfolgen kann und der RFID-Check allein (~8\,ms) dem Wachpersonal bereits sofort das Signal (z.\,B. Ampel-Anzeige auf dem Tablet) gibt, ist das System hochgradig praxistauglich für den schnellen Durchlauf in Pausenzeiten oder nach Schulschluss.
 
 \textbf{H2: „Lokale KI-Gesichtserkennung erreicht eine Erkennungsgenauigkeit von mindestens 90\,\% bei Schülerfotos.“}
-\\ \textbf{Verifiziert.} Mit 100\,\% Genauigkeit wird die Zielmarke übertroffen. Trotz kontrollierter Testbedingungen ($n = 10$) zeigt das System hohe Robustheit. Größere Stichproben wären für statistisch belastbare Aussagen nötig.
+\\ \textbf{Verifiziert.} In den Benchmarks wurde eine Genauigkeit von 100\,\% erreicht. Auch wenn in realen Umgebungen (Lichteinfall, Brillen, etc.) Abweichungen zu erwarten sind, bietet das System eine sehr hohe Robustheit, die über den geforderten 90\,\% liegt. Anzumerken ist, dass diese Ergebnisse unter kontrollierten Bedingungen mit einer begrenzten Stichprobe ($n = 10$) erzielt wurden. Für eine statistisch belastbare Aussage wären weitere Tests mit einer größeren und diverseren Stichprobe erforderlich.
 
 \textbf{H3: „Durch die lokale Verarbeitung biometrischer Daten lassen sich zentrale Anforderungen der DSGVO (Datenminimierung, Zweckbindung, Speicherbegrenzung) technisch unterstützen.“}
-\\ \textbf{Plausibilisiert.} Die lokale Ausführung auf dem Raspberry Pi ohne Cloud-Anbindung minimiert Leak-Risiken. Da Merkmale das Gerät nicht verlassen, werden die Prinzipien der Datenminimierung und Zweckbindung technisch gestützt.
+\\ \textbf{Plausibilisiert.} Die technische Umsetzung zeigt, dass die gesamte Verarbeitung (RFID-UID-Check und KI-Inferenz) auf einem lokalen Raspberry Pi ohne Cloud-Anbindung möglich ist. Da biometrische Merkmalsdaten und Bilder das Gerät nicht verlassen, wird das Risiko von Datenlecks minimiert und die Prinzipien der Datenminimierung, Zweckbindung und Speicherbegrenzung technisch unterstützt.
