@@ -1,12 +1,12 @@
 \section{Methodik und praktische Umsetzung}
 
-In diesem Kapitel werden die technische Architektur, die Implementierungsdetails sowie das methodische Vorgehen bei der Entwicklung des digitalen Schul-Zugangskontrollsystems dargelegt. Der Fokus liegt dabei auf der Verbindung von Hardware-Komponenten mit einer skalierbaren Software-Infrastruktur und der Integration moderner KI-Algorithmen zur Identitätsprüfung.
+In diesem Kapitel werden die technische Architektur, die Implementierungsdetails sowie das methodische Vorgehen bei der Entwicklung des digitalen Systems zur Zugangs- und Auslasskontrolle dargelegt. Der Fokus liegt dabei auf der Verbindung von Hardware-Komponenten mit einer skalierbaren Software-Infrastruktur und der Integration moderner KI-Algorithmen zur Identitätsprüfung.
 
 \subsection{Systemarchitektur}
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.8\textwidth,height=0.4\textheight,keepaspectratio]{figures/systemarchitektur.pdf}
-    \caption{Systemarchitektur des digitalen Schul-Zugangskontrollsystems}
+    \caption{Systemarchitektur des digitalen Systems zur Zugangs- und Auslasskontrolle}
     \label{fig:architecture}
 \end{figure}
 
@@ -24,9 +24,9 @@ Das Frontend wurde mit dem React Native Framework und dem Expo SDK \cite{reactna
     \label{fig:rfid_workflow}
 \end{figure}
 
-Das Herzstück der Zugangskontrolle ist die Identifikation der Nutzer über RFID-Medien. Jede Karte wird durch ihre weltweit eindeutige \textit{Unique Identifier} (UID) im System registriert. Das Berechtigungsmodell ist rollenbasiert (\textit{Role-Based Access Control}, RBAC) und differenziert zwischen Schülern, Lehrkräften, Sicherheitspersonal (Guards) und Administratoren.
+Das Herzstück der Zugangs- und Auslasskontrolle ist die Identifikation der Nutzer über RFID-Medien. Jede Karte wird durch ihre weltweit eindeutige \textit{Unique Identifier} (UID) im System registriert. Das Berechtigungsmodell ist rollenbasiert (\textit{Role-Based Access Control}, RBAC) und differenziert zwischen Schülern, Lehrkräften, Sicherheitspersonal (Guards) und Administratoren.
 
-Ein wesentliches Merkmal der Umsetzung ist die Verwaltung zeitlich begrenzter und wiederkehrender Berechtigungen. Lehrkräfte können über ihr Dashboard Zugriffsberechtigungen für bestimmte Zeitfenster definieren. Dabei wird in der Datenbank zwischen einmaligen Freigaben und rekursiven Mustern (z.\,B. wöchentliche Labortermine) unterschieden. Bei jedem Scan-Vorgang validiert das Backend die UID gegen die hinterlegten Zeitfenster und den aktuellen Status der Karte \cite{finkenzeller2015rfid}. Dieser automatisierte Prozess entlastet das Schulpersonal von manuellen Listen und erhöht gleichzeitig die Sicherheit durch Echtzeit-Protokollierung in den \textit{accessLogs}.
+Ein wesentliches Merkmal der Umsetzung ist die Verwaltung zeitlich begrenzter und wiederkehrender Berechtigungen. Lehrkräfte können über ihr Dashboard Zugangs- und Auslassberechtigungen für bestimmte Zeitfenster definieren. Dabei wird in der Datenbank zwischen einmaligen Freigaben und rekursiven Mustern (z.\,B. wöchentliche Labortermine) unterschieden. Da Berechtigungen logisch an das Schülerprofil gebunden sind und nicht an die physische Karte, ermöglicht das System eine flexible Neuvergabe: Eine einzelne RFID-Karte kann temporär an einen Schüler gebunden und später nach Ablauf der Berechtigung für einen anderen Schüler reaktiviert werden. Bei jedem Scan-Vorgang validiert das Backend die UID gegen die hinterlegten Zeitfenster und das aktuell zugewiesene Profil \cite{finkenzeller2015rfid}. Dieser automatisierte Prozess entlastet das Schulpersonal von manuellen Listen und erhöht gleichzeitig die Sicherheit durch Echtzeit-Protokollierung in den \textit{accessLogs}.
 
 \subsection{Gesichtserkennungs-Pipeline}
 \begin{figure}[htbp]
@@ -53,14 +53,14 @@ Um die Sicherheit über das einfache Vorzeigen einer RFID-Karte hinaus zu erhöh
     \label{fig:database_schema}
 \end{figure}
 
-Die Datenhaltung erfolgt in einer SQLite-Instanz, die sich durch ihre Dateibasiertheit und den Verzicht auf einen separaten Serverprozess ideal für lokale Schulumgebungen eignet \cite{sqlite2023}. Das Schema umfasst fünf zentrale Tabellen: \textit{students}, \textit{teachers}, \textit{cards}, \textit{permissions} und \textit{accessLogs}. Die Beziehungen sind über Fremdschlüssel (\textit{Foreign Keys}) definiert, um referenzielle Integrität zu gewährleisten. Beispielsweise verknüpft die Tabelle \textit{permissions} eine \textit{studentId} mit einer \textit{cardUID} und einer \textit{teacherId}, wodurch jederzeit nachvollziehbar ist, wer wem wann welchen Zugang gewährt hat.
+Die Datenhaltung erfolgt in einer SQLite-Instanz, die sich durch ihre Dateibasiertheit und den Verzicht auf einen separaten Serverprozess ideal für lokale Schulumgebungen eignet \cite{sqlite2023}. Das Schema umfasst fünf zentrale Tabellen: \textit{students}, \textit{teachers}, \textit{cards}, \textit{permissions} und \textit{accessLogs}. Die Beziehungen sind über Fremdschlüssel (\textit{Foreign Keys}) definiert, um referenzielle Integrität zu gewährleisten. Beispielsweise verknüpft die Tabelle \textit{permissions} eine \textit{studentId} mit einer \textit{cardUID} und einer \textit{teacherId}, wodurch jederzeit nachvollziehbar ist, wer wem wann welche Zugangs- oder Auslassberechtigung gewährt hat.
 
 \subsection{Datenschutzkonzept und Datensicherheit} \label{subsec:konzept_datenschutz}
 Das technische Datenschutzkonzept des Systems setzt die in Kapitel \ref{subsec:datenschutz} dargelegten theoretischen Anforderungen praktisch um. Die Sicherheit der Daten wird durch eine Kombination aus architektonischen Entscheidungen und kryptografischen Verfahren gewährleistet.
 
 \begin{itemize}
     \item \textbf{Dezentralisierung und lokale Persistenz:} Im Gegensatz zu kommerziellen Cloud-Lösungen erfolgt die Speicherung der biometrischen Templates ausschließlich in einer lokalen SQLite-Datenbank auf dem schuleigenen Server. Dies verhindert den unbefugten Zugriff durch Drittanbieter und minimiert die Angriffsfläche für großflächige Datenlecks.
-    \item \textbf{Datenminimierung:} Es werden keine Rohbilder der Gesichter dauerhaft gespeichert. Nach der initialen Registrierung generiert das System aus dem Foto einen 128-dimensionalen Merkmalsvektor (Face Embedding). Das ursprüngliche Bild kann anschließend gelöscht werden, da für den Abgleich lediglich der mathematische Vektor benötigt wird, aus dem das Originalbild nicht rekonstruiert werden kann (Einweg-Funktion).
+    \item \textbf{Datenminimierung und visuelle Verifikation:} Entgegen reiner Merkmalsextraktions-Systeme werden die Rohbilder der Gesichter optional dauerhaft gespeichert, um dem Sicherheitspersonal einen manuellen visuellen Abgleich mit der Person vor Ort zu ermöglichen. Falls jedoch maximale Datensparsamkeit erforderlich ist, unterstützt das System alternativ die Speicherung eines 128-dimensionalen Merkmalsvektors (Face Embedding), wobei das Originalbild nach der Registrierung gelöscht wird, um eine Rekonstruktion biometrischer Daten zu verhindern.
     \item \textbf{Verschlüsselung und Transport-Security:} Die Kommunikation zwischen den Guard-Tablets und dem Backend findet über eine mit TLS 1.3 verschlüsselte Verbindung statt. Sensible Datenfelder in der Datenbank, wie etwa die Verknüpfung zwischen RFID-UID und Klarnamen, können zusätzlich mittels AES-256 verschlüsselt werden.
     \item \textbf{Rollenbasierte Zugriffskontrolle (RBAC):} Der Zugriff auf das Administrations-Interface und die \textit{accessLogs} ist streng reglementiert. Lehrkräfte haben lediglich Zugriff auf die Berechtigungen ihrer eigenen Kurse, während das Sicherheitspersonal nur die für die aktuelle Verifikation notwendigen Daten (Name, Kurs, Status) sieht. Zudem wurden die Empfehlungen des BSI zur Absicherung von Webanwendungen berücksichtigt \cite{bsisicherheitscheck}.
 \end{itemize}

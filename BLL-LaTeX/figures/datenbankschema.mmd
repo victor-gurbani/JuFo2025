@@ -1,45 +1,45 @@
 erDiagram
-    STUDENTS ||--o{ CARDS : owns
-    STUDENTS ||--o{ PERMISSIONS : has
-    TEACHERS ||--o{ PERMISSIONS : grants
-    CARDS ||--o{ ACCESS_LOGS : generates
-    STUDENTS ||--o{ ACCESS_LOGS : generates
-    TEACHERS ||--o{ ACCESS_LOGS : verified_by
+    SCHUELER ||--o{ KARTEN : besitzt
+    SCHUELER ||--o{ BERECHTIGUNGEN : hat
+    LEHRKRAEFTE ||--o{ BERECHTIGUNGEN : erteilt
+    KARTEN ||--o{ ZUGANGSPROTOKOLLE : generiert
+    SCHUELER ||--o{ ZUGANGSPROTOKOLLE : generiert
+    LEHRKRAEFTE ||--o{ ZUGANGSPROTOKOLLE : verifiziert_von
 
-    STUDENTS {
+    SCHUELER {
         int id PK
         string name
-        string photo
-        string faceDescriptor
+        string foto
+        string gesichtsDeskriptor
     }
-    TEACHERS {
+    LEHRKRAEFTE {
         int id PK
         string name
         string email
-        string passwordHash
+        string passwortHash
     }
-    CARDS {
+    KARTEN {
         int id PK
         string uid
-        int studentId FK
-        boolean isActive
+        int schuelerId FK
+        boolean istAktiv
     }
-    PERMISSIONS {
+    BERECHTIGUNGEN {
         int id PK
-        int studentId FK
-        int grantedBy FK
-        datetime validFrom
-        datetime validUntil
-        boolean isRecurring
-        string recurrencePattern
-        datetime createdAt
+        int schuelerId FK
+        int erteiltVon FK
+        datetime gueltigAb
+        datetime gueltigBis
+        boolean istWiederkehrend
+        string wiederholungsMuster
+        datetime erstelltAm
     }
-    ACCESS_LOGS {
+    ZUGANGSPROTOKOLLE {
         int id PK
-        int cardId FK
-        int studentId FK
-        datetime timestamp
-        boolean granted
-        string reason
-        int verified_by FK
+        int kartenId FK
+        int schuelerId FK
+        datetime zeitstempel
+        boolean gewaehrt
+        string grund
+        int verifiziert_von FK
     }

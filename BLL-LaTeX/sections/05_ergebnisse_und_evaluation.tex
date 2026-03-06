@@ -9,7 +9,7 @@ In diesem Kapitel werden die im Rahmen der Benchmark-Tests erhobenen Daten präs
 Um eine fundierte Aussage über die Praxistauglichkeit des Systems treffen zu können, wurden zwei unterschiedliche Hardware-Szenarien verglichen:
 
 \begin{enumerate}
-    \item \textbf{Lokale Edge-Umgebung (RPi):} Ein Raspberry Pi 4 Model B mit 4\,GB RAM, der als dedizierter Server für die Zugangskontrolle fungiert. Dies entspricht dem Ziel-Szenario für eine datenschutzkonforme Schule.
+    \item \textbf{Lokale Edge-Umgebung (RPi):} Ein Raspberry Pi 4 Model B mit 4\,GB RAM, der als dedizierter Server für die Zugangs- und Auslasskontrolle fungiert. Dies entspricht dem Ziel-Szenario für eine datenschutzkonforme Schule.
     \item \textbf{Cloud-Umgebung (VPS):} Ein Oracle Cloud ARM-Server (Ampere Neoverse-N1) mit 3 vCPUs und 17\,GB RAM. Dies dient als Referenzwert für die Skalierbarkeit und zeigt das Potenzial bei leistungsstärkerer Hardware.
     \item \textbf{Lokale Workstation (MacBook):} Ein Apple MacBook Pro mit M4 Max Chip (16 Kerne: 12 Performance + 4 Efficiency), 64\,GB RAM. Dies dient als obere Referenz für die maximal erreichbare Performance.
 \end{enumerate}
@@ -18,7 +18,7 @@ Die Datenerhebung erfolgte automatisiert über ein Benchmark-Skript, welches 50 
 \subsection{Ergebnisse der RFID-Validierung}
 \label{subsec:ergebnisse_rfid}
 
-Die RFID-Validierung bildet das Rückgrat der schnellen Zugangskontrolle. Die Messwerte umfassen die Zeit von der Übermittlung der UID an den Backend-Server bis zur Rückgabe der Zugangsentscheidung inklusive Datenbankabfrage.
+Die RFID-Validierung bildet das Rückgrat der schnellen Zugangs- und Auslasskontrolle. Die Messwerte umfassen die Zeit von der Übermittlung der UID an den Backend-Server bis zur Rückgabe der Berechtigungsentscheidung inklusive Datenbankabfrage.
 
 \begin{table}[H]
 \centering
@@ -43,15 +43,15 @@ Wie in Tabelle \ref{tab:rfid_results} ersichtlich, variiert die Verarbeitungszei
 \begin{axis}[
     ybar,
     enlarge x limits=0.3,
-    legend style={at={(0.5,-0.2)}, anchor=north, legend columns=-1},
+    legend style={at={(0.5,-0.35)}, anchor=north, legend columns=-1},
     ylabel={Latenz (ms)},
     symbolic x coords={Durchschnitt, Minimum, Maximum},
     xtick=data,
     nodes near coords,
     nodes near coords align={vertical},
-    width=0.65\textwidth,
-    height=4cm,
-    ymin=0, ymax=16,
+    width=0.75\textwidth,
+    height=4.5cm,
+    ymin=0, ymax=18,
 ]
 \addplot coordinates {(Durchschnitt, 8) (Minimum, 6) (Maximum, 14)};
 \addplot coordinates {(Durchschnitt, 3) (Minimum, 2) (Maximum, 10)};
@@ -100,8 +100,8 @@ Der Vergleich zwischen den drei Testumgebungen zeigt eine klare Skalierung der P
 
 Abschließend werden die eingangs formulierten Hypothesen anhand der Ergebnisse bewertet:
 
-\textbf{H1: „Ein RFID-basiertes Berechtigungssystem kann Zugangsentscheidungen in unter 2 Sekunden treffen.“}
-\\ \textbf{Verifiziert (mit Nuancierung).} Mit einer durchschnittlichen Antwortzeit von 8,33\,ms (RFID) bzw. ca. 3,5\,s für den kombinierten RFID- und Gesichtsscan auf dem Raspberry Pi wird die 2-Sekunden-Zielmarke bei der Gesamtverifikation leicht überschritten, was primär durch die optionale Gesichtsverifizierung bedingt ist. Auf dem Cloud-Server liegt die Gesamtzeit bei unter 1\,s, auf dem MacBook M4 Max sogar bei nur 166\,ms. Da die Gesichtserkennung asynchron erfolgen kann und der RFID-Check allein (~8\,ms) die Schranke sofort öffnet, ist das System hochgradig praxistauglich für den Masseneinsatz in Pausenzeiten.
+\textbf{H1: „Ein kombiniertes RFID-basiertes System zur Zugangs- und Auslasskontrolle kann Berechtigungsentscheidungen in unter 2 Sekunden treffen.“}
+\\ \textbf{Verifiziert (mit Nuancierung).} Mit einer durchschnittlichen Antwortzeit von 8,33\,ms (RFID) bzw. ca. 3,5\,s für den kombinierten RFID- und Gesichtsscan auf dem Raspberry Pi wird die 2-Sekunden-Zielmarke bei der Gesamtverifikation leicht überschritten, was primär durch die optionale Gesichtsverifizierung bedingt ist. Auf dem Cloud-Server liegt die Gesamtzeit bei unter 1\,s, auf dem MacBook M4 Max sogar bei nur 166\,ms. Da die Gesichtserkennung jedoch asynchron im Hintergrund erfolgen kann und der RFID-Check allein (~8\,ms) dem Wachpersonal bereits sofort das Signal (z.\,B. Ampel-Anzeige auf dem Tablet) gibt, ist das System hochgradig praxistauglich für den schnellen Durchlauf in Pausenzeiten oder nach Schulschluss.
 
 \textbf{H2: „Lokale KI-Gesichtserkennung erreicht eine Erkennungsgenauigkeit von mindestens 90\,\% bei Schülerfotos.“}
 \\ \textbf{Verifiziert.} In den Benchmarks wurde eine Genauigkeit von 100\,\% erreicht. Auch wenn in realen Umgebungen (Lichteinfall, Brillen, etc.) Abweichungen zu erwarten sind, bietet das System eine sehr hohe Robustheit, die über den geforderten 90\,\% liegt. Anzumerken ist, dass diese Ergebnisse unter kontrollierten Bedingungen mit einer begrenzten Stichprobe ($n = 10$) erzielt wurden. Für eine statistisch belastbare Aussage wären weitere Tests mit einer größeren und diverseren Stichprobe erforderlich.
