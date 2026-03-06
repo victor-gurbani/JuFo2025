@@ -9,21 +9,21 @@ Die Evaluation der Benchmarks auf einem Raspberry Pi 4 zeigte, dass die technisc
 \subsection{Beantwortung der Leitfrage} \label{subsec:beantwortung_leitfrage}
 
 Basierend auf den Ergebnissen lässt sich die Leitfrage wie folgt beantworten: Eine effiziente, fälschungssichere und datenschutzkonforme Zugangs- und Auslasskontrolle lässt sich durch eine dezentrale Full-Stack-Architektur realisieren, welche biometrische Inferenz direkt am „Edge“ (lokaler Server) als zweiten Faktor ausführt, um eine missbräuchliche Weitergabe von Berechtigungen auszuschließen.
-,
+
 \textbf{Sicherheit} wird durch die Kombination zweier Faktoren erreicht: Der physische Besitz einer RFID-Karte wird durch die biometrische Prüfung der Identität ergänzt. Dies verhindert den Missbrauch verlorener oder entliehener Karten effektiv. Die serverseitige Bildnormalisierung (HEIC-zu-PNG-Pipeline) stellt zudem sicher, dass das System robust gegenüber verschiedenen Endgeräten der Nutzer ist.
-,
+
 Die \textbf{Datenschutzkonformität} wird primär durch die lokale Verarbeitung sichergestellt. Im Gegensatz zu Cloud-basierten Lösungen entfallen riskante Datenübertragungen an Drittanbieter. Die Nutzung von SQLite als portable, lokale Datenbank minimiert zudem die Angriffsfläche für externe Zugriffe.
-,
+
 Die \textbf{Vollautomatisierung} gelingt durch das entwickelte Backend, das Berechtigungen rollenbasiert (RBAC) verwaltet und wiederkehrende Zugangs- und Auslassmuster autonom erkennt. Das System entlastet das Schulpersonal, indem es Routinekontrollen automatisiert und Lehrkräften die granulare Verwaltung von Ausnahmegenehmigungen über eine mobile App ermöglicht.
-,
+
 \subsection{Wissenschaftlicher und praktischer Mehrwert} \label{subsec:mehrwert}
 
 Der wissenschaftliche Mehrwert dieser Arbeit liegt in der Demonstration, dass leistungsfähige KI-Modelle wie SSD MobileNet v1 zur Gesichtserkennung auch auf kostengünstiger Consumer-Hardware (Raspberry Pi) performant für Sicherheitszwecke eingesetzt werden können. Praktisch bietet das System eine skalierbare und kosteneffiziente Lösung für Bildungseinrichtungen, die ihre physische Sicherheit digitalisieren wollen, ohne die Privatsphäre der Schüler zu gefährden.
-,
+
 \subsection{Ausblick und zukünftige Arbeiten} \label{subsec:ausblick}
 
 Trotz der erfolgreichen Implementierung gibt es mehrere Ansatzpunkte für die zukünftige Weiterentwicklung des Systems:
-,
+
 \begin{enumerate}
     \item \textbf{Echtzeit-Videoerkennung:} Der aktuelle Prototyp basiert auf statischen Schnappschüssen. Die Migration zu einer kontinuierlichen Videoanalyse (Live-Stream) könnte den Prozess weiter beschleunigen und komfortabler gestalten.
     \item \textbf{Anti-Spoofing-Maßnahmen:} Um die Sicherheit weiter zu erhöhen, sollten Mechanismen zur Lebenderkennung (Liveness Detection) integriert werden, die verhindern, dass das System durch das Vorzeigen eines Fotos überlistet wird. Diese Schwachstelle kann durch kontinuierliches Video-Streaming reduziert werden: Durch die Analyse feiner zeitlicher Veränderungen im Gesicht (z.\,B. Mikrobewegungen, Blinzeln, minimale Perspektivwechsel) lässt sich Lebenderkennung (Liveness Detection) umsetzen und das Überlisten mit einem statischen Foto deutlich erschweren.
