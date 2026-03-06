@@ -1,6 +1,6 @@
 \section{Methodik und praktische Umsetzung}
 
-In diesem Kapitel werden die technische Architektur, die Implementierungsdetails sowie das methodische Vorgehen bei der Entwicklung des digitalen Systems zur Zugangs- und Auslasskontrolle dargelegt. Der Fokus liegt dabei auf der Verbindung von Hardware-Komponenten mit einer skalierbaren Software-Infrastruktur und der Integration moderner KI-Algorithmen zur Identitätsprüfung.
+In diesem Kapitel werden die technische Architektur, die Implementierungsdetails sowie das methodische Vorgehen bei der Entwicklung dargelegt. Der Fokus liegt dabei auf der Verbindung von Hardware mit einer skalierbaren Software-Infrastruktur und moderner KI.
 
 \subsection{Systemarchitektur}
 \begin{figure}[htbp]
@@ -10,11 +10,11 @@ In diesem Kapitel werden die technische Architektur, die Implementierungsdetails
     \label{fig:architecture}
 \end{figure}
 
-Die Architektur des Systems folgt einem streng entkoppelten Client-Server-Modell, um eine hohe Wartbarkeit und Flexibilität zu gewährleisten. Wie in Abbildung \ref{fig:architecture} dargestellt, besteht das Ökosystem aus drei Hauptkomponenten: einem Node.js-Backend, einer plattformübergreifenden Mobilanwendung (Frontend) und einer lokalen SQLite-Datenbank.
+Die Architektur des Systems folgt einem streng entkoppelten Client-Server-Modell für hohe Flexibilität. Das System besteht aus drei Hauptkomponenten: einem Node.js-Backend, einer Mobilanwendung (Frontend) und einer lokalen SQLite-Datenbank.
 
-Das Backend basiert auf dem Express.js-Framework \cite{expressjs2023} und fungiert als zentrale Instanz für die Geschäftslogik, Berechtigungsprüfung und KI-gestützte Gesichtserkennung. Bei der Entwicklung wurde auf eine saubere Software-Architektur und die Einhaltung von Entwurfsmustern geachtet, um die Wartbarkeit des Systems langfristig sicherzustellen \cite{martin2008clean}. Durch die Wahl von Node.js konnte eine hohe Performance bei asynchronen Operationen, wie etwa dem Einlesen großer Bilddaten, erzielt werden. Die Kommunikation erfolgt über eine RESTful API, die strikt zustandslos arbeitet und mittels JSON Web Tokens (JWT) abgesichert ist.
+Das Backend (Express.js) \cite{expressjs2023} fungiert als zentrale Instanz für Geschäftslogik, Berechtigungsprüfung und KI-Auswertung \cite{martin2008clean}. Node.js bietet hierbei hohe Performance bei asynchronen Operationen wie der Bildverarbeitung. Die Kommunikation erfolgt über eine zustandslose REST-API, abgesichert durch JSON Web Tokens (JWT).
 
-Das Frontend wurde mit dem React Native Framework und dem Expo SDK \cite{reactnative2023, expo2023} entwickelt. Dieser Ansatz ermöglicht die Bereitstellung einer nativen Anwendung für iOS und Android aus einer gemeinsamen Codebasis. Die Benutzeroberfläche nutzt die Material-Design-Vorgaben durch die Integration der Bibliothek \textit{react-native-paper}, was eine intuitive Bedienung für Lehrer, Schüler und Sicherheitspersonal sicherstellt. Rechenintensive Aufgaben, insbesondere die Bildverarbeitung und die Ausführung neuronaler Netze, werden konsequent auf den Server ausgelagert, um die Anforderungen an die Hardware der Endgeräte (Smartphones oder Tablets) minimal zu halten.
+Das Frontend wurde mit React Native und dem Expo SDK \cite{reactnative2023, expo2023} entwickelt, um iOS und Android aus einer Codebasis zu bedienen. Die UI nutzt \textit{react-native-paper} für intuitive Bedienung. Rechenintensive Aufgaben (Neuronale Netze) werden konsequent auf den Server ausgelagert, um Hardwareanforderungen an die Endgeräte gering zu halten.
 
 \subsection{RFID-Kartenmanagement und Berechtigungsmodell}
 \begin{figure}[htbp]
@@ -39,10 +39,10 @@ Ein wesentliches Merkmal der Umsetzung ist die Verwaltung zeitlich begrenzter un
 Um die Sicherheit über das einfache Vorzeigen einer RFID-Karte hinaus zu erhöhen, wurde eine biometrische Verifikationsschicht implementiert. Diese Pipeline ist in vier Phasen unterteilt: Normalisierung, Detektion, Merkmalsextraktion und Vergleich.
 
 \begin{enumerate}
-    \item \textbf{Bild-Normalisierung:} Da insbesondere iOS-Geräte Fotos häufig im HEIC-Format speichern, welches von vielen Computer-Vision-Bibliotheken nicht nativ unterstützt wird, wurde ein Normalisierungs-Modul entwickelt. Unter Verwendung der Bibliotheken \textit{heic-convert} und \textit{sharp} \cite{sharp2023} werden alle Uploads serverseitig in das PNG-Format umgewandelt und auf eine Auflösung von $1024 \times 1024$ Pixel skaliert. Dies stellt eine konsistente Datenbasis für das neuronale Netz sicher.
-    \item \textbf{Gesichtsdetektion:} Zur Lokalisierung von Gesichtern in den Aufnahmen kommt das \textit{SSD MobileNet v1}-Modell zum Einsatz, welches für ein ausgewogenes Verhältnis zwischen Geschwindigkeit und Genauigkeit optimiert ist.
-    \item \textbf{Merkmalsextraktion (Feature Extraction):} Nach der Detektion erfolgt eine Landmarker-Erkennung (68-Punkte-Modell), gefolgt von der Generierung eines 128-dimensionalen Merkmalsvektors (Face Descriptor) mittels eines ResNet-basierten neuronalen Netzes \cite{goodfellow2016deep}. Dieser Vektor repräsentiert die einzigartigen biometrischen Merkmale eines Gesichts in einem mathematischen Raum.
-    \item \textbf{Abgleich (Matching):} Die Verifikation erfolgt durch die Berechnung der euklidischen Distanz zwischen dem Vektor des aktuellen Snapshots und dem in der Datenbank hinterlegten Referenzvektor. Ein Schwellenwert (Threshold) von $0,6$ wurde experimentell als optimaler Kompromiss zwischen \textit{False Acceptance Rate} (FAR) und \textit{False Rejection Rate} (FRR) ermittelt \cite{vladmandic2023faceapi}.
+    \item \textbf{Bild-Normalisierung:} Da iOS-Geräte Fotos im HEIC-Format speichern (von vielen CV-Bibliotheken nicht nativ unterstützt), wandeln \textit{heic-convert} und \textit{sharp} \cite{sharp2023} alle Uploads in PNG um und skalieren sie auf $1024 \times 1024$ Pixel.
+    \item \textbf{Gesichtsdetektion:} Zur Lokalisierung kommt das effiziente \textit{SSD MobileNet v1} zum Einsatz.
+    \item \textbf{Merkmalsextraktion:} Nach einer Landmarker-Erkennung generiert ein ResNet-basiertes Netz einen 128-dimensionalen Merkmalsvektor (Face Descriptor) \cite{goodfellow2016deep}, der biometrische Merkmale mathematisch repräsentiert.
+    \item \textbf{Abgleich:} Die Verifikation berechnet die euklidische Distanz zwischen aktuellem Snapshot und Datenbank-Referenz. Ein Schwellenwert von $0,6$ balanciert FAR und FRR optimal \cite{vladmandic2023faceapi}.
 \end{enumerate}
 
 \subsection{Datenbankdesign und technische Persistenz}
@@ -53,7 +53,7 @@ Um die Sicherheit über das einfache Vorzeigen einer RFID-Karte hinaus zu erhöh
     \label{fig:database_schema}
 \end{figure}
 
-Die Datenhaltung erfolgt in einer SQLite-Instanz, die sich durch ihre Dateibasiertheit und den Verzicht auf einen separaten Serverprozess ideal für lokale Schulumgebungen eignet \cite{sqlite2023}. Das Schema umfasst fünf zentrale Tabellen: \textit{students}, \textit{teachers}, \textit{cards}, \textit{permissions} und \textit{accessLogs}. Die Beziehungen sind über Fremdschlüssel (\textit{Foreign Keys}) definiert, um referenzielle Integrität zu gewährleisten. Beispielsweise verknüpft die Tabelle \textit{permissions} eine \textit{studentId} mit einer \textit{cardUID} und einer \textit{teacherId}, wodurch jederzeit nachvollziehbar ist, wer wem wann welche Zugangs- oder Auslassberechtigung gewährt hat.
+Die Datenhaltung erfolgt in einer SQLite-Instanz, die sich ohne separaten Serverprozess ideal für Schulumgebungen eignet \cite{sqlite2023}. Das Schema umfasst Tabellen für \textit{students}, \textit{teachers}, \textit{cards}, \textit{permissions} und \textit{accessLogs}. Fremdschlüssel definieren die Relationen: So verknüpft \textit{permissions} eine \textit{studentId} mit \textit{cardUID} und \textit{teacherId}, wodurch stets nachvollziehbar bleibt, wer wem Zutritt gewährt hat.
 
 \subsection{Datenschutzkonzept und Datensicherheit} \label{subsec:konzept_datenschutz}
 Das technische Datenschutzkonzept des Systems setzt die in Kapitel \ref{subsec:datenschutz} dargelegten theoretischen Anforderungen praktisch um. Die Sicherheit der Daten wird durch eine Kombination aus architektonischen Entscheidungen und kryptografischen Verfahren gewährleistet.
