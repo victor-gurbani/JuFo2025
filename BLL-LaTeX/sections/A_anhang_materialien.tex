@@ -1,9 +1,9 @@
 \section{Anhang A: Material, Zusatzdaten und erweiterte Nachweise}\label{sec:anhanga}
 
-\subsection{Ergaenzende Tabellen und Rohdaten}
+\subsection{Ergänzende Tabellen und Rohdaten}
 
 \subsubsection{Datenbankschema (SQLite)}
-Die folgenden SQL-Anweisungen beschreiben die Struktur der verwendeten Datenbank \texttt{database.db}. Die Tabellen bilden die Grundlage fuer das Berechtigungssystem.
+Die folgenden SQL-Anweisungen beschreiben die Struktur der verwendeten Datenbank \texttt{database.db}. Die Tabellen bilden die Grundlage für das Berechtigungssystem.
 
 \begin{lstlisting}[language=SQL]
 CREATE TABLE IF NOT EXISTS cards (
@@ -61,33 +61,33 @@ CREATE TABLE IF NOT EXISTS accessLogs (
 \end{lstlisting}
 
 \subsubsection{API-Endpunkte}
-In der folgenden Tabelle sind die wichtigsten API-Endpunkte des Backends aufgefuehrt, die von der Guard-App und dem Schueler-Interface genutzt werden.
+In der folgenden Tabelle sind die wichtigsten API-Endpunkte des Backends aufgeführt, die von der Guard-App und dem Schüler-Interface genutzt werden.
 
 \begin{longtable}{lll}
-\caption{Uebersicht der API-Endpunkte} \\
+\caption{Übersicht der API-Endpunkte} \\
 \toprule
 \textbf{Methode} & \textbf{Pfad} & \textbf{Beschreibung} \\ \midrule
 \endhead
-POST & /auth/login & Authentifizierung fuer Personal \\
-POST & /auth/login-student & Login fuer Schueler via ID \\
+POST & /auth/login & Authentifizierung für Personal \\
+POST & /auth/login-student & Login für Schüler via ID \\
 POST & /guard/validate & Validierung eines RFID-Scans \\
 POST & /guard/verify-face & Vergleich von Snapshot und Referenz \\
-GET & /student/profile & Abruf des Schuelerprofils \\
-POST & /cards/assign & Verknuepfung Karte mit Schueler \\ \bottomrule
+GET & /student/profile & Abruf des Schülerprofils \\
+POST & /cards/assign & Verknüpfung Karte mit Schüler \\ \bottomrule
 \end{longtable}
 
-\subsection{Ergaenzende Abbildungen}
-Die Benutzeroberflaeche der Guard-App ist fuer die schnelle Verifikation optimiert. \autoref{fig:screenshot_guard} zeigt die Ansicht nach einem erfolgreichen RFID-Scan.
+\subsection{Ergänzende Abbildungen}
+Die Benutzeroberfläche der Guard-App ist für die schnelle Verifikation optimiert. \autoref{fig:screenshot_guard} zeigt die Ansicht nach einem erfolgreichen RFID-Scan.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.8\textwidth,height=0.4\textheight,keepaspectratio]{figures/systemarchitektur.pdf}
-  \caption{Benutzeroberflaeche der Guard-App bei erfolgreicher Validierung}
+  \caption{Benutzeroberfläche der Guard-App bei erfolgreicher Validierung}
   \label{fig:screenshot_guard}
 \end{figure}
 
 \subsection{Technische Artefakte}
-Hier werden zentrale Code-Ausschnitte dokumentiert, die die technische Logik des Systems repraesentieren.
+Hier werden zentrale Code-Ausschnitte dokumentiert, die die technische Logik des Systems repräsentieren.
 
 \subsubsection{Distanzberechnung (Euklidische Distanz)}
 Die Entscheidung ueber eine Gesichtsuereinstimmung basiert auf der euklidischen Distanz der Face-Descriptoren.
