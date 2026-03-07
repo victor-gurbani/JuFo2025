@@ -124,6 +124,13 @@
 \fancyhead[R]{BLL}
 \fancyfoot[C]{\thepage}
 
+\makeatletter
+\ExplSyntaxOn
+\cs_if_exist:NF \tbl_save_outer_table_cols:
+  { \cs_new_protected:Npn \tbl_save_outer_table_cols: { } }
+\ExplSyntaxOff
+\makeatother
+
 \begin{document}
 
 % Title page (no page number)
