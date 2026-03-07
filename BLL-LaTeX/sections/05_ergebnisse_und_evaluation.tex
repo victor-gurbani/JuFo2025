@@ -100,11 +100,11 @@ Der Vergleich zwischen den drei Testumgebungen zeigt eine klare Skalierung der P
 
 Abschließend werden die eingangs formulierten Hypothesen anhand der Ergebnisse bewertet:
 
-\textbf{H1: „Ein kombiniertes RFID-basiertes System zur Zugangs- und Auslasskontrolle kann Berechtigungsentscheidungen in unter 2 Sekunden treffen.“}
+\textbf{H1: \enquote{Ein kombiniertes RFID-basiertes System zur Zugangs- und Auslasskontrolle kann Berechtigungsentscheidungen in unter 2 Sekunden treffen.}}
 \\ \textbf{Verifiziert (mit Nuancierung).} Mit einer durchschnittlichen Antwortzeit von 8,33\,ms (RFID) bzw. ca. 3,5\,s für den kombinierten RFID- und Gesichtsscan auf dem Raspberry Pi wird die 2-Sekunden-Zielmarke bei der Gesamtverifikation leicht überschritten, was primär durch die optionale Gesichtsverifizierung bedingt ist. Auf dem Cloud-Server liegt die Gesamtzeit bei unter 1\,s, auf dem MacBook M4 Max sogar bei nur 166\,ms. Da die Gesichtserkennung jedoch asynchron im Hintergrund erfolgen kann und der RFID-Check allein (~8\,ms) dem Wachpersonal bereits sofort das Signal (z.\,B. Ampel-Anzeige auf dem Tablet) gibt, ist das System hochgradig praxistauglich für den schnellen Durchlauf in Pausenzeiten oder nach Schulschluss.
 
-\textbf{H2: „Lokale KI-Gesichtserkennung erreicht eine Erkennungsgenauigkeit von mindestens 90\,\% bei Schülerfotos.“}
+\textbf{H2: \enquote{Lokale KI-Gesichtserkennung erreicht eine Erkennungsgenauigkeit von mindestens 90\,\% bei Schülerfotos.}}
 \\ \textbf{Verifiziert.} In den Benchmarks wurde eine Genauigkeit von 100\,\% erreicht. Auch wenn in realen Umgebungen (Lichteinfall, Brillen, etc.) Abweichungen zu erwarten sind, bietet das System eine sehr hohe Robustheit, die über den geforderten 90\,\% liegt. Anzumerken ist, dass diese Ergebnisse unter kontrollierten Bedingungen mit einer begrenzten Stichprobe ($n = 10$) erzielt wurden. Für eine statistisch belastbare Aussage wären weitere Tests mit einer größeren und diverseren Stichprobe erforderlich.
 
-\textbf{H3: „Durch die lokale Verarbeitung biometrischer Daten lassen sich zentrale Anforderungen der DSGVO (Datenminimierung, Zweckbindung, Speicherbegrenzung) technisch unterstützen.“}
+\textbf{H3: \enquote{Durch die lokale Verarbeitung biometrischer Daten lassen sich zentrale Anforderungen der DSGVO (Datenminimierung, Zweckbindung, Speicherbegrenzung) technisch unterstützen.}}
 \\ \textbf{Plausibilisiert.} Die technische Umsetzung zeigt, dass die gesamte Verarbeitung (RFID-UID-Check und KI-Inferenz) auf einem lokalen Raspberry Pi ohne Cloud-Anbindung möglich ist. Da biometrische Merkmalsdaten und Bilder das Gerät nicht verlassen, wird das Risiko von Datenlecks minimiert und die Prinzipien der Datenminimierung, Zweckbindung und Speicherbegrenzung technisch unterstützt.

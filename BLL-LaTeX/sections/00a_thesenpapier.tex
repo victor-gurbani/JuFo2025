@@ -36,7 +36,7 @@
 
 \subsection*{Diskussionsanker für das Prüfungsgespräch}
 \begin{itemize}[leftmargin=*]
-\item \textbf{Sicherheitsrisiko „RFID-Cloning“:} Die verwendeten EM4100-Chips (125\,kHz) besitzen keine Verschlüsselung und sind trivial klonbar. Dies ist bewusst akzeptiert: Das Klonen einer Karte entspricht dem Kopieren einer Papier-Bescheinigung und wird durch die biometrische Zwei-Faktor-Verifikation (Gesichtserkennung) vollständig kompensiert. $\rightarrow$ Die eigentliche Sicherheit liegt im zweiten Faktor.
+\item \textbf{Sicherheitsrisiko \enquote{RFID-Cloning}:} Die verwendeten EM4100-Chips (125\,kHz) besitzen keine Verschlüsselung und sind trivial klonbar. Dies ist bewusst akzeptiert: Das Klonen einer Karte entspricht dem Kopieren einer Papier-Bescheinigung und wird durch die biometrische Zwei-Faktor-Verifikation (Gesichtserkennung) vollständig kompensiert. $\rightarrow$ Die eigentliche Sicherheit liegt im zweiten Faktor.
 \item \textbf{Akzeptanz der Biometrie:} Ist die Akzeptanz bei Schülern und Eltern gegeben? $\rightarrow$ Ja, durch das Opt-in-Modell und die Garantie der lokalen Speicherung ohne Cloud-Zwang.
 \item \textbf{Skalierbarkeit:} Kann das System für Schulen mit $>1500$ Schülern skaliert werden? $\rightarrow$ Migration von SQLite zu PostgreSQL und Lastverteilung der KI-Anfragen auf mehrere Edge-Nodes.
 \end{itemize}
