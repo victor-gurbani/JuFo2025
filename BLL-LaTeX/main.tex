@@ -95,9 +95,13 @@
 \usepackage[backend=biber,style=authoryear,sorting=nyt,autocite=inline]{biblatex}
 \addbibresource{references.bib}
 
+\DefineBibliographyStrings{ngerman}{
+  urlseen = {Zuletzt besucht am},
+}
+
 % --- Draft Watermark Flag ---
 \newif\ifdraftversion
-\draftversiontrue % Set to \draftversionfalse to disable
+\draftversionfalse % Set to \draftversionfalse to disable
 
 \ifdraftversion
   \usepackage{draftwatermark}

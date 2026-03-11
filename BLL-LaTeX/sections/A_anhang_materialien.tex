@@ -22,10 +22,8 @@ CREATE TABLE IF NOT EXISTS permissions (
   isValid INTEGER,
   assignedStudent TEXT,
   assignedBy TEXT,
-  associatedCard TEXT,
   FOREIGN KEY (assignedStudent) REFERENCES students(id),
-  FOREIGN KEY (assignedBy) REFERENCES teachers(id),
-  FOREIGN KEY (associatedCard) REFERENCES cards(uid)
+  FOREIGN KEY (assignedBy) REFERENCES teachers(id)
 );
 
 CREATE TABLE IF NOT EXISTS students (
@@ -50,12 +48,12 @@ CREATE TABLE IF NOT EXISTS teachers (
 
 CREATE TABLE IF NOT EXISTS accessLogs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  cardUID TEXT,
+  kartenId TEXT,
   studentId TEXT,
   timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
   accessGranted INTEGER,
   verificationMethod TEXT,
-  FOREIGN KEY (cardUID) REFERENCES cards(uid),
+  FOREIGN KEY (kartenId) REFERENCES cards(uid),
   FOREIGN KEY (studentId) REFERENCES students(id)
 );
 \end{lstlisting}
@@ -81,7 +79,7 @@ Die Benutzeroberfläche der Guard-App ist für die schnelle Verifikation optimie
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.8\textwidth,height=0.4\textheight,keepaspectratio]{figures/systemarchitektur.pdf}
+  \includegraphics[width=0.4\textwidth,height=0.4\textheight,keepaspectratio]{figures/GuardAccessGranted.png}
   \caption{Benutzeroberfläche der Guard-App bei erfolgreicher Validierung}
   \label{fig:screenshot_guard}
 \end{figure}
@@ -90,7 +88,7 @@ Die Benutzeroberfläche der Guard-App ist für die schnelle Verifikation optimie
 Hier werden zentrale Code-Ausschnitte dokumentiert, die die technische Logik des Systems repräsentieren.
 
 \subsubsection{Distanzberechnung (Euklidische Distanz)}
-Die Entscheidung ueber eine Gesichtsuereinstimmung basiert auf der euklidischen Distanz der Face-Descriptoren.
+Die Entscheidung über eine Gesichtsübereinstimmung basiert auf der euklidischen Distanz der Face-Descriptoren.
 \begin{lstlisting}
 const distance = faceapi.euclideanDistance(
   snapshotDetection.descriptor,
