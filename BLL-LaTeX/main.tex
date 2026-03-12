@@ -104,6 +104,25 @@
   urlseen = {Zuletzt besucht am},
 }
 
+% Make the entire citation clickable (not just the year)
+\DeclareCiteCommand{\cite}
+  {\usebibmacro{prenote}}
+  {\printtext[bibhyperref]{\usebibmacro{cite}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+
+\DeclareCiteCommand{\parencite}[\mkbibparens]
+  {\usebibmacro{prenote}}
+  {\printtext[bibhyperref]{\usebibmacro{cite}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+
+\DeclareCiteCommand{\autocite}[\mkbibparens]
+  {\usebibmacro{prenote}}
+  {\printtext[bibhyperref]{\usebibmacro{cite}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+
 % --- Draft Watermark Flag ---
 \newif\ifdraftversion
 \draftversionfalse % Set to \draftversionfalse to disable
