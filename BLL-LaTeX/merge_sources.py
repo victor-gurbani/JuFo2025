@@ -66,7 +66,9 @@ def main():
         r"",
         r"\vspace{1.5cm}",
         r"{\color{titlecolor}\rule{\linewidth}{1pt}}",
-        r"\vspace{2.5cm}",
+        r"",
+        r"\vfill",
+        r"",
         r"\begin{tabularx}{0.9\textwidth}{>{\bfseries}p{3.8cm}X}",
         r"Verfasser/in: & Victor Gurbani \\",
         r"Erstkorrektor: & Steffen Ramin \\",
@@ -74,7 +76,7 @@ def main():
         r"Abgabedatum: & 13. März 2026 \\",
         r"\end{tabularx}",
         r"",
-        r"\vfill",
+        r"\vspace{2cm}",
         r"\end{titlepage}",
         r"\newpage",
         r"",
@@ -84,7 +86,7 @@ def main():
     ]
     
     for filename in sorted(os.listdir(PDF_DIR)):
-        if not filename.endswith(".pdf"):
+        if not filename.endswith(".pdf") or filename.endswith("_OLD.pdf"):
             continue
             
         key = filename[:-4]
