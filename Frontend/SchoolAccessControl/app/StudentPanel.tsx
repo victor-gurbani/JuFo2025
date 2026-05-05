@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { View, ScrollView, Image, Platform } from "react-native";  
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, Switch, ActivityIndicator, HelperText } from "react-native-paper";
 import * as FileSystem from 'expo-file-system';  
@@ -17,12 +17,14 @@ export default function StudentPanel() {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [verifyFace, setVerifyFace] = useState(true);
   const [nextPhotoUpdate, setNextPhotoUpdate] = useState<string | null>(null);
+  const [accessLogs, setAccessLogs] = useState<any[]>([]);
   
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
   // Loading states
   const [isLoadingInfo, setIsLoadingInfo] = useState(false);
+  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
   const [isUpdatingInfo, setIsUpdatingInfo] = useState(false);
   const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
 
@@ -34,7 +36,53 @@ export default function StudentPanel() {
   // Load student info on mount
   useEffect(() => {
     loadStudentInfo();
+    loadAccessLogs();
   }, []);
+
+  const formatLogTime = (timestamp: any) => {
+    if (!timestamp) {
+      return "Unknown time";
+    }
+
+    const numericTimestamp = typeof timestamp === "number" ? timestamp : Number(timestamp);
+    const date = Number.isFinite(numericTimestamp)
+      ? new Date(numericTimestamp * 1000)
+      : new Date(timestamp);
+
+    if (Number.isNaN(date.getTime())) {
+      return String(timestamp);
+    }
+
+    return date.toLocaleString();
+  };
+
+  const describeLogType = (direction: string) => {
+    if (direction === "FACE_VERIFY") {
+      return "Face verification";
+    }
+
+    if (direction === "ENTRY") {
+      return "Card swipe";
+    }
+
+    return direction || "Access attempt";
+  };
+
+  const loadAccessLogs = () => {
+    setIsLoadingLogs(true);
+    api.get("/student/access-logs")
+      .then((res) => {
+        setAccessLogs(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch((err) => {
+        showSnackbar("Could not load card activity: " + (err.response?.data?.error || err.message));
+        setAccessLogs([]);
+      })
+      .finally(() => {
+        setIsLoadingLogs(false);
+      });
+  };
+
   const loadStudentInfo = () => {
     setIsLoadingInfo(true);
     api.get("/student/info")
@@ -80,6 +128,7 @@ export default function StudentPanel() {
       .then(() => {
         showSnackbar("Information updated successfully");
         loadStudentInfo();
+        loadAccessLogs();
       })
       .catch((err) => showSnackbar("Error: " + (err.response?.data?.error || err.message)))
       .finally(() => {
@@ -293,6 +342,48 @@ export default function StudentPanel() {
                       {isUpdatingInfo ? "Updating..." : "Update Information"}
                     </Button>
                   </View>
+                </Card.Content>
+              </Card>
+              <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
+                <Card.Content>
+                  <Title>Card Activity</Title>
+                  <Text style={{ color: theme.colors.onSurfaceVariant, marginBottom: 12 }}>
+                    {accessLogs.length} {accessLogs.length === 1 ? "record" : "records"}
+                  </Text>
+
+                  {isLoadingLogs ? (
+                    <ActivityIndicator style={{ marginVertical: 16 }} />
+                  ) : accessLogs.length === 0 ? (
+                    <Paragraph>No card activity recorded yet.</Paragraph>
+                  ) : (
+                    accessLogs.map((log) => (
+                      <View
+                        key={log.id}
+                        style={{
+                          paddingVertical: 12,
+                          borderTopWidth: 1,
+                          borderTopColor: theme.colors.outlineVariant,
+                        }}
+                      >
+                        <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
+                          <Text style={{ fontWeight: "700", flex: 1 }}>
+                            {formatLogTime(log.timestamp)}
+                          </Text>
+                          <Text style={{ fontWeight: "700", color: log.wasApproved ? "#2e7d32" : "#c62828" }}>
+                            {log.wasApproved ? "Approved" : "Denied"}
+                          </Text>
+                        </View>
+                        <Paragraph style={{ marginTop: 4 }}>
+                          {describeLogType(log.direction)} using {log.cardUID || log.card || "unknown card"}
+                        </Paragraph>
+                        {log.verifiedByName ? (
+                          <Text style={{ color: theme.colors.onSurfaceVariant }}>
+                            Verified by {log.verifiedByName}
+                          </Text>
+                        ) : null}
+                      </View>
+                    ))
+                  )}
                 </Card.Content>
               </Card>
             </>

@@ -86,6 +86,47 @@ module.exports = (db) => {
     });
   });
 
+  // Get card and face verification activity for the authenticated student
+  router.get("/access-logs", checkAuth(db, ['VIEW_OWN_INFO']), (req, res) => {
+    const studentId = req.query.studentId || req.user.id;
+    const requestedLimit = parseInt(req.query.limit, 10) || 100;
+    const limit = Math.min(Math.max(requestedLimit, 1), 500);
+
+    if (studentId !== req.user.id && !req.user.permissions.includes('VIEW_STUDENTS')) {
+      return res.status(403).json({ error: "You can only view your own access history" });
+    }
+
+    const query = `
+      SELECT
+        al.id,
+        al.direction,
+        al.student,
+        al.card,
+        al.wasApproved,
+        al.timestamp,
+        al.verified_by as verifiedBy,
+        t.name as verifiedByName,
+        c.uid as cardUID
+      FROM accessLogs al
+      LEFT JOIN teachers t ON al.verified_by = t.id
+      LEFT JOIN cards c ON al.card = c.uid
+      WHERE al.student = ?
+      ORDER BY al.timestamp DESC, al.id DESC
+      LIMIT ?
+    `;
+
+    db.all(query, [studentId, limit], (err, rows) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+
+      res.json(rows.map((row) => ({
+        ...row,
+        wasApproved: row.wasApproved === 1
+      })));
+    });
+  });
+
   // Update student photo (with once per week limitation)
   /**
    * POST /student/update-photo - Update student profile photo with optional face verification

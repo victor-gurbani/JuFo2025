@@ -16,6 +16,7 @@ export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState<"admin" | "teacher" | "guard" | "student" | "">(""); // Track selected role
   const textInputRef = useRef<any>(null);
+  const passwordInputRef = useRef<any>(null);
   const router = useRouter();
   const { theme } = useAppTheme();
 
@@ -112,11 +113,21 @@ export default function LoginScreen() {
               style={{ marginVertical: 10 }}
               disabled={!role || isLoading}
               editable={!!role && !isLoading}
+              returnKeyType={role === "student" ? "go" : "next"}
+              blurOnSubmit={role === "student"}
+              onSubmitEditing={() => {
+                if (role === "student") {
+                  handleLogin();
+                } else {
+                  passwordInputRef.current?.focus?.();
+                }
+              }}
             />
 
             {/* Password Input (not needed for students) */}
             {role !== "student" && (
               <TextInput
+                ref={passwordInputRef}
                 label="Password"
                 value={password}
                 onChangeText={setPassword}
@@ -125,6 +136,8 @@ export default function LoginScreen() {
                 style={{ marginVertical: 10 }}
                 disabled={!role || isLoading}
                 editable={!!role && !isLoading}
+                returnKeyType="go"
+                onSubmitEditing={handleLogin}
               />
             )}
 
