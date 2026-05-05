@@ -25,7 +25,7 @@ module.exports = (db) => {
 
     // For prototype: simple shared secret or check against DB if password column exists
     // We will check if the user exists in the teachers table
-    db.get('SELECT * FROM teachers WHERE id = ?', [id], (err, user) => {
+    db.get('SELECT * FROM teachers WHERE lower(id) = lower(?)', [id], (err, user) => {
       if (err) {
         return res.status(500).json({ error: 'Database error' });
       }
@@ -84,7 +84,7 @@ module.exports = (db) => {
       return res.status(400).json({ error: 'Student ID is required' });
     }
 
-    db.get('SELECT * FROM students WHERE id = ?', [studentId], (err, student) => {
+    db.get('SELECT * FROM students WHERE lower(id) = lower(?)', [studentId], (err, student) => {
       if (err) {
         return res.status(500).json({ error: 'Database error' });
       }

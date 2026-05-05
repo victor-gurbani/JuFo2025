@@ -20,16 +20,16 @@ module.exports = (db, requiredLevel) => {
     if (!req.user || !req.user.id) {
       return res.status(401).json({ error: "Unauthorized: User not authenticated" });
     }
-    const userId = req.user.id.toLowerCase();
-    const query = `SELECT permissionLevel FROM teachers WHERE id = ?`;
+    const userId = req.user.id;
+    const query = `SELECT permissionLevel FROM teachers WHERE lower(id) = lower(?)`;
 
     db.get(query, [userId], (err, row) => {
       if (err) return res.status(500).json({ error: err.message });
       if (!row) return res.status(404).json({ error: "Teacher not found" });
 
       const { permissionLevel } = row;
-      const userLevel = roleHierarchy[permissionLevel.toLowerCase()] || -1;
-      const requiredLevelNum = roleHierarchy[requiredLevel.toLowerCase()] || 0;
+      const userLevel = roleHierarchy[permissionLevel.toLowerCase()] ?? -1;
+      const requiredLevelNum = roleHierarchy[requiredLevel.toLowerCase()] ?? 0;
 
       if (userLevel >= requiredLevelNum) {
         return next();

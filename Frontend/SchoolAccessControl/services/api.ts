@@ -2,16 +2,31 @@ import axios from "axios";
 import Constants from "expo-constants";
 import { setToken, getToken, deleteToken } from './storage';
 
+declare const process: {
+  env: {
+    EXPO_PUBLIC_API_URL?: string;
+  };
+};
+
 const getBaseURL = () => {
-  // Try to get from app config, fallback to localhost:3000 for development
-  const configURL = Constants.expoConfig?.extra?.apiBaseUrl;
+  const envURL = typeof process !== "undefined" ? process.env.EXPO_PUBLIC_API_URL : undefined;
+  const configURL = envURL || Constants.expoConfig?.extra?.apiBaseUrl;
   if (configURL) return configURL;
-  
-  // Development fallback
+
+  if (typeof window !== "undefined" && window.location?.hostname) {
+    return `${window.location.protocol}//${window.location.hostname}:3000`;
+  }
+
   if (__DEV__) {
+    const hostUri = Constants.expoConfig?.hostUri;
+    const host = hostUri?.split(":")[0];
+    if (host) {
+      return `http://${host}:3000`;
+    }
+
     return "http://localhost:3000";
   }
-  
+
   return "http://localhost:3000"; // fallback
 };
 
