@@ -1,0 +1,45 @@
+erDiagram
+    SCHUELER ||--o{ KARTEN : besitzt
+    SCHUELER ||--o{ BERECHTIGUNGEN : hat
+    LEHRKRAEFTE ||--o{ BERECHTIGUNGEN : erteilt
+    KARTEN ||--o{ ZUGANGSPROTOKOLLE : generiert
+    SCHUELER ||--o{ ZUGANGSPROTOKOLLE : generiert
+    LEHRKRAEFTE ||--o{ ZUGANGSPROTOKOLLE : verifiziert_von
+
+    SCHUELER {
+        int id PK
+        string name
+        string foto
+        string gesichtsDeskriptor
+    }
+    LEHRKRAEFTE {
+        int id PK
+        string name
+        string email
+        string passwortHash
+    }
+    KARTEN {
+        int id PK
+        string uid
+        int schuelerId FK
+        boolean istAktiv
+    }
+    BERECHTIGUNGEN {
+        int id PK
+        int schuelerId FK
+        int erteiltVon FK
+        datetime gueltigAb
+        datetime gueltigBis
+        boolean istWiederkehrend
+        string wiederholungsMuster
+        datetime erstelltAm
+    }
+    ZUGANGSPROTOKOLLE {
+        int id PK
+        int kartenId FK
+        int schuelerId FK
+        datetime zeitstempel
+        boolean gewaehrt
+        string grund
+        int verifiziert_von FK
+    }

@@ -10,9 +10,7 @@ import { useAppTheme } from '../theme/ThemeContext';
 export default function StudentPanel() {
   const router = useRouter();
   const { theme } = useAppTheme();
-  const [inputStudentId, setInputStudentId] = useState("");
-  const [committedStudentId, setCommittedStudentId] = useState("");
-  const idInputTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
 
   const [studentInfo, setStudentInfo] = useState<any>(null);
   const [email, setEmail] = useState("");
@@ -33,38 +31,13 @@ export default function StudentPanel() {
     setSnackbarVisible(true);
   };
 
-  const handleStudentIdChange = (text: string) => {
-    setInputStudentId(text);
-    
-    // Clear any existing timeout
-    if (idInputTimeoutRef.current) {
-      clearTimeout(idInputTimeoutRef.current);
-    }
-    
-    // Set new timeout to commit the ID after 800ms of inactivity
-    idInputTimeoutRef.current = setTimeout(() => {
-      setCommittedStudentId(text);
-    }, 800);
-  };
-
-  const apiWithStudentId = (method: string, url: string, body?: any) => {
-    if (method === "GET" || method === "DELETE") {
-      return api[method.toLowerCase()](`${url}?studentId=${committedStudentId}`);
-    } else {
-      return api[method.toLowerCase()](url, { ...body, studentId: committedStudentId });
-    }
-  };
-
-  // Load student info when the ID is committed
+  // Load student info on mount
   useEffect(() => {
-    if (committedStudentId) {
-      loadStudentInfo();
-    }
-  }, [committedStudentId]);
-
+    loadStudentInfo();
+  }, []);
   const loadStudentInfo = () => {
     setIsLoadingInfo(true);
-    apiWithStudentId("GET", "/student/info")
+    api.get("/student/info")
       .then((res) => {
         setStudentInfo(res.data);
         setEmail(res.data.email || '');
@@ -103,7 +76,7 @@ export default function StudentPanel() {
     }
 
     setIsUpdatingInfo(true);
-    apiWithStudentId("POST", "/student/update-info", { email })
+    api.post("/student/update-info", { email })
       .then(() => {
         showSnackbar("Information updated successfully");
         loadStudentInfo();
@@ -175,7 +148,7 @@ export default function StudentPanel() {
                 throw new Error("File does not exist");
               }
             }
-          } catch (error) {
+          } catch (error: any) {
             showSnackbar("Failed to process the image: " + error.message);
             return;
           }
@@ -185,7 +158,7 @@ export default function StudentPanel() {
         setPhotoUrl(imageData);
         uploadPhotoToServer(imageData);
       }
-    } catch (error) {
+    } catch (error: any) {
       showSnackbar("Error picking image: " + error.message);
     }
   };
@@ -197,7 +170,7 @@ export default function StudentPanel() {
     }
 
     setIsUpdatingPhoto(true);
-    apiWithStudentId("POST", "/student/update-photo", {
+    api.post("/student/update-photo", {
       photoUrl: imageData,
       verifyFace
     })
@@ -229,19 +202,10 @@ export default function StudentPanel() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView style={{ margin: 20 }}>
-        <TextInput
-          label="Your Student ID"
-          value={inputStudentId}
-          onChangeText={handleStudentIdChange}
-          mode="outlined"
-          style={{ marginBottom: 10 }}
-        />
-        
-        {committedStudentId ? (
-          isLoadingInfo ? (
-            <ActivityIndicator style={{ marginTop: 20 }} />
-          ) : studentInfo ? (
-            <>
+        {isLoadingInfo ? (
+          <ActivityIndicator style={{ marginTop: 20 }} />
+        ) : studentInfo ? (
+          <>
               <Card style={{ marginBottom: 20, margin: 10 }} elevation={4}>
                 <Card.Content>
                   <Title>Student Information</Title>
@@ -334,10 +298,7 @@ export default function StudentPanel() {
             </>
           ) : (
             <Text style={{ margin: 20 }}>Student not found. Please check your ID.</Text>
-          )
-        ) : (
-          <Text style={{ margin: 20 }}>Please enter your Student ID to view your information.</Text>
-        )}
+          )}
       </ScrollView>
       
       <Snackbar

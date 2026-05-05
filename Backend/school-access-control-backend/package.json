@@ -22,9 +22,11 @@
     "bytenode": "^1.5.7",
     "canvas": "^2.11.2",
     "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
     "express": "^4.21.2",
     "face-api.js": "^0.22.2",
     "heic-convert": "^2.1.0",
+    "jsonwebtoken": "^9.0.3",
     "sharp": "^0.33.5",
     "sqlite3": "^5.1.7",
     "util": "^0.12.5"

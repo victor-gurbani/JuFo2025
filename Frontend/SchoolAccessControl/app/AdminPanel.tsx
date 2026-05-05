@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { View, ScrollView, Image } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable, SegmentedButtons, Portal, Modal, ActivityIndicator } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
-import api from "../services/api";
+import api, { getUserId } from "../services/api";
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useWindowDimensions } from 'react-native';
@@ -14,14 +14,12 @@ export default function AdminPanel() {
   const router = useRouter();
   const { theme } = useAppTheme(); // Get the current theme
   // State to store the current admin/teacher's ID
-  const [inputTeacherId, setInputTeacherId] = useState("");
-  const [committedTeacherId, setCommittedTeacherId] = useState("");
-  const idInputTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const [dashboard, setDashboard] = useState("");
-  const [teachers, setTeachers] = useState([]);
+  const [teachers, setTeachers] = useState<any[]>([]);
   const [teachersLoading, setTeachersLoading] = useState(false);
   const [teacherPhotos, setTeacherPhotos] = useState<{[key: string]: string}>({});
-  const [cards, setCards] = useState([]);
+  const [cards, setCards] = useState<any[]>([]);
   const [teacherId, setTeacherId] = useState("");
   const [teacherName, setTeacherName] = useState("");
   const [teacherPermission, setTeacherPermission] = useState("");
@@ -63,54 +61,31 @@ export default function AdminPanel() {
   const [isUpdatingStudent, setIsUpdatingStudent] = useState(false);
   const [studentPhotos, setStudentPhotos] = useState<{[key: string]: string}>({});
 
-  // Helper function to append teacherId to requests
-  const apiWithTeacherId = (method: string, url: string, body?: any) => {
-    if (method === "GET" || method === "DELETE") {
-      const separator = url.includes('?') ? '&' : '?';
-      return api[method.toLowerCase()](`${url}${separator}teacherId=${committedTeacherId}`);
-    } else {
-      return api[method.toLowerCase()](url, { ...body, teacherId: committedTeacherId });
-    }
-  };
 
-  const handleTeacherIdChange = (text: string) => {
-    setInputTeacherId(text);
-    
-    // Clear any existing timeout
-    if (idInputTimeoutRef.current) {
-      clearTimeout(idInputTimeoutRef.current);
-    }
-    
-    // Set new timeout to commit the ID after 800ms of inactivity
-    idInputTimeoutRef.current = setTimeout(() => {
-      setCommittedTeacherId(text);
-    }, 800);
-  };
+
 
   useEffect(() => {
-    if (committedTeacherId) {
-      // Fetch admin dashboard info
-      apiWithTeacherId("GET", "/admin/dashboard")
-        .then((response) => {
-          setDashboard(response.data.message);
-        })
-        .catch((err) => showSnackbar("Error: " + err));
+    // Fetch admin dashboard info
+    api.get("/admin/dashboard")
+      .then((response) => {
+        setDashboard(response.data.message);
+      })
+      .catch((err) => showSnackbar("Error: " + err));
 
-      loadTeachers();
-      loadCards();
-      loadStudents();
-    }
-  }, [committedTeacherId]);
+    loadTeachers();
+    loadCards();
+    loadStudents();
+  }, []);
 
   useEffect(() => {
-    if (committedTeacherId && activeTab === 'cards') {
+    if (activeTab === 'cards') {
       loadAccessLogs();
     }
-  }, [committedTeacherId, currentPage, pageSize, activeTab]);
+  }, [currentPage, pageSize, activeTab]);
 
   const loadTeachers = () => {
     setIsLoadingTeachers(true);
-    apiWithTeacherId("GET", "/admin/teachers")
+    api.get("/admin/teachers")
       .then((res) => {
         setTeachers(res.data);
         // Now that we have basic data, load the photos separately
@@ -125,7 +100,7 @@ export default function AdminPanel() {
   };
 
   const loadTeacherPhotos = () => {
-    apiWithTeacherId("GET", "/admin/teachers/photos")
+    api.get("/admin/teachers/photos")
       .then((res) => {
         const photoMap: {[key: string]: string} = {};
         res.data.forEach((item: {id: string, photoUrl: string}) => {
@@ -143,7 +118,7 @@ export default function AdminPanel() {
 
   const loadCards = () => {
     setIsLoadingCards(true);
-    apiWithTeacherId("GET", "/admin/cards")
+    api.get("/admin/cards")
       .then((res) => setCards(res.data))
       .catch((err) => showSnackbar("Error: " + err))
       .finally(() => {
@@ -153,7 +128,7 @@ export default function AdminPanel() {
 
   const loadAccessLogs = () => {
     setIsLoadingLogs(true);
-    apiWithTeacherId("GET", `/admin/access-logs?page=${currentPage}&limit=${pageSize}`)
+    api.get(`/admin/access-logs?page=${currentPage}&limit=${pageSize}`)
       .then((res) => {
         setAccessLogs(res.data);
         // If backend returns total count in headers or response
@@ -169,7 +144,7 @@ export default function AdminPanel() {
 
   const loadStudents = () => {
     setIsLoadingStudents(true);
-    apiWithTeacherId("GET", "/admin/students")
+    api.get("/admin/students")
       .then((res) => {
         setStudents(res.data);
         // Now that we have basic data, load the photos separately
@@ -182,7 +157,7 @@ export default function AdminPanel() {
   };
 
   const loadStudentPhotos = () => {
-    apiWithTeacherId("GET", "/admin/students/photos")
+    api.get("/admin/students/photos")
       .then((res) => {
         const photoMap: {[key: string]: string} = {};
         res.data.forEach((item: {id: string, photoUrl: string}) => {
@@ -200,7 +175,7 @@ export default function AdminPanel() {
 
   const deleteStudent = (id: string) => {
     setIsDeletingStudent(id);
-    apiWithTeacherId("DELETE", `/admin/students/${id}`)
+    api.delete(`/admin/students/${id}`)
       .then(() => {
         showSnackbar("Student deleted");
         loadStudents();
@@ -271,12 +246,12 @@ export default function AdminPanel() {
                 throw new Error("File does not exist");
               }
             }
-          } catch (error) {
+          } catch (error: any) {
             showSnackbar("Failed to process the image: " + error.message);
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       showSnackbar("Error picking image: " + error.message);
     }
   };
@@ -343,12 +318,12 @@ export default function AdminPanel() {
                 throw new Error("File does not exist");
               }
             }
-          } catch (error) {
+          } catch (error: any) {
             showSnackbar("Failed to process the image: " + error.message);
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       showSnackbar("Error picking image: " + error.message);
     }
   };
@@ -360,7 +335,7 @@ export default function AdminPanel() {
     }
 
     setIsCreatingTeacher(true);
-    apiWithTeacherId("POST", "/admin/teachers", {
+    api.post("/admin/teachers", {
       id: teacherId,
       name: teacherName,
       permissionLevel: teacherPermission,
@@ -387,7 +362,7 @@ export default function AdminPanel() {
     }
 
     setIsUpdatingTeacher(true);
-    apiWithTeacherId("PUT", `/admin/teachers/${teacherId}`, {
+    api.put(`/admin/teachers/${teacherId}`, {
       name: teacherName,
       permissionLevel: teacherPermission,
       photoUrl: photoUrl
@@ -413,7 +388,7 @@ export default function AdminPanel() {
     }
 
     setIsCreatingStudent(true);
-    apiWithTeacherId("POST", "/admin/students", {
+    api.post("/admin/students", {
       id: studentId,
       name: studentName,
       classGroup: studentClassGroup,
@@ -444,7 +419,7 @@ export default function AdminPanel() {
     }
 
     setIsUpdatingStudent(true);
-    apiWithTeacherId("PUT", `/admin/students/${studentId}`, {
+    api.put(`/admin/students/${studentId}`, {
       name: studentName,
       classGroup: studentClassGroup,
       email: studentEmail,
@@ -469,7 +444,7 @@ export default function AdminPanel() {
 
   const deleteTeacher = (id: string) => {
     setIsDeletingTeacher(id);
-    apiWithTeacherId("DELETE", `/admin/teachers/${id}`)
+    api.delete(`/admin/teachers/${id}`)
       .then(() => {
         showSnackbar("Teacher deleted");
         loadTeachers();
@@ -485,7 +460,7 @@ export default function AdminPanel() {
     setSelectedCard(cards.find((c: any) => c.uid === cardUID));
     
     // Load permissions for this card
-    apiWithTeacherId("GET", `/cards/${cardUID}/permissions`)
+    api.get(`/cards/${cardUID}/permissions`)
       .then((res) => {
         setCardPermissions(res.data);
       })
@@ -495,7 +470,7 @@ export default function AdminPanel() {
       });
     
     // Load access logs for this specific card
-    apiWithTeacherId("GET", `/admin/card-logs/${cardUID}`)
+    api.get(`/admin/card-logs/${cardUID}`)
       .then((res) => {
         setCardLogs(res.data || []);
       })
@@ -511,14 +486,14 @@ export default function AdminPanel() {
   const invalidateCard = (cardUID: string) => {
     setIsInvalidatingCard(cardUID);
     
-    apiWithTeacherId("POST", "/admin/invalidate-card", { cardUID })
+    api.post("/admin/invalidate-card", { cardUID })
       .then(() => {
         showSnackbar("Card invalidated successfully");
         loadCards(); // Refresh the cards list
       })
       .catch((err) => {
         // If admin route fails, try the teacher route as fallback
-        return apiWithTeacherId("POST", "/teacher/invalidate-card", { cardUID })
+        return api.post("/teacher/invalidate-card", { cardUID })
           .then(() => {
             showSnackbar("Card invalidated successfully");
             loadCards(); // Refresh the cards list
@@ -540,7 +515,13 @@ export default function AdminPanel() {
   const { width } = useWindowDimensions();
 
   // Add this useEffect to handle keyboard events for the modal
+  // Add this useEffect to handle keyboard events for the modal (web only)
   useEffect(() => {
+    // Only run on web platform
+    if (Platform.OS !== 'web') {
+      return;
+    }
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && showCardDetailModal) {
         setShowCardDetailModal(false);
@@ -548,29 +529,21 @@ export default function AdminPanel() {
     };
 
     // Only add the listener when the modal is visible
-    if (showCardDetailModal) {
+    if (showCardDetailModal && Platform.OS === 'web') {
       document.addEventListener('keydown', handleKeyDown);
     }
 
     // Clean up the event listener when the component unmounts or the modal closes
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      if (Platform.OS === 'web') {
+        document.removeEventListener('keydown', handleKeyDown);
+      }
     };
   }, [showCardDetailModal]);
 
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={{ margin: 20 }}>
-        {/* Input field for Admin/Teacher ID */}
-        <TextInput
-          label="Current Admin / Teacher ID"
-          value={inputTeacherId}
-          onChangeText={handleTeacherIdChange}
-          style={{ marginVertical: 5 }}
-          mode="outlined"
-        />
-
-        {committedTeacherId ? (
           <>
             <SegmentedButtons
               value={activeTab}
@@ -1158,9 +1131,6 @@ export default function AdminPanel() {
               </>
             )}
           </>
-        ) : (
-          <Text>Please enter your Admin or Teacher ID to proceed.</Text>
-        )}
       </ScrollView>
       <Portal>
         <Modal

@@ -1,0 +1,73 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[left=2.5cm,right=2.5cm,top=2.3cm,bottom=2.3cm]{geometry}
+\usepackage{setspace}
+\setstretch{1.1}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\blltitle}{Sichere Zugangs- und Auslasskontrolle durch RFID und KI-Gesichtserkennung}
+\newcommand{\studentname}{Victor Gurbani}
+\newcommand{\examdate}{März 2026}
+\newcommand{\fachname}{Informatik}
+
+\begin{document}
+
+{\Large\textbf{Thesenpapier zur Besonderen Lernleistung}}\\
+\textbf{Titel:} \blltitle\\
+\textbf{Name:} \studentname \hfill \textbf{Fach:} \fachname\\
+\textbf{Kolloquium:} \examdate \hfill \textbf{Erstkorrektor:} Steffen Ramin\\
+\textbf{Zweitkorrektor:} Stephan Seel
+
+\vspace{0.8cm}
+\section*{Kernthesen}
+\subsection*{Technologische Architektur \& Sicherheit}
+
+\textbf{These 1:} Passive RFID-Technologie bietet für die schulische Zugangs- und Auslasskontrolle ein besseres Verhältnis von Sicherheit zu Datenschutz als aktive biometrische Identifikation allein.\\
+\textit{Beleg aus der Arbeit:} Kapitel 4.1 (Hardware-Architektur) und Kapitel 5.3 (Datenschutz-Evaluation)
+
+\textbf{These 2:} Lokale KI-Gesichtserkennung mit SSD MobileNet v1 ist für den Schulkontext ausreichend genau, aber nicht für sicherheitskritische Anwendungen geeignet.\\
+\textit{Beleg aus der Arbeit:} Kapitel 5.1 (Benchmark-Ergebnisse zur Genauigkeit) und Tabelle 2 (False Positive Rate)
+
+\textbf{These 3:} Die Kombination von kartenbasierter Authentifizierung und biometrischer Verifikation bietet eine dem Schulkontext angemessene Zwei-Faktor-Sicherheit.\\
+\textit{Beleg aus der Arbeit:} Kapitel 4.2 (Workflow-Analyse) und Abbildung 3 (Zwei-Faktor-Prozess)
+
+\subsection*{Datenschutzrechtliche Verhältnismäßigkeit}
+
+\textbf{These 4:} Die Edge-Computing-Architektur dieses Systems beweist, dass die strikten Vorgaben der DSGVO (Art. 9) kein Innovationshindernis für biometrische Zugangs- und Auslasskontrollen an deutschen Schulen darstellen, sondern durch konsequentes 'Privacy by Design' technisch vollständig gelöst werden können.\\
+\textit{Beleg aus der Arbeit:} Kapitel 4.3 (Backend-Struktur) und Kapitel 5.3 (DSGVO-Konformitätsanalyse)
+
+\subsection*{Wirtschaftlichkeit}
+
+\textbf{These 5:} Ein Open-Source-System zur Zugangs- und Auslasskontrolle auf Basis von Standardhardware (Raspberry Pi, RFID-Reader) kann kommerzielle Lösungen in Bildungseinrichtungen wirtschaftlich ersetzen.\\
+\textit{Beleg aus der Arbeit:} Kapitel 5.2 (Kostenvergleich) und Anhang A (Stückliste)
+\vspace{0.6cm}
+\section*{Methodische Verteidigung in 3 Punkten}
+\begin{enumerate}
+\item \textbf{Untersuchungsdesign:} Iterativer Prototyping-Ansatz (Design Science Research), um die theoretischen Sicherheitsmodelle direkt in einer realitätsnahen Testumgebung zu validieren.
+\item \textbf{Daten/Werkzeuge:} Einsatz von TypeScript/Node.js und TensorFlow.js für eine performante, plattformunabhängige Implementierung bei gleichzeitig hoher Typsicherheit.
+\item \textbf{Limitation:} Die Performance der Gesichtserkennung ist stark von den Lichtverhältnissen abhängig; dies wurde durch eine Software-seitige Normalisierung der Bilder (HEIC-zu-PNG-Pipeline) teilweise kompensiert.
+\end{enumerate}
+
+\section*{Diskussionsanker fuer das Pruefungsgespraech}
+\begin{itemize}
+\item \textbf{Sicherheitsrisiko „RFID-Cloning“:} Die verwendeten EM4100-Chips (125\,kHz) besitzen keine Verschlüsselung und sind trivial klonbar. Dies ist bewusst akzeptiert: Das Klonen einer Karte entspricht dem Kopieren einer Papier-Bescheinigung und wird durch die biometrische Zwei-Faktor-Verifikation (Gesichtserkennung) vollständig kompensiert. $\rightarrow$ Die eigentliche Sicherheit liegt im zweiten Faktor.
+\item \textbf{Akzeptanz der Biometrie:} Ist die Akzeptanz bei Schülern und Eltern gegeben? $\rightarrow$ Ja, durch das Opt-in-Modell und die Garantie der lokalen Speicherung ohne Cloud-Zwang.
+\item \textbf{Skalierbarkeit:} Kann das System für Schulen mit $>1500$ Schülern skaliert werden? $\rightarrow$ Migration von SQLite zu PostgreSQL und Lastverteilung der KI-Anfragen auf mehrere Edge-Nodes.
+\end{itemize}
+
+\vspace{0.6cm}
+\section*{Zentrale Literatur}
+\begin{itemize}
+    \small
+    \item \textbf{Europäisches Parlament und Rat} (2016). \textit{Datenschutz-Grundverordnung (DSGVO)}. Amtsblatt der Europäischen Union L 119. \url{https://gdpr-info.eu/de/}
+    \item \textbf{EM Microelectronic-Marin SA} (2004). \textit{EM4100 Read Only Contactless Identification Device (Datasheet)}. \url{https://www.emmicroelectronic.com/sites/default/files/public/products/datasheets/4100-DS.pdf}
+    \item \textbf{Google LLC} (2023). \textit{TensorFlow.js for Node.js}. \url{https://www.tensorflow.org/js/tutorials/setup/nodejs}
+\end{itemize}
+
+\end{document}

@@ -1,10 +1,23 @@
+const express = require("express");
+// Replace checkPermission with checkAuth
+const checkAuth = require("../middleware/checkAuth");
+
 module.exports = (db) => {
-  const express = require("express");
-  const checkPermission = require("../middleware/checkPermission");
   const router = express.Router();
 
   // Create a new card (allow admins and tutors)
-  router.post("/", checkPermission(db, "tutor"), (req, res) => {
+  /**
+   * POST /cards - Create a new NFC card
+   * Adds a new card to the system with UID and validity status
+   * @param {Object} req.body - Request body
+   * @param {string} req.body.uid - Unique NFC card identifier
+   * @param {string} req.body.lastAssigned - Student ID or empty string
+   * @param {boolean} req.body.isValid - Whether card is active (default: true)
+   * @requires Authentication with MANAGE_CARDS permission
+   * @returns {Object} Card object with uid, lastAssigned, isValid
+   * @throws {500} If database operation fails
+   */
+  router.post("/", checkAuth(db, ['MANAGE_CARDS']), (req, res) => {
     const { uid, lastAssigned, isValid } = req.body;
 
     const query = `INSERT INTO cards (uid, lastAssigned, isValid) VALUES (?, ?, ?)`;
@@ -17,7 +30,14 @@ module.exports = (db) => {
   });
 
   // Read all cards (allow guards, teachers, tutors, admins)
-  router.get("/", checkPermission(db, "guard"), (req, res) => {
+  /**
+   * GET /cards - Retrieve all NFC cards
+   * Returns a list of all cards in the system
+   * @requires Authentication with VIEW_CARDS permission
+   * @returns {Array} Array of card objects with uid, lastAssigned, isValid status
+   * @throws {500} If database operation fails
+   */
+  router.get("/", checkAuth(db, ['VIEW_CARDS']), (req, res) => {
     const query = `SELECT * FROM cards`;
     db.all(query, [], (err, rows) => {
       if (err) {
@@ -28,7 +48,16 @@ module.exports = (db) => {
   });
 
   // Read a specific card by UID (allow guards, admins)
-  router.get("/:uid", checkPermission(db, "guard"), (req, res) => {
+  /**
+   * GET /cards/:uid - Retrieve a specific card by UID
+   * Fetches detailed information for a single card
+   * @param {string} req.params.uid - Card UID
+   * @requires Authentication with VIEW_CARDS permission
+   * @returns {Object} Card object with uid, lastAssigned, isValid
+   * @throws {404} If card not found
+   * @throws {500} If database operation fails
+   */
+  router.get("/:uid", checkAuth(db, ['VIEW_CARDS']), (req, res) => {
     const { uid } = req.params;
     const query = `SELECT * FROM cards WHERE uid = ? LIMIT 1`;
     db.get(query, [uid], (err, row) => {
@@ -43,7 +72,7 @@ module.exports = (db) => {
   });
 
   // Update a card (allow admins and tutors)
-  router.put("/:uid", checkPermission(db, "tutor"), (req, res) => {
+  router.put("/:uid", checkAuth(db, ['MANAGE_CARDS']), (req, res) => {
     const { lastAssigned, isValid } = req.body;
     const query = `UPDATE cards SET lastAssigned = ?, isValid = ? WHERE uid = ?`;
     db.run(query, [lastAssigned, isValid ? 1 : 0, req.params.uid], function (err) {
@@ -58,7 +87,7 @@ module.exports = (db) => {
   });
 
   // Delete a card (allow admins and tutors)
-  router.delete("/:uid", checkPermission(db, "tutor"), (req, res) => {
+  router.delete("/:uid", checkAuth(db, ['MANAGE_CARDS']), (req, res) => {
     const query = `DELETE FROM cards WHERE uid = ?`;
     db.run(query, [req.params.uid], function (err) {
       if (err) {
@@ -72,7 +101,15 @@ module.exports = (db) => {
   });
 
   // Get permissions for a specific card (allow guards, admins)
-  router.get("/:uid/permissions", checkPermission(db, "guard"), (req, res) => {
+  /**
+   * GET /cards/:uid/permissions - Get all permissions for a card
+   * Returns active permissions assigned to a specific card
+   * @param {string} req.params.uid - Card UID
+   * @requires Authentication with VIEW_PERMISSIONS and VIEW_CARDS permissions
+   * @returns {Array} Array of permission objects with startDate, endDate, recurrence info, and assignee
+   * @throws {500} If database operation fails
+   */
+  router.get("/:uid/permissions", checkAuth(db, ['VIEW_PERMISSIONS', 'VIEW_CARDS']), (req, res) => {
     const { uid } = req.params;
     const permissionsQuery = `
       SELECT p.id, p.startDate, p.endDate, p.isRecurring, p.recurrencePattern, p.assignedStudent, t.name AS assignedBy

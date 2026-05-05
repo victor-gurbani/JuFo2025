@@ -1,10 +1,11 @@
 const express = require("express");
 const checkPermission = require("../middleware/checkPermission");
+const checkAuth = require("../middleware/checkAuth");
 const { processImage } = require('../utils/imageProcessor');
 
 module.exports = (db) => {
   const router = express.Router();
-
+  router.use(checkAuth(db));
   // Get all cards (allow only admins)
   router.get("/cards", checkPermission(db, "admin"), (req, res) => {
     const query = `SELECT * FROM cards`;
@@ -24,6 +25,19 @@ module.exports = (db) => {
   });
 
   // Add a new endpoint for teacher photos
+  /**
+   * POST /admin/teachers - Create a new teacher account
+   * Creates a teacher with role-based permissions and optional photo
+   * @param {Object} req.body - Request body
+   * @param {string} req.body.id - Unique teacher ID
+   * @param {string} req.body.name - Teacher's full name
+   * @param {string} req.body.permissionLevel - Role (admin, tutor, teacher, guard)
+   * @param {string} req.body.photoUrl - Optional photo data-URI
+   * @requires Authentication + admin permission
+   * @returns {Object} Teacher object with processed photoUrl
+   * @throws {400} If ID is 'photos' (reserved)
+   * @throws {500} If database or image processing fails
+   */
   router.get("/teachers/photos", checkPermission(db, "admin"), (req, res) => {
     const query = `SELECT id, photoUrl FROM teachers WHERE photoUrl IS NOT NULL`;
     db.all(query, [], (err, rows) => {
@@ -94,6 +108,13 @@ module.exports = (db) => {
   });
 
   // Get all students (only admins) - Update the existing route
+  /**
+   * GET /admin/students - Retrieve all students with aggregated info
+   * Returns comprehensive student list with assigned cards and permissions
+   * @requires Authentication + admin permission
+   * @returns {Array} Array of student objects with cards and teacher assignments
+   * @throws {500} If database operation fails
+   */
   router.get("/students", checkPermission(db, "admin"), (req, res) => {
     const query = `
       SELECT 
@@ -166,6 +187,17 @@ module.exports = (db) => {
   });
 
   // Access logs endpoint
+  /**
+   * GET /admin/access-logs - Retrieve paginated access logs
+   * Returns timestamped records of all card validations and access attempts
+   * Includes student name and card UID for reference
+   * @param {number} req.query.page - Page number (default: 1)
+   * @param {number} req.query.limit - Records per page (default: 20)
+   * @requires Authentication + admin permission
+   * @returns {Array} Array of access log entries ordered by timestamp DESC
+   * @header {number} x-total-count - Total count of all logs
+   * @throws {500} If database operation fails
+   */
   router.get("/access-logs", checkPermission(db, "admin"), (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -243,6 +275,21 @@ module.exports = (db) => {
   });
 
   // Create a student
+  /**
+   * POST /admin/students - Create a new student account
+   * Creates a student record with optional profile photo
+   * @param {Object} req.body - Request body
+   * @param {string} req.body.id - Unique student ID
+   * @param {string} req.body.name - Student's full name
+   * @param {string} req.body.classGroup - Class/group designation
+   * @param {string} req.body.email - Student's email address
+   * @param {string} req.body.tutor - Assigned tutor ID
+   * @param {string} req.body.photoUrl - Optional photo data-URI
+   * @requires Authentication + admin permission
+   * @returns {Object} Student object with processed photoUrl
+   * @throws {400} If ID is 'photos' (reserved)
+   * @throws {500} If database or image processing fails
+   */
   router.post("/students", checkPermission(db, "admin"), async (req, res) => {
     try {
       const { id, name, classGroup, email, tutor, photoUrl } = req.body;

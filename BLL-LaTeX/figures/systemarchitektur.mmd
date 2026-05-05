@@ -1,0 +1,15 @@
+graph TD
+    subgraph Frontend
+        App[Mobile App<br/>Expo / React Native]
+    end
+    subgraph Backend
+        API[REST API<br/>Express.js / Node.js]
+    end
+    subgraph Data & AI
+        DB[(SQLite Database)]
+        AI[TensorFlow.js<br/>Face Recognition]
+    end
+
+    App <-->|HTTP/JSON| API
+    API <-->|SQL Queries| DB
+    API <-->|Image Processing| AI

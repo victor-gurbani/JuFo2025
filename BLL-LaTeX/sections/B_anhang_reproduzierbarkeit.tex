@@ -1,0 +1,55 @@
+\section{Anhang B: Reproduzierbarkeit und Projektlogik}
+
+\subsection{Projektstruktur}
+Das Projekt ist in zwei Hauptkomponenten unterteilt: das Node.js-Backend und das React-Native-Frontend. Die folgende Struktur zeigt die wesentlichen Verzeichnisse.
+\begin{lstlisting}[language=bash]
+.
+|-- Backend/school-access-control-backend/
+|   |-- middleware/ (Authentifizierung & Sicherheit)
+|   |-- routes/ (API-Endpunkte)
+|   |-- utils/ (Bildverarbeitung & KI-Logik)
+|   |-- weights/ (TensorFlow.js Modellgewichte)
+|   `-- server.js (Haupteinstiegspunkt)
+|-- Frontend/SchoolAccessControl/ (Mobile App)
+|-- BLL-LaTeX/ (Dokumentation)
+`-- database.db (SQLite-Datenbank)
+\end{lstlisting}
+
+\subsection{Reproduktionsanleitung}
+Um das System in einer Testumgebung zu reproduzieren, sind die folgenden Schritte notwendig.
+
+\subsubsection{Hardware-Voraussetzungen}
+\begin{itemize}
+  \item Raspberry Pi 4 (mind. 4GB RAM empfohlen für KI-Inferenz)
+  \item USB-RFID-Lesegerät (125\,kHz, EM4100-kompatibel)
+  \item Kamera-Modul oder USB-Webcam zur Gesichtserfassung
+\end{itemize}
+
+\subsubsection{Software-Voraussetzungen und Installation}
+\begin{enumerate}
+  \item Installation von Node.js 22.x und npm.
+  \item Repository klonen: \texttt{git clone https://github.com/victor-gurbani/jufo2025}.
+  \item Backend-Abhängigkeiten installieren:
+    \begin{lstlisting}[language=bash]
+    cd Backend/school-access-control-backend
+    npm install
+    npm rebuild @tensorflow/tfjs-node --build-from-source
+    \end{lstlisting}
+  \item Umgebungsvariablen konfigurieren: Datei \texttt{.env} mit \texttt{JWT\_SECRET} und \texttt{PORT=3000} anlegen.
+  \item Server starten: \texttt{node server.js}.
+\end{enumerate}
+
+\subsubsection{Durchführung von Benchmarks}
+Die im \autoref{sec:ergebnisse} (\nameref{sec:ergebnisse}) genannten Latenzwerte können durch die bereitgestellten Benchmark-Skripte verifiziert werden.
+\begin{lstlisting}[language=bash]
+cd Backend/school-access-control-backend/benchmarks
+node benchmark_face.js
+\end{lstlisting}
+Das Skript gibt die Inferenzzeit für 20 Testbilder aus und speichert die Ergebnisse in \texttt{results/rpi\_face.csv}.
+
+\subsection{Fehlerbehandlung und Plausibilitätschecks}
+\begin{itemize}
+  \item \textbf{Modell-Ladefehler:} Falls die Gewichte in \texttt{/weights} fehlen, startet der Gesichtserkennungs-Service nicht. Prüfen Sie das \texttt{server.log} auf entsprechende Fehlermeldungen.
+  \item \textbf{Speichermangel:} Bei der Verarbeitung vieler HEIC-Bilder auf einem Raspberry Pi kann es zu \enquote{Out of Memory} Fehlern kommen. Das System ist so konfiguriert, dass es nach jeder Bildkonvertierung \texttt{global.gc()} aufruft (erfordert Start mit \texttt{--expose-gc}).
+  \item \textbf{Erwartete Ausgabe:} Ein erfolgreicher RFID-Scan liefert ein JSON-Objekt mit \texttt{"valid": true} und der \texttt{photoUrl} des Schülers zurück.
+\end{itemize}

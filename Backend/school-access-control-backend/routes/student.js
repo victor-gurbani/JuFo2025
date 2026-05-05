@@ -1,9 +1,13 @@
-const express = require("express");
+const express = require('express');
+const checkAuth = require('../middleware/checkAuth');
 const { processImage } = require('../utils/imageProcessor');
 const faceapi = require('@vladmandic/face-api');
-const canvas = require("canvas");
-const fs = require("fs");
-const path = require("path");
+const canvas = require('canvas');
+const fs = require('fs');
+const path = require('path');
+
+// Debug logging - only in development
+const debug = process.env.NODE_ENV === 'development';
 
 // Patch nodejs environment for face-api.js
 const { Canvas, Image, ImageData } = canvas;
@@ -21,14 +25,14 @@ module.exports = (db) => {
       // Make sure the models directory exists
       if (!fs.existsSync(modelsPath)) {
         fs.mkdirSync(modelsPath, { recursive: true });
-        console.log("Models directory created. Please download face-api models to this location.");
+        if (debug) console.log('Models directory created. Please download face-api models to this location.');
         return false;
       }
       
       // Only load the detection model, we don't need landmark and recognition for basic face detection
       await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelsPath);
       
-      console.log("Face detection model loaded successfully");
+      if (debug) console.log('Face detection model loaded successfully');
       return true;
     } catch (error) {
       console.error("Error loading face detection model:", error);
@@ -42,11 +46,22 @@ module.exports = (db) => {
   });
 
   // Get student information (requires student authentication)
-  router.get("/info", (req, res) => {
-    const { studentId } = req.query;
+  /**
+   * GET /student/info - Retrieve student profile information
+   * Returns student details including name, email, photo, class group, and tutor info
+   * @param {string} req.query.studentId - Optional student ID (if not provided, uses authenticated user ID)
+   * @requires Authentication with VIEW_OWN_INFO permission
+   * @returns {Object} Student object with id, name, email, photoUrl, classGroup, lastPhotoUpdate, tutorName
+   * @throws {403} If user tries to view another student's info without elevated permissions
+   * @throws {404} If student not found
+   */
+  router.get("/info", checkAuth(db, ['VIEW_OWN_INFO']), (req, res) => {
+    // Get student ID from authenticated user
+    const studentId = req.query.studentId || req.user.id;
 
-    if (!studentId) {
-      return res.status(400).json({ error: "Student ID is required" });
+    // Check if the user is requesting their own info or has elevated permissions
+    if (studentId !== req.user.id && !req.user.permissions.includes('VIEW_STUDENTS')) {
+      return res.status(403).json({ error: "You can only view your own student information" });
     }
 
     const query = `
@@ -72,12 +87,34 @@ module.exports = (db) => {
   });
 
   // Update student photo (with once per week limitation)
-  router.post("/update-photo", async (req, res) => {
+  /**
+   * POST /student/update-photo - Update student profile photo with optional face verification
+   * Handles photo upload, resizing, and optional face detection verification
+   * Enforces once-per-week update limit for non-admin users
+   * @param {Object} req.body - Request body
+   * @param {string} req.body.photoUrl - Photo data-URI
+   * @param {boolean} req.body.verifyFace - Optional face detection (default: false)
+   * @param {string} req.body.studentId - Optional student ID (if not provided, uses authenticated user ID)
+   * @requires Authentication with UPDATE_OWN_PHOTO permission
+   * @returns {Object} {success, message, nextUpdateAvailable} - Confirmation with next update timestamp
+   * @throws {403} If update limit exceeded or insufficient permissions
+   * @throws {400} If no face detected (when verifyFace=true) or photo quality too low
+   * @throws {503} If face detection service not available
+   */
+  router.post("/update-photo", checkAuth(db, ['UPDATE_OWN_PHOTO']), async (req, res) => {
     try {
-      const { studentId, photoUrl, verifyFace } = req.body;
+      // Get student ID from authenticated user or parameter for elevated users
+      const studentId = req.body.studentId || req.user.id;
+      const photoUrl = req.body.photoUrl;
+      const verifyFace = req.body.verifyFace;
       
-      if (!studentId || !photoUrl) {
-        return res.status(400).json({ error: "Student ID and photo are required" });
+      // Check if the user is updating their own photo or has elevated permissions
+      if (studentId !== req.user.id && !req.user.permissions.includes('MANAGE_STUDENTS')) {
+        return res.status(403).json({ error: "You can only update your own photo" });
+      }
+
+      if (!photoUrl) {
+        return res.status(400).json({ error: "Photo is required" });
       }
 
       // Check when photo was last updated
@@ -92,10 +129,13 @@ module.exports = (db) => {
         }
 
         // Check if a week has passed since the last update
+        // Skip this check for admins/managers
         const now = new Date();
         const lastUpdate = row.lastPhotoUpdate ? new Date(row.lastPhotoUpdate) : null;
         
-        if (lastUpdate && now.getTime() - lastUpdate.getTime() < 7 * 24 * 60 * 60 * 1000) {
+        if (lastUpdate && 
+            now.getTime() - lastUpdate.getTime() < 7 * 24 * 60 * 60 * 1000 && 
+            !req.user.permissions.includes('MANAGE_STUDENTS')) {
           return res.status(403).json({ 
             error: "Photo can only be updated once per week", 
             nextUpdateAvailable: new Date(lastUpdate.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString() 
@@ -129,7 +169,7 @@ module.exports = (db) => {
             // Continue with update if a face was detected
             updateStudentPhoto(processedBuffer);
           } catch (error) {
-            console.error("Face detection error:", error);
+            console.error('Face detection error:', error);
             return res.status(500).json({ error: "Failed to process face detection" });
           }
         } else {
@@ -138,7 +178,7 @@ module.exports = (db) => {
             const processedPhotoUrl = await processImage(photoUrl);
             updateStudentPhoto(processedPhotoUrl);
           } catch (error) {
-            console.error("Photo processing error:", error);
+            console.error('Photo processing error:', error);
             return res.status(500).json({ error: "Failed to process photo" });
           }
         }
@@ -169,11 +209,26 @@ module.exports = (db) => {
   });
 
   // Update student information (email only for now)
-  router.post("/update-info", (req, res) => {
-    const { studentId, email } = req.body;
+  /**
+   * POST /student/update-info - Update student information
+   * Currently allows updating email address only
+   * @param {Object} req.body - Request body
+   * @param {string} req.body.email - New email address
+   * @param {string} req.body.studentId - Optional student ID (if not provided, uses authenticated user ID)
+   * @requires Authentication with UPDATE_OWN_INFO permission
+   * @returns {Object} {success, message} - Confirmation message
+   * @throws {403} If user tries to update another student's info without elevated permissions
+   * @throws {400} If email is missing or invalid
+   * @throws {404} If student not found
+   */
+  router.post("/update-info", checkAuth(db, ['UPDATE_OWN_INFO']), (req, res) => {
+    // Get student ID from authenticated user or parameter for elevated users
+    const studentId = req.body.studentId || req.user.id;
+    const { email } = req.body;
     
-    if (!studentId) {
-      return res.status(400).json({ error: "Student ID is required" });
+    // Check if the user is updating their own info or has elevated permissions
+    if (studentId !== req.user.id && !req.user.permissions.includes('MANAGE_STUDENTS')) {
+      return res.status(403).json({ error: "You can only update your own information" });
     }
 
     // Only allow updating email for now

@@ -4,13 +4,19 @@ const fs = require('fs');
 
 const heicConvert = require('heic-convert');
 
-async function processImage(base64Image) {
-  // Console log the frist 100 characters of the base64 image
-  // console.log('Base64 image data:', base64Image.slice(0, 100));
-  // For memory tracking - uncomment when debugging
-  // const startMemory = process.memoryUsage().heapUsed / 1024 / 1024;
-  // console.log(`Memory usage at start: ${startMemory.toFixed(2)} MB`);
-  
+// Debug logging - only in development
+  const debug = process.env.NODE_ENV === 'development';
+
+
+  /**
+   * Process and normalize image data for face recognition
+   * Handles multiple image formats (JPEG, PNG, HEIC/HEIF) and converts to standardized PNG
+   * Resizes images to 1024x1024 to optimize for face-api processing
+   * @param {string} base64Image - Base64 encoded image string (may include data:image/...;base64, prefix)
+   * @returns {Promise<string>} Base64 encoded PNG image as data URI
+   * @throws {Error} If image processing fails
+   */
+  async function processImage(base64Image) {
   let imageBuffer = null;
   let processedImageBuffer = null;
   let heicBuffer = null;
@@ -54,7 +60,7 @@ async function processImage(base64Image) {
         
         heicBuffer = null; // Help garbage collection
       } catch (conversionError) {
-        console.error('HEIC/HEIF conversion error:', conversionError);
+        if (debug) console.error('HEIC/HEIF conversion error:', conversionError);
         throw new Error(`Failed to convert ${isHeicFormat ? 'HEIC' : 'HEIF'} image: ${conversionError.message}`);
       }
     } else {
@@ -78,7 +84,7 @@ async function processImage(base64Image) {
       // Replace buffer with processed version and clear the old one
       processedImageBuffer = sharpOutput;
     } catch (sharpError) {
-      console.error('Sharp processing error:', sharpError);
+      if (debug) console.error('Sharp processing error:', sharpError);
       throw new Error('Failed to process image with Sharp');
     }
     
@@ -100,7 +106,7 @@ async function processImage(base64Image) {
     
     return result;
   } catch (error) {
-    console.error('Image processing error:', error);
+    if (debug) console.error('Image processing error:', error);
     
     // Clean up all buffers on error
     imageBuffer = null;

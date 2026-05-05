@@ -1,0 +1,224 @@
+\documentclass[12pt,a4paper]{article}
+
+% Encoding and language
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{csquotes}
+
+% Typography and layout
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[left=2.5cm,right=2.0cm,top=2.0cm,bottom=2.0cm]{geometry}
+\usepackage{setspace}
+\setstretch{1.35}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+\setlength{\floatsep}{8pt}
+\setlength{\textfloatsep}{12pt}
+\setlength{\intextsep}{8pt}
+
+% Tighten float spacing
+\setlength{\floatsep}{6pt}
+\setlength{\textfloatsep}{8pt}
+\setlength{\intextsep}{6pt}
+
+% Math, figures, tables
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% --- Imported Improvements from JuFo 2026 ---
+
+% Better figure placement defaults
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.85}
+\renewcommand{\textfraction}{0.15}
+\renewcommand{\floatpagefraction}{0.7}
+
+% Define colors
+\definecolor{titlecolor}{RGB}{0, 51, 102}
+\definecolor{codebg}{RGB}{245, 245, 245}
+\definecolor{codecomment}{RGB}{92, 99, 112}
+\definecolor{codekeyword}{RGB}{30, 64, 175}
+\definecolor{codestring}{RGB}{14, 116, 144}
+
+% ---------------------------------------------
+
+\lstdefinelanguage{JavaScript}{
+  keywords={break, case, catch, continue, debugger, default, delete, do, else, false, finally, for, function, if, in, instanceof, new, null, return, switch, this, throw, true, try, typeof, var, void, while, with, let, const, async, await, Promise, Buffer},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]"
+}
+\lstset{
+  language=JavaScript,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{codekeyword},
+  commentstyle=\color{codecomment},
+  stringstyle=\color{codestring},
+  backgroundcolor=\color{codebg},
+  showstringspaces=false,
+  inputencoding=utf8,
+  breaklines=true,
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{black!20},
+  xleftmargin=0.4em,
+  xrightmargin=0.4em,
+  aboveskip=0.8em,
+  belowskip=0.8em,
+  numbers=left,
+  numberstyle=\tiny\color{codecomment},
+  literate={ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1 {Ä}{{\"A}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1 {ß}{{\ss}}1 {–}{{--}}1
+}
+
+% Headers and links
+\usepackage{fancyhdr}
+\usepackage[
+  colorlinks=true, 
+  linkcolor=blue!40!black, 
+  urlcolor=blue!40!black, 
+  citecolor=black
+]{hyperref}
+\usepackage[all]{hypcap} % Jump to the top of figures/tables, not their captions
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+% Bibliography
+\usepackage[backend=biber,style=authoryear,sorting=nyt,autocite=inline]{biblatex}
+\addbibresource{references.bib}
+
+\DefineBibliographyStrings{ngerman}{
+  urlseen = {Zuletzt besucht am},
+}
+
+% Make the entire citation clickable (not just the year)
+\DeclareCiteCommand{\cite}
+  {\usebibmacro{prenote}}
+  {\printtext[bibhyperref]{\usebibmacro{cite}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+
+\DeclareCiteCommand{\parencite}[\mkbibparens]
+  {\usebibmacro{prenote}}
+  {\printtext[bibhyperref]{\usebibmacro{cite}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+
+\DeclareCiteCommand{\autocite}[\mkbibparens]
+  {\usebibmacro{prenote}}
+  {\printtext[bibhyperref]{\usebibmacro{cite}}}
+  {\multicitedelim}
+  {\usebibmacro{postnote}}
+
+% --- Draft Watermark Flag ---
+\newif\ifdraftversion
+\draftversionfalse % Set to \draftversionfalse to disable
+
+\ifdraftversion
+  \usepackage{draftwatermark}
+  \SetWatermarkText{ENTWURF}
+  \SetWatermarkScale{1.2}
+\fi
+% ----------------------------
+
+% Metadata (fill these first)
+\newcommand{\blltitle}{Digitale Schul-Zugangskontrolle}
+\newcommand{\bllsubtitle}{Ein hybrides System zur Zugangs- und Auslasskontrolle: Digitalisierung von Papierprozessen und Verhinderung von Missbrauch durch die Kombination von passiver RFID-Technologie und lokaler KI-Gesichtserkennung}
+\newcommand{\studentname}{Victor Gurbani}
+\newcommand{\schoolname}{Deutsche Schule Madrid}
+\newcommand{\courseyear}{Abiturjahrgang 2026}
+\newcommand{\erstkorrektor}{Steffen Ramin}
+\newcommand{\zweitkorrektor}{Stephan Seel}
+\newcommand{\abgabedatum}{13. März 2026}
+
+% Header/footer
+\setlength{\headheight}{14.5pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\studentname}
+\fancyhead[R]{BLL}
+\fancyfoot[C]{\thepage}
+
+\makeatletter
+\ExplSyntaxOn
+\cs_if_exist:NF \tbl_save_outer_table_cols:
+  { \cs_new_protected:Npn \tbl_save_outer_table_cols: { } }
+\ExplSyntaxOff
+\makeatother
+
+\begin{document}
+
+% Title page (no page number)
+\hypersetup{pageanchor=false}
+\input{sections/00_titelblatt}
+\clearpage
+
+% Front matter in Roman numerals
+\pagenumbering{Roman}
+\setcounter{page}{1}
+
+\input{sections/01_kurzfassung}
+\clearpage
+
+{
+\hypersetup{linkcolor=black}
+\tableofcontents
+\clearpage
+
+\listoffigures
+\addcontentsline{toc}{section}{Abbildungsverzeichnis}
+\clearpage
+
+\listoftables
+\addcontentsline{toc}{section}{Tabellenverzeichnis}
+\clearpage
+}
+
+% Main text in Arabic numerals
+\hypersetup{pageanchor=true}
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\input{sections/00a_thesenpapier}
+\input{sections/02_einleitung}
+\input{sections/03_theoretischer_hintergrund}
+\input{sections/04_methodik_und_umsetzung}
+\input{sections/05_ergebnisse_und_evaluation}
+\input{sections/06_reflexion_arbeitsprozess}
+\input{sections/07_fazit_und_ausblick}
+% \input{sections/08_rubrik_check}
+
+% Back matter in Roman numerals (as often required in BLL formats)
+\clearpage
+\hypersetup{pageanchor=false}
+\pagenumbering{Roman}
+\setcounter{page}{1}
+
+\printbibliography[heading=bibintoc,title={Literatur- und Quellenverzeichnis}]
+\clearpage
+
+\input{sections/09_unterstuetzungsleistungen}
+\clearpage
+
+\input{sections/10_selbststaendigkeitserklaerung}
+\clearpage
+
+\appendix
+\input{sections/A_anhang_materialien}
+\input{sections/B_anhang_reproduzierbarkeit}
+
+\end{document}

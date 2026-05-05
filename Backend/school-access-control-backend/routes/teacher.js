@@ -1,10 +1,11 @@
 const express = require("express");
 const checkPermission = require("../middleware/checkPermission");
+const checkAuth = require("../middleware/checkAuth");
 const { processImage } = require('../utils/imageProcessor');
 
 module.exports = (db) => {
   const router = express.Router();
-
+  router.use(checkAuth(db));
   // Assign a card to a student (allow teachers, tutors, admins)
   router.post("/assign-card", checkPermission(db, "teacher"), async (req, res) => {
     try {
@@ -72,7 +73,7 @@ module.exports = (db) => {
             startDate, endDate, isRecurring, recurrencePattern, isValid, assignedStudent, assignedBy, associatedCard
           ) VALUES (?, ?, ?, ?, 1, ?, ?, ?)
         `;
-        db.run(insertPermissionQuery, [startDate, endDate, isRecurring ? 1 : 0, recurrencePattern || "", studentId, req.body.teacherId, cardUID], function (permErr) {
+        db.run(insertPermissionQuery, [startDate, endDate, isRecurring ? 1 : 0, recurrencePattern || "", studentId, req.user.id, cardUID], function (permErr) {
           if (permErr) return res.status(500).json({ error: permErr.message });
           res.json({ success: true, cardUID, studentId });
         });

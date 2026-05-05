@@ -1,17 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { View, ScrollView, Image } from "react-native";
 import { TextInput, Button, Snackbar, Text, Card, Title, Paragraph, DataTable } from "react-native-paper";
-import api from "../services/api";
+import api, { getUserId } from "../services/api";
 import { useRouter } from 'expo-router';
 import { useAppTheme } from '../theme/ThemeContext';
+import { mockValidationResponse, mockInvalidValidationResponse } from '../utils/mockData';
 
 export default function GuardPanel() {
-  const router = useRouter();
-  const { theme } = useAppTheme();
-  // State variables
-  const [inputGuardId, setInputGuardId] = useState("");
-  const [committedGuardId, setCommittedGuardId] = useState("");
-  const idInputTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [uid, setUid] = useState("");
   const [result, setResult] = useState("");
   const [visible, setVisible] = useState(false);
@@ -19,8 +14,8 @@ export default function GuardPanel() {
   const [permissions, setPermissions] = useState<any[]>([]); // State to store permissions related to the card
   const [cards, setCards] = useState<any[]>([]); // State to store all cards (if needed)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null); // Add photo URL state
-  const textInputRef = useRef<TextInput>(null);
-
+  const textInputRef = useRef<any>(null);
+  const { theme } = useAppTheme();
   // Snackbar message state
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -29,15 +24,33 @@ export default function GuardPanel() {
   const [isValidating, setIsValidating] = useState(false);
   const [isLoadingCards, setIsLoadingCards] = useState(false);
 
-  // Helper function to append guardId to requests
-  const apiWithGuardId = (method: string, url: string, body?: any) => {
-    if (method === "GET" || method === "DELETE") {
-      return api[method.toLowerCase()](`${url}?guardId=${committedGuardId}`); 
-    } else {
-      return api[method.toLowerCase()](url, { ...body, guardId: committedGuardId });
-    }
-  };
+  // Mock mode state
+  const [isMockMode, setIsMockMode] = useState(false);
+  const [mockPressCount, setMockPressCount] = useState(0);
+  const mockTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const handleTitlePress = () => {
+    setMockPressCount((prev) => {
+      const newCount = prev + 1;
+      if (newCount >= 5) {
+        setIsMockMode((prevMode) => {
+          const newMode = !prevMode;
+          showSnackbar(newMode ? "Mock Mode Enabled" : "Mock Mode Disabled");
+          return newMode;
+        });
+        return 0;
+      }
+      
+      if (mockTimeoutRef.current) {
+        clearTimeout(mockTimeoutRef.current);
+      }
+      mockTimeoutRef.current = setTimeout(() => {
+        setMockPressCount(0);
+      }, 2000);
+      
+      return newCount;
+    });
+  };
   // Function to show snackbar messages
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
@@ -47,7 +60,7 @@ export default function GuardPanel() {
   // Fetch all cards (optional, based on your requirements)
   const loadCards = () => {
     setIsLoadingCards(true);
-    apiWithGuardId("GET", "/cards")
+    api.get("/cards")
       .then((res) => setCards(res.data))
       .catch((err) => showSnackbar("Error fetching cards: " + err))
       .finally(() => {
@@ -56,24 +69,8 @@ export default function GuardPanel() {
   };
 
   useEffect(() => {
-    if (committedGuardId) {
-      loadCards();
-    }
-  }, [committedGuardId]);
-
-  const handleGuardIdChange = (text: string) => {
-    setInputGuardId(text);
-    
-    // Clear any existing timeout
-    if (idInputTimeoutRef.current) {
-      clearTimeout(idInputTimeoutRef.current);
-    }
-    
-    // Set new timeout to commit the ID after 800ms of inactivity
-    idInputTimeoutRef.current = setTimeout(() => {
-      setCommittedGuardId(text);
-    }, 800);
-  };
+    loadCards();
+  }, []);
 
   const handleValidation = () => {
     if (uid.trim() === "") {
@@ -83,7 +80,32 @@ export default function GuardPanel() {
 
     setIsValidating(true);
     setResult("Validating...");
-    apiWithGuardId("POST", "/guard/validate", { cardUID: uid })
+
+    if (isMockMode) {
+      setTimeout(() => {
+        const res = uid.toLowerCase() === "invalid" ? mockInvalidValidationResponse : mockValidationResponse;
+        if (res.data.valid) {
+          setResult("Access Granted");
+          setCardInfo(res.data.card);
+          setPermissions(res.data.permissions);
+          setPhotoUrl(res.data.photoUrl);
+          showSnackbar("Card validation successful (MOCK)");
+        } else {
+          setResult("Access Denied");
+          setCardInfo(null);
+          setPermissions([]);
+          setPhotoUrl(null);
+          showSnackbar("Invalid card or expired permissions (MOCK)");
+        }
+        setVisible(true);
+        setUid("");
+        textInputRef.current?.focus();
+        setIsValidating(false);
+      }, 500);
+      return;
+    }
+
+    api.post("/guard/validate", { cardUID: uid })
       .then((res) => {
         if (res.data.valid) {
           setResult("Access Granted");
@@ -119,19 +141,20 @@ export default function GuardPanel() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView style={{ margin: 20 }}>
-        {/* Input field for Guard ID */}
-        <TextInput
-          label="Current Guard ID"
-          value={inputGuardId}
-          onChangeText={handleGuardIdChange}
-          style={{ marginVertical: 5 }}
-          mode="outlined"
-        />
-
-        {committedGuardId ? (
-          <>
-            <Text style={{ fontWeight: "bold", marginBottom: 10 }}>Guard Panel</Text>
-
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <Text 
+                style={{ fontWeight: "bold", fontSize: 20 }}
+                onPress={handleTitlePress}
+                suppressHighlighting={true}
+              >
+                Guard Panel
+              </Text>
+              {isMockMode && (
+                <View style={{ backgroundColor: theme.colors.error, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
+                  <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12 }}>DEMO</Text>
+                </View>
+              )}
+            </View>
             {/* Card Validation Section */}
             <Card elevation={4} style={{ margin: 10 }}>
               <Card.Content>
@@ -289,11 +312,6 @@ export default function GuardPanel() {
                 )}
               </Card.Content>
             </Card>
-            
-          </>
-        ) : (
-          <Text>Please enter your Guard ID to proceed.</Text>
-        )}
       </ScrollView>
       <Snackbar
         visible={snackbarVisible}

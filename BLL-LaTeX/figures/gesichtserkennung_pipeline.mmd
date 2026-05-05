@@ -1,0 +1,11 @@
+graph TD
+    A[Bildeingabe] --> B{Ist es HEIC/HEIF?}
+    B -- Ja --> C[Umwandlung in PNG<br/>heic-convert]
+    B -- Nein --> D[Größenanpassung auf 1024x1024<br/>sharp]
+    C --> D
+    D --> E[Gesicht erkennen<br/>SSD Mobilenet v1]
+    E --> F[Deskriptor extrahieren<br/>128D Vektor]
+    F --> G[Euklidische Distanz berechnen<br/>vs. gespeicherter Deskriptor]
+    G --> H{Distanz < Schwellenwert?}
+    H -- Ja --> I[Übereinstimmung]
+    H -- Nein --> J[Keine Übereinstimmung]

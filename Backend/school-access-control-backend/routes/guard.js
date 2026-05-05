@@ -1,21 +1,21 @@
 const tf = require('@tensorflow/tfjs-node')
 
-const express = require("express");
-const checkPermission = require("../middleware/checkPermission");
-const faceapi = require('@vladmandic/face-api'); // much faster and can use modern tf
-const canvas = require("canvas");
-const fs = require("fs");
-const path = require("path");
+const express = require('express');
+const checkAuth = require('../middleware/checkAuth');
+const faceapi = require('@vladmandic/face-api');
+const canvas = require('canvas');
+const fs = require('fs');
+const path = require('path');
 
-
+// Debug logging - only in development
+const debug = process.env.NODE_ENV === 'development';
 
 // Import the image processor utility
-const { processImage } = require("../utils/imageProcessor");
+const { processImage } = require('../utils/imageProcessor');
 
 // Patch nodejs environment for face-api.js
 const { Canvas, Image, ImageData } = canvas;
 faceapi.env.monkeyPatch({ Canvas, Image, ImageData });
-
 module.exports = (db) => {
   const router = express.Router();
   let modelsLoaded = false;
@@ -28,7 +28,7 @@ module.exports = (db) => {
       // Make sure the models directory exists
       if (!fs.existsSync(modelsPath)) {
         fs.mkdirSync(modelsPath, { recursive: true });
-        console.log("Models directory created. Please download face-api models to this location.");
+        if (debug) console.log('Models directory created. Please download face-api models to this location.');
         return false;
       }
       
@@ -37,7 +37,7 @@ module.exports = (db) => {
       await faceapi.nets.faceLandmark68Net.loadFromDisk(modelsPath);
       await faceapi.nets.faceRecognitionNet.loadFromDisk(modelsPath);
       
-      console.log("Face recognition models loaded successfully");
+      if (debug) console.log('Face recognition models loaded successfully');
       return true;
     } catch (error) {
       console.error("Error loading face recognition models:", error);
@@ -51,8 +51,17 @@ module.exports = (db) => {
   });
 
   // Validate a card swipe (allow guards, teachers, tutors, admins)
-  router.post("/validate", checkPermission(db, "guard"), (req, res) => {
+
+  /**
+   * POST /guard/validate - Validate a card swipe
+   * Checks if a card is valid and assigned to a student with valid permissions
+   * @param {string} req.body.cardUID - The NFC card UID to validate
+   * @returns {Object} {valid, studentId, studentName, photoUrl} if valid card, or {valid: false, message} otherwise
+   */
+  router.post("/validate", checkAuth(db, ['VALIDATE_SWIPE']), (req, res) => {
     const { cardUID } = req.body;
+    const verifiedBy = req.user.id; // Use authenticated user ID
+    
     const cardQuery = `
       SELECT c.uid, c.lastAssigned, c.isValid
       FROM cards c
@@ -66,12 +75,12 @@ module.exports = (db) => {
       LEFT JOIN students s ON p.assignedStudent = s.id
       WHERE p.associatedCard = ? AND p.isValid = 1
     `;
+    
     db.get(cardQuery, [cardUID], (err, cardRow) => {
       if (err) return res.status(500).json({ error: err.message });
       if (!cardRow) return res.json({ valid: false });
       if (cardRow.isValid !== 1) return res.json({ valid: false });
       
-
       // Fetch permissions related to the card
       db.all(permissionsQuery, [cardUID], (permErr, permRows) => {
         if (permErr) return res.status(500).json({ error: permErr.message });
@@ -84,14 +93,14 @@ module.exports = (db) => {
           return now >= startDate && now <= endDate;
         });
 
-        // After validation, log the access attempt
+        // After validation, log the access attempt with verified_by
         const logAccess = (isValid, studentId) => {
           const logQuery = `
-            INSERT INTO accessLogs (direction, student, card, wasApproved, timestamp)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO accessLogs (direction, student, card, wasApproved, timestamp, verified_by)
+            VALUES (?, ?, ?, ?, ?, ?)
           `;
-          db.run(logQuery, ['ENTRY', studentId, cardUID, isValid ? 1 : 0, Math.floor(Date.now() / 1000)], (logErr) => {
-            if (logErr) console.error("Error logging access:", logErr.message);
+          db.run(logQuery, ['ENTRY', studentId, cardUID, isValid ? 1 : 0, Math.floor(Date.now() / 1000), verifiedBy], (logErr) => {
+            if (logErr) console.error('Error logging access:', logErr.message);
           });
         };
 
@@ -124,13 +133,21 @@ module.exports = (db) => {
   });
 
   // New endpoint for face verification
-  router.post("/verify-face", checkPermission(db, "guard"), async (req, res) => {
-    console.log("Starting face verification request");
+
+  /**
+   * POST /guard/verify-face - Verify face against reference photo
+   * Uses TensorFlow.js face-api for face detection and comparison
+   * @param {string} req.body.snapshotImage - Base64 encoded snapshot image from camera
+   * @param {string} req.body.cardUID - The NFC card UID to match against
+   * @returns {Object} {match, similarity, distance} with euclidean distance and similarity threshold (0.6)
+   */
+  router.post("/verify-face", checkAuth(db, ['VERIFY_FACE']), async (req, res) => {
+    if (debug) console.log('Starting face verification request');
     try {
       // Check if models are loaded
-      console.log("Checking if models are loaded:", modelsLoaded);
+      if (debug) console.log('Checking if models are loaded:', modelsLoaded);
       if (!modelsLoaded) {
-        console.log("Models not loaded, returning error");
+        if (debug) console.log('Models not loaded, returning error');
         return res.status(503).json({ 
           error: "Face recognition service not available", 
           message: "Face recognition models not loaded properly" 
@@ -138,11 +155,13 @@ module.exports = (db) => {
       }
 
       const { snapshotImage, cardUID } = req.body;
-      console.log("Received request with cardUID:", cardUID);
-      console.log("Snapshot image received:", snapshotImage ? "Yes" : "No");
+      const verifiedBy = req.user.id; // Use authenticated user ID
+      
+      if (debug) console.log('Received request with cardUID:', cardUID);
+      if (debug) console.log('Snapshot image received:', snapshotImage ? 'Yes' : 'No');
       
       if (!snapshotImage || !cardUID) {
-        console.log("Missing required data in request");
+        if (debug) console.log('Missing required data in request');
         return res.status(400).json({ 
           error: "Missing required data", 
           message: "Both snapshot image and card UID are required" 
@@ -151,7 +170,7 @@ module.exports = (db) => {
 
       // Get the reference student photo for this card
       // Updated to get the most recently assigned student's photo
-      console.log("Querying database for reference photo with cardUID:", cardUID);
+      if (debug) console.log('Querying database for reference photo with cardUID:', cardUID);
       const photoQuery = `
         SELECT s.photoUrl, s.id as studentId
         FROM students s
@@ -161,48 +180,20 @@ module.exports = (db) => {
         AND p.assignedStudent = c.lastAssigned
         LIMIT 1
       `;
-      // TODO: verify all edge cases AND p.assignedStudent = c.lastAssigned
+
 
       db.get(photoQuery, [cardUID], async (err, row) => {
-        console.log("Database query completed");
+        if (debug) console.log('Database query completed');
         if (err) {
-          console.error("Database error:", err);
+          console.error('Database error:', err);
           return res.status(500).json({ error: err.message });
         }
 
-        /*  If no row found with the lastAssigned match, try getting the most recent permission
-        if (!row || !row.photoUrl) {
-          console.log("No exact match found, trying with most recent permission");
-          
-          const fallbackQuery = `
-            SELECT s.photoUrl, s.id as studentId
-            FROM students s
-            JOIN permissions p ON s.id = p.assignedStudent
-            JOIN cards c ON p.associatedCard = c.uid
-            WHERE c.uid = ? AND c.isValid = 1 AND p.isValid = 1
-            ORDER BY p.createdAt DESC
-            LIMIT 1
-          `;
-          
-          db.get(fallbackQuery, [cardUID], async (fallbackErr, fallbackRow) => {
-            if (fallbackErr) {
-              console.error("Fallback database error:", fallbackErr);
-              return res.status(500).json({ error: fallbackErr.message });
-            }
-            
-            if (!fallbackRow || !fallbackRow.photoUrl) {
-              console.log("No reference photo found for this card");
-              return res.status(404).json({ 
-                error: "Reference photo not found", 
-                match: false, 
-                similarity: 0 
-              });
-            }
-            */
+
 
         // If no row found at all, it means no student with this card
         if (!row) {
-          console.log("No student found with this card ID");
+        if (debug) console.log('No student found with this card ID');
           return res.status(404).json({ 
             error: "No student assigned to this card", 
             match: false, 
@@ -212,7 +203,7 @@ module.exports = (db) => {
         
         // If student found but no photo
         if (!row.photoUrl) {
-          console.log("Student found but has no reference photo");
+          if (debug) console.log('Student found but has no reference photo');
           return res.status(404).json({ 
             error: "The assigned student does not have a reference photo", 
             match: false, 
@@ -221,11 +212,11 @@ module.exports = (db) => {
         }
 
         // Continue with the face verification using row
-        processFaceVerification(row, snapshotImage, cardUID, res);
+        processFaceVerification(row, snapshotImage, cardUID, res, verifiedBy);
       });
     } catch (error) {
-      console.error("Face verification error:", error);
-      console.error("Error stack:", error.stack);
+      console.error('Face verification error:', error);
+      console.error('Error stack:', error.stack);
       res.status(500).json({ 
         error: "Face verification failed", 
         message: error.message,
@@ -236,46 +227,46 @@ module.exports = (db) => {
   });
 
   // Helper function to process the face verification
-  async function processFaceVerification(row, snapshotImage, cardUID, res) {
+  async function processFaceVerification(row, snapshotImage, cardUID, res, verifiedBy) {
     try {
-      console.log("Snapshot image data preview:", snapshotImage.slice(0, 20) + "...");
+      if (debug) console.log('Snapshot image data preview:', snapshotImage.slice(0, 20) + '...');
       // Process the snapshot image using utility
-      console.log("Processing snapshot image");
+      if (debug) console.log('Processing snapshot image');
       const snapshotBuffer = await processImage(snapshotImage);
-      console.log("Snapshot processing complete, buffer size:", snapshotBuffer.length);
+      if (debug) console.log('Snapshot processing complete, buffer size:', snapshotBuffer.length);
 
-      console.log("Reference photo URL preview:", row.photoUrl.slice(0, 20) + "...");
+      if (debug) console.log('Reference photo URL preview:', row.photoUrl.slice(0, 20) + '...');
       // Process the reference image using utility
-      console.log("Processing reference image");
+      if (debug) console.log('Processing reference image');
       const referenceBuffer = await processImage(row.photoUrl);
-      console.log("Reference processing complete, buffer size:", referenceBuffer.length);
+      if (debug) console.log('Reference processing complete, buffer size:', referenceBuffer.length);
 
       // Load images
-      console.log("Loading images into canvas");
+      if (debug) console.log('Loading images into canvas');
       const referenceImg = await canvas.loadImage(referenceBuffer);
-      console.log("Reference image loaded, dimensions:", referenceImg.width, "x", referenceImg.height);
+      if (debug) console.log('Reference image loaded, dimensions:', referenceImg.width, 'x', referenceImg.height);
       
       const snapshotImg = await canvas.loadImage(snapshotBuffer);
-      console.log("Snapshot image loaded, dimensions:", snapshotImg.width, "x", snapshotImg.height);
+      if (debug) console.log('Snapshot image loaded, dimensions:', snapshotImg.width, 'x', snapshotImg.height);
       
       // Detect faces and get face descriptors
-      console.log("Detecting face in snapshot image");
+      if (debug) console.log('Detecting face in snapshot image');
       const snapshotDetection = await faceapi
         .detectSingleFace(snapshotImg)
         .withFaceLandmarks()
         .withFaceDescriptor();
-      console.log("Snapshot face detection result:", snapshotDetection ? "Face detected" : "No face detected");
+      if (debug) console.log('Snapshot face detection result:', snapshotDetection ? 'Face detected' : 'No face detected');
 
-      console.log("Detecting face in reference image");
+      if (debug) console.log('Detecting face in reference image');
       const referenceDetection = await faceapi
         .detectSingleFace(referenceImg)
         .withFaceLandmarks()
         .withFaceDescriptor();
-      console.log("Reference face detection result:", referenceDetection ? "Face detected" : "No face detected");
+      if (debug) console.log('Reference face detection result:', referenceDetection ? 'Face detected' : 'No face detected');
 
       // Check if faces were detected in both images
       if (!snapshotDetection || !referenceDetection) {
-        console.log("Face detection failed in one or both images");
+        if (debug) console.log('Face detection failed in one or both images');
         return res.json({ 
           match: false, 
           similarity: 0, 
@@ -284,12 +275,12 @@ module.exports = (db) => {
       }
 
       // Calculate similarity using Euclidean distance
-      console.log("Calculating face similarity");
+      if (debug) console.log('Calculating face similarity');
       const distance = faceapi.euclideanDistance(
         snapshotDetection.descriptor,
         referenceDetection.descriptor
       );
-      console.log("Euclidean distance between faces:", distance);
+      if (debug) console.log('Euclidean distance between faces:', distance);
 
       // Convert distance to similarity score (0-100%)
       // Lower distance means higher similarity
@@ -298,23 +289,23 @@ module.exports = (db) => {
       const similarity = Math.max(0, Math.min(100, (1 - distance) * 100));
       const match = distance < threshold;
       
-      console.log("Calculated similarity score:", similarity);
-      console.log("Face match result:", match);
+      if (debug) console.log('Calculated similarity score:', similarity);
+      if (debug) console.log('Face match result:', match);
 
-      // Log the verification attempt
-      console.log("Logging verification attempt to database");
+      // Log the verification attempt with verified_by
+      if (debug) console.log('Logging verification attempt to database');
       const logQuery = `
-        INSERT INTO accessLogs (direction, student, card, wasApproved, timestamp)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO accessLogs (direction, student, card, wasApproved, timestamp, verified_by)
+        VALUES (?, ?, ?, ?, ?, ?)
       `;
       
-      db.run(logQuery, ['FACE_VERIFY', row.studentId, cardUID, match ? 1 : 0, Math.floor(Date.now() / 1000)], (logErr) => {
-        if (logErr) console.error("Error logging face verification:", logErr);
-        else console.log("Verification attempt logged successfully");
+      db.run(logQuery, ['FACE_VERIFY', row.studentId, cardUID, match ? 1 : 0, Math.floor(Date.now() / 1000), verifiedBy], (logErr) => {
+        if (logErr) console.error('Error logging face verification:', logErr);
+        else if (debug) console.log('Verification attempt logged successfully');
       });
 
       // Return the result
-      console.log("Sending verification response to client");
+      if (debug) console.log('Sending verification response to client');
       res.json({
         match,
         similarity,
@@ -325,7 +316,7 @@ module.exports = (db) => {
         }
       });
     } catch (imageError) {
-      console.error("Error processing images:", imageError);
+      console.error('Error processing images:', imageError);
       res.status(500).json({
         error: "Image processing failed",
         message: imageError.message,

@@ -1,0 +1,51 @@
+
+\addcontentsline{toc}{section}{Thesenpapier}
+\section*{Thesenpapier zur Besonderen Lernleistung}
+
+\subsection*{Kernthesen}
+\vspace{0.5em}
+
+\subsubsection*{Technologische Architektur \& Sicherheit}
+
+\textbf{These 1:} Passive RFID-Technologie bietet für die schulische Zugangs- und Auslasskontrolle ein besseres Verhältnis von Sicherheit zu Datenschutz als aktive biometrische Identifikation allein.\\
+\textit{Beleg aus der Arbeit:} \autoref{subsec:systemarchitektur} (\nameref{subsec:systemarchitektur}) und \autoref{subsec:konzept_datenschutz} (\nameref{subsec:konzept_datenschutz})
+
+\textbf{These 2:} Lokale KI-Gesichtserkennung mit SSD MobileNet v1 ist für den Schulkontext ausreichend genau, aber nicht für sicherheitskritische Anwendungen geeignet.\\
+\textit{Beleg aus der Arbeit:} \autoref{subsec:ergebnisse_gesicht} (\nameref{subsec:ergebnisse_gesicht}) und \autoref{tab:face_results} (\nameref{tab:face_results})
+
+\textbf{These 3:} Die Kombination von kartenbasierter Authentifizierung und biometrischer Verifikation bietet eine dem Schulkontext angemessene Zwei-Faktor-Sicherheit.\\
+\textit{Beleg aus der Arbeit:} \autoref{subsec:rfid_management} (\nameref{subsec:rfid_management}) und \autoref{fig:face_pipeline} (Gesichtserkennungs-Pipeline)
+
+\subsubsection*{Datenschutzrechtliche Verhältnismäßigkeit}
+
+\textbf{These 4:} Die Edge-Computing-Architektur dieses Systems beweist, dass die strikten Vorgaben der DSGVO (Art. 9) kein Innovationshindernis für biometrische Zugangs- und Auslasskontrollen an deutschen Schulen darstellen, sondern durch konsequentes \enquote{Privacy by Design} technisch vollständig gelöst werden können.\\
+\textit{Beleg aus der Arbeit:} \autoref{subsec:datenbankdesign} (\nameref{subsec:datenbankdesign}) und \autoref{subsec:konzept_datenschutz} (\nameref{subsec:konzept_datenschutz})
+
+\subsubsection*{Wirtschaftlichkeit}
+
+\textbf{These 5:} Ein Open-Source-System zur Zugangs- und Auslasskontrolle auf Basis von Standardhardware (Raspberry Pi, RFID-Reader) kann kommerzielle Lösungen in Bildungseinrichtungen wirtschaftlich ersetzen.\\
+\textit{Beleg aus der Arbeit:} \autoref{subsec:leistungsvergleich} (\nameref{subsec:leistungsvergleich}) und \autoref{sec:anhanga} (Material und Zusatzdaten)
+
+\vspace{1em}
+\subsection*{Methodische Verteidigung in 3 Punkten}
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Untersuchungsdesign:} Iterativer Prototyping-Ansatz (Design Science Research), um die theoretischen Sicherheitsmodelle direkt in einer realitätsnahen Testumgebung zu validieren.
+\item \textbf{Daten/Werkzeuge:} Einsatz von TypeScript/Node.js und TensorFlow.js für eine performante, plattformunabhängige Implementierung bei gleichzeitig hoher Typsicherheit.
+\item \textbf{Limitation:} Die Performance der Gesichtserkennung ist stark von den Lichtverhältnissen abhängig; dies wurde durch eine Software-seitige Normalisierung der Bilder (HEIC-zu-PNG-Pipeline) teilweise kompensiert.
+\end{enumerate}
+
+\subsection*{Diskussionsanker für das Prüfungsgespräch}
+\begin{itemize}[leftmargin=*]
+\item \textbf{Sicherheitsrisiko \enquote{RFID-Cloning}:} Die verwendeten EM4100-Chips (125\,kHz) besitzen keine Verschlüsselung und sind trivial klonbar. Dies ist bewusst akzeptiert: Das Klonen einer Karte entspricht dem Kopieren einer Papier-Bescheinigung und wird durch die biometrische Zwei-Faktor-Verifikation (Gesichtserkennung) vollständig kompensiert. $\rightarrow$ Die eigentliche Sicherheit liegt im zweiten Faktor.
+\item \textbf{Akzeptanz der Biometrie:} Ist die Akzeptanz bei Schülern und Eltern gegeben? $\rightarrow$ Ja, durch das Opt-in-Modell und die Garantie der lokalen Speicherung ohne Cloud-Zwang.
+\item \textbf{Skalierbarkeit:} Kann das System für Schulen mit $>1500$ Schülern skaliert werden? $\rightarrow$ Migration von SQLite zu PostgreSQL und Lastverteilung der KI-Anfragen auf mehrere Edge-Nodes.
+\end{itemize}
+
+\vspace{1em}
+\subsection*{Zentrale Literatur}
+\begin{itemize}[leftmargin=*]
+    \small
+    \item \textbf{Europäisches Parlament und Rat} (2016). \textit{Datenschutz-Grundverordnung (DSGVO)}. Amtsblatt der Europäischen Union L 119. \url{https://gdpr-info.eu/de/}
+    \item \textbf{EM Microelectronic-Marin SA} (2004). \textit{EM4100 Read Only Contactless Identification Device (Datasheet)}. \url{https://www.emmicroelectronic.com/sites/default/files/public/products/datasheets/4100-DS.pdf}
+    \item \textbf{Google LLC} (2023). \textit{TensorFlow.js for Node.js}. \url{https://www.tensorflow.org/js/tutorials/setup/nodejs}
+\end{itemize}
